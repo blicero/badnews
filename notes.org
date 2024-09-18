@@ -1,0 +1,25 @@
+# -*- mode: org; fill-column: 78; -*-
+# Time-stamp: <2024-09-18 21:12:53 krylon>
+#
+#+TAGS: internals(i) ui(u) bug(b) feature(f)
+#+TAGS: database(d) design(e), meditation(m)
+#+TAGS: optimize(o) refactor(r) cleanup(c)
+#+TODO: TODO(t)  RESEARCH(r) IMPLEMENT(i) TEST(e) | DONE(d) FAILED(f) CANCELLED(c)
+#+TODO: MEDITATE(m) PLANNING(p) | SUSPENDED(s)
+#+PRIORITIES: A G D
+
+* BadNews
+  BadNews is an RSS reader
+** Clock table
+   #+BEGIN: clocktable :scope file :maxlevel 202 :emphasize t
+   #+CAPTION: Clock summary at [2024-09-18 Mi 21:12]
+   | Headline     | Time   |
+   |--------------+--------|
+   | *Total time* | *0:00* |
+   #+END:
+** Journal
+** Features [0/0]
+** Components [0/0]
+** Bugs [0/0]
+
+
