@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 18. 09. 2024 by Benjamin Walkenhorst
 // (c) 2024 Benjamin Walkenhorst
-// Time-stamp: <2024-09-18 20:25:36 krylon>
+// Time-stamp: <2024-09-18 21:05:53 krylon>
 
 package common
 
@@ -18,7 +18,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/blicero/guang/logdomain"
+	"github.com/blicero/badnews/common/path"
+	"github.com/blicero/badnews/logdomain"
 	"github.com/google/uuid"
 	"github.com/hashicorp/logutils"
 )
@@ -187,7 +188,11 @@ func InitApp() error {
 
 // GetUUID returns a randomized UUID
 func GetUUID() string {
-	return uuid.NewRandom().String()
+	id, err := uuid.NewRandom()
+	if err != nil {
+		panic(err)
+	}
+	return id.String()
 } // func GetUUID() string
 
 // TimeEqual returns true if the two timestamps are less than one second apart.
