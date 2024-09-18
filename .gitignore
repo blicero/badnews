@@ -1,0 +1,14 @@
+*~
+*#
+.*
+*_string.go
+*_gen.go
+*ffjson.go
+*templates.go
+build
+build_templates
+*.log
+*TAGS*
+bak.*
+*.bak
+scrollmaster
