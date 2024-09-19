@@ -7,4 +7,7 @@ require (
 	github.com/hashicorp/logutils v1.0.0
 )
 
-require github.com/blicero/krylib v0.2.1 // indirect
+require (
+	github.com/blicero/krylib v0.2.1 // indirect
+	github.com/mattn/go-sqlite3 v1.14.23 // indirect
+)
