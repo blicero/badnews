@@ -1,5 +1,5 @@
 # -*- mode: org; fill-column: 78; -*-
-# Time-stamp: <2024-09-18 21:12:53 krylon>
+# Time-stamp: <2024-09-19 21:01:59 krylon>
 #
 #+TAGS: internals(i) ui(u) bug(b) feature(f)
 #+TAGS: database(d) design(e), meditation(m)
@@ -12,14 +12,52 @@
   BadNews is an RSS reader
 ** Clock table
    #+BEGIN: clocktable :scope file :maxlevel 202 :emphasize t
-   #+CAPTION: Clock summary at [2024-09-18 Mi 21:12]
-   | Headline     | Time   |
-   |--------------+--------|
-   | *Total time* | *0:00* |
+   #+CAPTION: Clock summary at [2024-09-19 Do 21:01]
+   | Headline               | Time   |        |      |
+   |------------------------+--------+--------+------|
+   | *Total time*           | *4:36* |        |      |
+   |------------------------+--------+--------+------|
+   | *BadNews*              | *4:36* |        |      |
+   | \_  /Components [0/0]/ |        | /4:36/ |      |
+   | \_    Data model [0/0] |        |        | 0:27 |
+   | \_    Database [0/0]   |        |        | 4:09 |
    #+END:
 ** Journal
 ** Features [0/0]
+   :PROPERTIES:
+   :COOKIE_DATA: todo recursive
+   :VISIBILITY: children
+   :END:
 ** Components [0/0]
+   :PROPERTIES:
+   :COOKIE_DATA: todo recursive
+   :VISIBILITY: children
+   :END:
+*** Data model [0/0]
+    :PROPERTIES:
+    :COOKIE_DATA: todo recursive
+    :VISIBILITY: children
+    :END:
+    :LOGBOOK:
+    CLOCK: [2024-09-19 Do 16:25]--[2024-09-19 Do 16:52] =>  0:27
+    :END:
+*** Database [0/0]
+    :PROPERTIES:
+    :COOKIE_DATA: todo recursive
+    :VISIBILITY: children
+    :END:
+    :LOGBOOK:
+    CLOCK: [2024-09-19 Do 16:52]--[2024-09-19 Do 21:01] =>  4:09
+    :END:
+*** Feed catcher / parser [0/0]
+    :PROPERTIES:
+    :COOKIE_DATA: todo recursive
+    :VISIBILITY: children
+    :END:
 ** Bugs [0/0]
+   :PROPERTIES:
+   :COOKIE_DATA: todo recursive
+   :VISIBILITY: children
+   :END:
 
 
