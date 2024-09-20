@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 18. 09. 2024 by Benjamin Walkenhorst
 // (c) 2024 Benjamin Walkenhorst
-// Time-stamp: <2024-09-18 21:05:53 krylon>
+// Time-stamp: <2024-09-20 18:13:59 krylon>
 
 package common
 
@@ -146,7 +146,7 @@ func GetLogger(dom logdomain.ID) (*log.Logger, error) {
 		return nil, fmt.Errorf("Error initializing application environment: %s", err.Error())
 	}
 
-	logName := fmt.Sprintf("%s.%s",
+	logName := fmt.Sprintf("%s.%s ",
 		AppName,
 		dom)
 
