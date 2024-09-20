@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 19. 09. 2024 by Benjamin Walkenhorst
 // (c) 2024 Benjamin Walkenhorst
-// Time-stamp: <2024-09-19 19:46:23 krylon>
+// Time-stamp: <2024-09-20 10:50:49 krylon>
 
 // Package database provides persistence.
 package database
@@ -12,6 +12,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"net/url"
 	"os"
 	"regexp"
 	"sync"
@@ -20,6 +21,7 @@ import (
 	"github.com/blicero/badnews/common"
 	"github.com/blicero/badnews/database/query"
 	"github.com/blicero/badnews/logdomain"
+	"github.com/blicero/badnews/model"
 	"github.com/blicero/krylib"
 	_ "github.com/mattn/go-sqlite3" // Import the database driver
 )
@@ -158,7 +160,7 @@ func (db *Database) initialize() error {
 		return err
 	}
 
-	for _, q := range qInit {
+	for _, q := range initQueries {
 		db.log.Printf("[TRACE] Execute init query:\n%s\n",
 			q)
 		if _, err = tx.Exec(q); err != nil {
@@ -227,7 +229,7 @@ func (db *Database) getQuery(id query.ID) (*sql.Stmt, error) {
 
 	if stmt, found = db.queries[id]; found {
 		return stmt, nil
-	} else if _, found = qdb[id]; !found {
+	} else if _, found = dbQueries[id]; !found {
 		return nil, fmt.Errorf("Unknown Query %d",
 			id)
 	}
@@ -235,7 +237,7 @@ func (db *Database) getQuery(id query.ID) (*sql.Stmt, error) {
 	db.log.Printf("[TRACE] Prepare query %s\n", id)
 
 PREPARE_QUERY:
-	if stmt, err = db.db.Prepare(qdb[id]); err != nil {
+	if stmt, err = db.db.Prepare(dbQueries[id]); err != nil {
 		if worthARetry(err) {
 			waitForRetry()
 			goto PREPARE_QUERY
@@ -244,7 +246,7 @@ PREPARE_QUERY:
 		db.log.Printf("[ERROR] Cannot parse query %s: %s\n%s\n",
 			id,
 			err.Error(),
-			qdb[id])
+			dbQueries[id])
 		return nil, err
 	}
 
@@ -545,3 +547,223 @@ func (db *Database) Commit() error {
 	db.tx = nil
 	return nil
 } // func (db *Database) Commit() error
+
+// FeedAdd enters a Feed into the database.
+func (db *Database) FeedAdd(f *model.Feed) error {
+	const qid query.ID = query.FeedAdd
+	var (
+		err    error
+		msg    string
+		stmt   *sql.Stmt
+		tx     *sql.Tx
+		status bool
+	)
+
+	if stmt, err = db.getQuery(qid); err != nil {
+		db.log.Printf("[ERROR] Cannot prepare query %s: %s\n",
+			qid,
+			err.Error())
+		return err
+	} else if db.tx != nil {
+		tx = db.tx
+	} else {
+		db.log.Printf("[INFO] Start ad-hoc transaction for adding Feed %s\n",
+			f.Title)
+	BEGIN_AD_HOC:
+		if tx, err = db.db.Begin(); err != nil {
+			if worthARetry(err) {
+				waitForRetry()
+				goto BEGIN_AD_HOC
+			} else {
+				msg = fmt.Sprintf("Error starting transaction: %s\n",
+					err.Error())
+				db.log.Printf("[ERROR] %s\n", msg)
+				return errors.New(msg)
+			}
+
+		} else {
+			defer func() {
+				var err2 error
+				if status {
+					if err2 = tx.Commit(); err2 != nil {
+						db.log.Printf("[ERROR] Failed to commit ad-hoc transaction: %s\n",
+							err2.Error())
+					}
+				} else if err2 = tx.Rollback(); err2 != nil {
+					db.log.Printf("[ERROR] Rollback of ad-hoc transaction failed: %s\n",
+						err2.Error())
+				}
+			}()
+		}
+	}
+
+	stmt = tx.Stmt(stmt)
+	var rows *sql.Rows
+
+EXEC_QUERY:
+	if rows, err = stmt.Query(f.Title, f.URL.String(), f.Homepage.String(), f.UpdateInterval.Seconds()); err != nil {
+		if worthARetry(err) {
+			waitForRetry()
+			goto EXEC_QUERY
+		} else {
+			err = fmt.Errorf("Cannot add Feed %s to database: %s",
+				f.Title,
+				err.Error())
+			db.log.Printf("[ERROR] %s\n", err.Error())
+			return err
+		}
+	} else {
+		var id int64
+
+		defer rows.Close()
+
+		if !rows.Next() {
+			// CANTHAPPEN
+			db.log.Printf("[ERROR] Query %s did not return a value\n",
+				qid)
+			return fmt.Errorf("Query %s did not return a value", qid)
+		} else if err = rows.Scan(&id); err != nil {
+			msg = fmt.Sprintf("Failed to get ID for newly added host %s: %s",
+				f.Title,
+				err.Error())
+			db.log.Printf("[ERROR] %s\n", msg)
+			return errors.New(msg)
+		}
+
+		f.ID = id
+		status = true
+		return nil
+	}
+} // func (db *Database) FeedAdd(f *model.Feed) error
+
+// FeedGetByID loads a Feed by its ID.
+func (db *Database) FeedGetByID(id int64) (*model.Feed, error) {
+	const qid query.ID = query.FeedGetByID
+	var (
+		err  error
+		msg  string
+		stmt *sql.Stmt
+	)
+
+	if stmt, err = db.getQuery(qid); err != nil {
+		db.log.Printf("[ERROR] Cannot prepare query %s: %s\n",
+			qid,
+			err.Error())
+		return nil, err
+	} else if db.tx != nil {
+		stmt = db.tx.Stmt(stmt)
+	}
+
+	var rows *sql.Rows
+
+EXEC_QUERY:
+	if rows, err = stmt.Query(id); err != nil {
+		if worthARetry(err) {
+			waitForRetry()
+			goto EXEC_QUERY
+		}
+
+		return nil, err
+	}
+
+	defer rows.Close() // nolint: errcheck,gosec
+
+	if rows.Next() {
+		var (
+			timestamp, interval int64
+			ustr, hstr          string
+			f                   = &model.Feed{ID: id}
+		)
+
+		if err = rows.Scan(&f.Title, &ustr, &hstr, &interval, &timestamp, &f.Active); err != nil {
+			msg = fmt.Sprintf("Error scanning row for Feed %d: %s",
+				id,
+				err.Error())
+			db.log.Printf("[ERROR] %s\n", msg)
+			return nil, errors.New(msg)
+		} else if f.URL, err = url.Parse(ustr); err != nil {
+			db.log.Printf("[ERROR] Cannot parse URL %q: %s\n",
+				ustr,
+				err.Error())
+			return nil, err
+		} else if f.Homepage, err = url.Parse(hstr); err != nil {
+			db.log.Printf("[ERROR] Cannot parse URL %q: %s\n",
+				hstr,
+				err.Error())
+			return nil, err
+		}
+
+		f.LastRefresh = time.Unix(timestamp, 0)
+		f.UpdateInterval = time.Second * time.Duration(interval)
+
+		return f, nil
+	}
+
+	db.log.Printf("[INFO] Feed %d was not found in database\n", id)
+	return nil, nil
+} // func (db *Database) FeedGetByID(id int64) (*model.Feed, error)
+
+// FeedGetAll loads all Feeds from the database.
+func (db *Database) FeedGetAll() ([]model.Feed, error) {
+	const qid query.ID = query.FeedGetAll
+	var (
+		err  error
+		msg  string
+		stmt *sql.Stmt
+	)
+
+	if stmt, err = db.getQuery(qid); err != nil {
+		db.log.Printf("[ERROR] Cannot prepare query %s: %s\n",
+			qid,
+			err.Error())
+		return nil, err
+	} else if db.tx != nil {
+		stmt = db.tx.Stmt(stmt)
+	}
+
+	var rows *sql.Rows
+
+EXEC_QUERY:
+	if rows, err = stmt.Query(); err != nil {
+		if worthARetry(err) {
+			waitForRetry()
+			goto EXEC_QUERY
+		}
+
+		return nil, err
+	}
+
+	defer rows.Close() // nolint: errcheck,gosec
+	var feeds = make([]model.Feed, 0, 16)
+
+	for rows.Next() {
+		var (
+			timestamp, interval int64
+			ustr, hstr          string
+			f                   model.Feed
+		)
+
+		if err = rows.Scan(&f.ID, &f.Title, &ustr, &hstr, &interval, &timestamp, &f.Active); err != nil {
+			msg = fmt.Sprintf("Error scanning row for Feed: %s",
+				err.Error())
+			db.log.Printf("[ERROR] %s\n", msg)
+			return nil, errors.New(msg)
+		} else if f.URL, err = url.Parse(ustr); err != nil {
+			db.log.Printf("[ERROR] Cannot parse URL %q: %s\n",
+				ustr,
+				err.Error())
+			return nil, err
+		} else if f.Homepage, err = url.Parse(hstr); err != nil {
+			db.log.Printf("[ERROR] Cannot parse URL %q: %s\n",
+				hstr,
+				err.Error())
+			return nil, err
+		}
+
+		f.LastRefresh = time.Unix(timestamp, 0)
+		f.UpdateInterval = time.Second * time.Duration(interval)
+		feeds = append(feeds, f)
+	}
+
+	return feeds, nil
+} // func (db *Database) FeedGetAll() ([]model.Feed, error)
