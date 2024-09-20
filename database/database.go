@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 19. 09. 2024 by Benjamin Walkenhorst
 // (c) 2024 Benjamin Walkenhorst
-// Time-stamp: <2024-09-20 10:50:49 krylon>
+// Time-stamp: <2024-09-20 16:32:07 krylon>
 
 // Package database provides persistence.
 package database
@@ -767,3 +767,277 @@ EXEC_QUERY:
 
 	return feeds, nil
 } // func (db *Database) FeedGetAll() ([]model.Feed, error)
+
+// FeedGetPending load all Feeds that need to be refreshed.
+func (db *Database) FeedGetPending() ([]model.Feed, error) {
+	const qid query.ID = query.FeedGetPending
+	var (
+		err  error
+		msg  string
+		stmt *sql.Stmt
+	)
+
+	if stmt, err = db.getQuery(qid); err != nil {
+		db.log.Printf("[ERROR] Cannot prepare query %s: %s\n",
+			qid,
+			err.Error())
+		return nil, err
+	} else if db.tx != nil {
+		stmt = db.tx.Stmt(stmt)
+	}
+
+	var rows *sql.Rows
+
+EXEC_QUERY:
+	if rows, err = stmt.Query(); err != nil {
+		if worthARetry(err) {
+			waitForRetry()
+			goto EXEC_QUERY
+		}
+
+		return nil, err
+	}
+
+	defer rows.Close() // nolint: errcheck,gosec
+	var feeds = make([]model.Feed, 0, 16)
+
+	for rows.Next() {
+		var (
+			timestamp, interval int64
+			ustr, hstr          string
+			f                   model.Feed
+		)
+
+		if err = rows.Scan(&f.ID, &f.Title, &ustr, &hstr, &interval, &timestamp, &f.Active); err != nil {
+			msg = fmt.Sprintf("Error scanning row for Feed: %s",
+				err.Error())
+			db.log.Printf("[ERROR] %s\n", msg)
+			return nil, errors.New(msg)
+		} else if f.URL, err = url.Parse(ustr); err != nil {
+			db.log.Printf("[ERROR] Cannot parse URL %q: %s\n",
+				ustr,
+				err.Error())
+			return nil, err
+		} else if f.Homepage, err = url.Parse(hstr); err != nil {
+			db.log.Printf("[ERROR] Cannot parse URL %q: %s\n",
+				hstr,
+				err.Error())
+			return nil, err
+		}
+
+		f.LastRefresh = time.Unix(timestamp, 0)
+		f.UpdateInterval = time.Second * time.Duration(interval)
+		feeds = append(feeds, f)
+	}
+
+	return feeds, nil
+} // func (db *Database) FeedGetPending() ([]model.Feed, error)
+
+// FeedUpdateRefresh updates the given Feed's LastRefresh timestamp
+func (db *Database) FeedUpdateRefresh(f *model.Feed, stamp time.Time) error {
+	const qid query.ID = query.FeedUpdateRefresh
+	var (
+		err    error
+		msg    string
+		stmt   *sql.Stmt
+		tx     *sql.Tx
+		status bool
+	)
+
+	if stmt, err = db.getQuery(qid); err != nil {
+		db.log.Printf("[ERROR] Cannot prepare query %s: %s\n",
+			qid,
+			err.Error())
+		return err
+	} else if db.tx != nil {
+		tx = db.tx
+	} else {
+		db.log.Printf("[INFO] Start ad-hoc transaction for adding Feed %s\n",
+			f.Title)
+	BEGIN_AD_HOC:
+		if tx, err = db.db.Begin(); err != nil {
+			if worthARetry(err) {
+				waitForRetry()
+				goto BEGIN_AD_HOC
+			} else {
+				msg = fmt.Sprintf("Error starting transaction: %s\n",
+					err.Error())
+				db.log.Printf("[ERROR] %s\n", msg)
+				return errors.New(msg)
+			}
+
+		} else {
+			defer func() {
+				var err2 error
+				if status {
+					if err2 = tx.Commit(); err2 != nil {
+						db.log.Printf("[ERROR] Failed to commit ad-hoc transaction: %s\n",
+							err2.Error())
+					}
+				} else if err2 = tx.Rollback(); err2 != nil {
+					db.log.Printf("[ERROR] Rollback of ad-hoc transaction failed: %s\n",
+						err2.Error())
+				}
+			}()
+		}
+	}
+
+	stmt = tx.Stmt(stmt)
+
+EXEC_QUERY:
+	if _, err = stmt.Exec(stamp.Unix(), f.ID); err != nil {
+		if worthARetry(err) {
+			waitForRetry()
+			goto EXEC_QUERY
+		} else {
+			err = fmt.Errorf("Cannot add Feed %s to database: %s",
+				f.Title,
+				err.Error())
+			db.log.Printf("[ERROR] %s\n", err.Error())
+			return err
+		}
+	}
+
+	f.LastRefresh = stamp
+	status = true
+	return nil
+} // func (db *Database) FeedUpdateRefresh(f *model.Feed, stamp time.Time) error
+
+// FeedSetActive sets the given Feed's Active flag
+func (db *Database) FeedSetActive(f *model.Feed, active bool) error {
+	const qid query.ID = query.FeedSetActive
+	var (
+		err    error
+		msg    string
+		stmt   *sql.Stmt
+		tx     *sql.Tx
+		status bool
+	)
+
+	if stmt, err = db.getQuery(qid); err != nil {
+		db.log.Printf("[ERROR] Cannot prepare query %s: %s\n",
+			qid,
+			err.Error())
+		return err
+	} else if db.tx != nil {
+		tx = db.tx
+	} else {
+		db.log.Printf("[INFO] Start ad-hoc transaction for adding Feed %s\n",
+			f.Title)
+	BEGIN_AD_HOC:
+		if tx, err = db.db.Begin(); err != nil {
+			if worthARetry(err) {
+				waitForRetry()
+				goto BEGIN_AD_HOC
+			} else {
+				msg = fmt.Sprintf("Error starting transaction: %s\n",
+					err.Error())
+				db.log.Printf("[ERROR] %s\n", msg)
+				return errors.New(msg)
+			}
+
+		} else {
+			defer func() {
+				var err2 error
+				if status {
+					if err2 = tx.Commit(); err2 != nil {
+						db.log.Printf("[ERROR] Failed to commit ad-hoc transaction: %s\n",
+							err2.Error())
+					}
+				} else if err2 = tx.Rollback(); err2 != nil {
+					db.log.Printf("[ERROR] Rollback of ad-hoc transaction failed: %s\n",
+						err2.Error())
+				}
+			}()
+		}
+	}
+
+	stmt = tx.Stmt(stmt)
+
+EXEC_QUERY:
+	if _, err = stmt.Exec(active, f.ID); err != nil {
+		if worthARetry(err) {
+			waitForRetry()
+			goto EXEC_QUERY
+		} else {
+			err = fmt.Errorf("Cannot add Feed %s to database: %s",
+				f.Title,
+				err.Error())
+			db.log.Printf("[ERROR] %s\n", err.Error())
+			return err
+		}
+	}
+
+	f.Active = active
+	status = true
+	return nil
+} // func (db *Database) FeedSetActive(f *model.Feed, active bool) error
+
+// FeedDelete removes the given Feed from the database.
+func (db *Database) FeedDelete(f *model.Feed) error {
+	const qid query.ID = query.FeedDelete
+	var (
+		err    error
+		msg    string
+		stmt   *sql.Stmt
+		tx     *sql.Tx
+		status bool
+	)
+
+	if stmt, err = db.getQuery(qid); err != nil {
+		db.log.Printf("[ERROR] Cannot prepare query %s: %s\n",
+			qid,
+			err.Error())
+		return err
+	} else if db.tx != nil {
+		tx = db.tx
+	} else {
+		db.log.Printf("[INFO] Start ad-hoc transaction for adding Feed %s\n",
+			f.Title)
+	BEGIN_AD_HOC:
+		if tx, err = db.db.Begin(); err != nil {
+			if worthARetry(err) {
+				waitForRetry()
+				goto BEGIN_AD_HOC
+			} else {
+				msg = fmt.Sprintf("Error starting transaction: %s\n",
+					err.Error())
+				db.log.Printf("[ERROR] %s\n", msg)
+				return errors.New(msg)
+			}
+
+		} else {
+			defer func() {
+				var err2 error
+				if status {
+					if err2 = tx.Commit(); err2 != nil {
+						db.log.Printf("[ERROR] Failed to commit ad-hoc transaction: %s\n",
+							err2.Error())
+					}
+				} else if err2 = tx.Rollback(); err2 != nil {
+					db.log.Printf("[ERROR] Rollback of ad-hoc transaction failed: %s\n",
+						err2.Error())
+				}
+			}()
+		}
+	}
+
+	stmt = tx.Stmt(stmt)
+
+EXEC_QUERY:
+	if _, err = stmt.Exec(f.ID); err != nil {
+		if worthARetry(err) {
+			waitForRetry()
+			goto EXEC_QUERY
+		} else {
+			err = fmt.Errorf("Cannot add Feed %s to database: %s",
+				f.Title,
+				err.Error())
+			db.log.Printf("[ERROR] %s\n", err.Error())
+			return err
+		}
+	}
+
+	status = true
+	return nil
+} // func (db *Database) FeedDelete(f *model.Feed) error
