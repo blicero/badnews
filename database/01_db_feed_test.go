@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 20. 09. 2024 by Benjamin Walkenhorst
 // (c) 2024 Benjamin Walkenhorst
-// Time-stamp: <2024-09-20 21:44:31 krylon>
+// Time-stamp: <2024-09-21 15:40:47 krylon>
 
 package database
 
@@ -89,6 +89,7 @@ func TestDBFeedAdd(t *testing.T) {
 				URL:            u,
 				Homepage:       hplink,
 				UpdateInterval: time.Second * 3600,
+				Active:         true,
 			},
 		}
 
@@ -107,8 +108,48 @@ func TestDBFeedAdd(t *testing.T) {
 					c.f.Title,
 					err.Error())
 			}
+		} else if c.f.ID == 0 {
+			t.Fatalf("After adding Feed %s, ID is still zero",
+				c.f.Title)
 		} else if !c.expectError {
 			feeds = append(feeds, c.f)
 		}
 	}
 } // func TestDBFeedAdd(t *testing.T)
+
+func TestDBFeedGet(t *testing.T) {
+	if db == nil {
+		t.SkipNow()
+	}
+
+	var err error
+
+	for _, f1 := range feeds {
+		var f2 *model.Feed
+
+		if f2, err = db.FeedGetByID(f1.ID); err != nil {
+			t.Fatalf("Error getting Feed %s (%d) from database: %s",
+				f1.Title,
+				f1.ID,
+				err.Error())
+		} else if f2 == nil {
+			t.Fatalf("Feed %s (%d) was not found in database",
+				f1.Title, f1.ID)
+		} else if !feedEqual(&f1, f2) {
+			t.Fatalf("Feed from database not equal to original Feed:\nOriginal: %s\nDatabase: %s",
+				&f1,
+				f2)
+		}
+	}
+} // func TestDBFeedGet(t *testing.T)
+
+// Helpers
+
+func feedEqual(f1, f2 *model.Feed) bool {
+	return f1.ID == f2.ID &&
+		f1.Title == f2.Title &&
+		f1.URL.String() == f2.URL.String() &&
+		f1.Homepage.String() == f2.Homepage.String() &&
+		f1.UpdateInterval == f2.UpdateInterval &&
+		f1.Active == f2.Active
+} // func feedEqual(f1, f2 *model.Feed) bool
