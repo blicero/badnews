@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 20. 09. 2024 by Benjamin Walkenhorst
 // (c) 2024 Benjamin Walkenhorst
-// Time-stamp: <2024-09-21 15:40:47 krylon>
+// Time-stamp: <2024-09-21 20:40:32 krylon>
 
 package database
 
@@ -117,7 +117,7 @@ func TestDBFeedAdd(t *testing.T) {
 	}
 } // func TestDBFeedAdd(t *testing.T)
 
-func TestDBFeedGet(t *testing.T) {
+func TestDBFeedGetByID(t *testing.T) {
 	if db == nil {
 		t.SkipNow()
 	}
@@ -141,7 +141,55 @@ func TestDBFeedGet(t *testing.T) {
 				f2)
 		}
 	}
-} // func TestDBFeedGet(t *testing.T)
+} // func TestDBFeedGetByID(t *testing.T)
+
+func TestDBFeedGetPending(t *testing.T) {
+	if db == nil {
+		t.SkipNow()
+	}
+
+	var (
+		err     error
+		pending []model.Feed
+	)
+
+	if pending, err = db.FeedGetPending(); err != nil {
+		t.Fatalf("Failed to fetch pending Feeds: %s", err.Error())
+	} else if len(pending) != len(feeds) {
+		t.Fatalf("Unexpected number of results from FeedGetPending: %d (expected %d)",
+			len(pending),
+			len(feeds))
+	}
+} // func TestDBFeedGetPending(t *testing.T)
+
+func TestDBFeedUpdateRefresh(t *testing.T) {
+	if db == nil {
+		t.SkipNow()
+	}
+
+	var (
+		err error
+		now = time.Now()
+	)
+
+	for i := range feeds {
+		if err = db.FeedUpdateRefresh(&feeds[i], now); err != nil {
+			t.Fatalf("Error setting update timestamp on Feed %s (%d): %s",
+				feeds[i].Title,
+				feeds[i].ID,
+				err.Error())
+		}
+	}
+
+	var pending []model.Feed
+
+	if pending, err = db.FeedGetPending(); err != nil {
+		t.Fatalf("Failed to get pending Feeds: %s", err.Error())
+	} else if len(pending) != 0 {
+		t.Fatalf("Unexpected number of pending Feeds: %d (expected 0)",
+			len(pending))
+	}
+} // func TestDBFeedUpdateRefresh(t *testing.T)
 
 // Helpers
 
