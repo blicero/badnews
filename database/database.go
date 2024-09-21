@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 19. 09. 2024 by Benjamin Walkenhorst
 // (c) 2024 Benjamin Walkenhorst
-// Time-stamp: <2024-09-20 16:32:07 krylon>
+// Time-stamp: <2024-09-21 20:41:42 krylon>
 
 // Package database provides persistence.
 package database
@@ -567,8 +567,8 @@ func (db *Database) FeedAdd(f *model.Feed) error {
 	} else if db.tx != nil {
 		tx = db.tx
 	} else {
-		db.log.Printf("[INFO] Start ad-hoc transaction for adding Feed %s\n",
-			f.Title)
+		// db.log.Printf("[INFO] Start ad-hoc transaction for adding Feed %s\n",
+		// 	f.Title)
 	BEGIN_AD_HOC:
 		if tx, err = db.db.Begin(); err != nil {
 			if worthARetry(err) {
@@ -852,8 +852,8 @@ func (db *Database) FeedUpdateRefresh(f *model.Feed, stamp time.Time) error {
 	} else if db.tx != nil {
 		tx = db.tx
 	} else {
-		db.log.Printf("[INFO] Start ad-hoc transaction for adding Feed %s\n",
-			f.Title)
+		// db.log.Printf("[INFO] Start ad-hoc transaction for adding Feed %s\n",
+		// 	f.Title)
 	BEGIN_AD_HOC:
 		if tx, err = db.db.Begin(); err != nil {
 			if worthARetry(err) {
@@ -922,8 +922,8 @@ func (db *Database) FeedSetActive(f *model.Feed, active bool) error {
 	} else if db.tx != nil {
 		tx = db.tx
 	} else {
-		db.log.Printf("[INFO] Start ad-hoc transaction for adding Feed %s\n",
-			f.Title)
+		// db.log.Printf("[INFO] Start ad-hoc transaction for adding Feed %s\n",
+		// 	f.Title)
 	BEGIN_AD_HOC:
 		if tx, err = db.db.Begin(); err != nil {
 			if worthARetry(err) {
@@ -992,8 +992,8 @@ func (db *Database) FeedDelete(f *model.Feed) error {
 	} else if db.tx != nil {
 		tx = db.tx
 	} else {
-		db.log.Printf("[INFO] Start ad-hoc transaction for adding Feed %s\n",
-			f.Title)
+		// db.log.Printf("[INFO] Start ad-hoc transaction for adding Feed %s\n",
+		// 	f.Title)
 	BEGIN_AD_HOC:
 		if tx, err = db.db.Begin(); err != nil {
 			if worthARetry(err) {
