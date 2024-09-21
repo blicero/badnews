@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 20. 09. 2024 by Benjamin Walkenhorst
 // (c) 2024 Benjamin Walkenhorst
-// Time-stamp: <2024-09-20 16:14:43 krylon>
+// Time-stamp: <2024-09-21 20:49:44 krylon>
 
 package database
 
@@ -13,6 +13,12 @@ import (
 	"time"
 
 	"github.com/blicero/badnews/common"
+	"github.com/blicero/badnews/model"
+)
+
+var (
+	db    *Database
+	feeds []model.Feed
 )
 
 func TestMain(m *testing.M) {
