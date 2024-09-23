@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 19. 09. 2024 by Benjamin Walkenhorst
 // (c) 2024 Benjamin Walkenhorst
-// Time-stamp: <2024-09-19 21:02:06 krylon>
+// Time-stamp: <2024-09-23 20:57:06 krylon>
 
 package database
 
@@ -29,10 +29,13 @@ CREATE TABLE item (
     timestamp           INTEGER NOT NULL,
     headline            TEXT NOT NULL,
     description         TEXT NOT NULL DEFAULT '',
-    FOREIGN KEY (feed_id) REFERENCES feed (id)
+    rating              INTEGER NOT NULL DEFAULT 0,
+    FOREIGN KEY (feed_id) REFERENCES feed (id),
+    CHECK (rating IN (-1, 0, 1))
 ) STRICT
 `,
 	"CREATE INDEX item_feed_idx ON item (feed_id)",
 	"CREATE INDEX item_time_idx ON item (timestamp)",
 	"CREATE INDEX item_headline_idx ON item (headline)",
+	"CREATE INDEX item_rating_idx ON item (rating)",
 }

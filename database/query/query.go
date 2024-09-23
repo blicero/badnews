@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 19. 09. 2024 by Benjamin Walkenhorst
 // (c) 2024 Benjamin Walkenhorst
-// Time-stamp: <2024-09-19 17:10:21 krylon>
+// Time-stamp: <2024-09-23 20:58:48 krylon>
 
 // Package query provides symbolic constants to identify database queries.
 package query
@@ -20,6 +20,12 @@ const (
 	FeedUpdateRefresh
 	FeedSetActive
 	FeedDelete
+	ItemAdd
+	ItemGetRecent
+	ItemGetByFeed
+	ItemGetRated
+	ItemRate
+	ItemUnrate
 )
 
 // AllQueries returns a slice of all queries.

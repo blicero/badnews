@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 19. 09. 2024 by Benjamin Walkenhorst
 // (c) 2024 Benjamin Walkenhorst
-// Time-stamp: <2024-09-21 15:39:27 krylon>
+// Time-stamp: <2024-09-22 10:05:44 krylon>
 
 // Package model provides the data types used across the application.
 package model
@@ -43,4 +43,5 @@ type Item struct {
 	Timestamp   time.Time
 	Headline    string
 	Description string
+	Rating      int8
 }

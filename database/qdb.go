@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 19. 09. 2024 by Benjamin Walkenhorst
 // (c) 2024 Benjamin Walkenhorst
-// Time-stamp: <2024-09-19 19:32:16 krylon>
+// Time-stamp: <2024-09-23 21:16:42 krylon>
 
 package database
 
@@ -59,4 +59,51 @@ SET active = ?
 WHERE id = ?
 `,
 	query.FeedDelete: "DELETE FROM feed WHERE id = ?",
+	query.ItemAdd: `
+INSERT INTO item (feed_id, url, timestamp, headline, description, rating)
+          VALUES (      ?,   ?,         ?,        ?,           ?,      ?)
+RETURNING id
+`,
+	query.ItemGetRecent: `
+SELECT
+    id,
+    feed_id,
+    url,
+    timestamp,
+    headline,
+    description,
+    rating
+FROM item
+WHERE timestamp > ?
+ORDER BY timestamp DESC
+`,
+	query.ItemGetByFeed: `
+SELECT
+    id,
+    url,
+    timestamp,
+    headline,
+    description,
+    rating
+FROM item
+WHERE feed_id = ?
+ORDER BY timestamp DESC
+LIMIT ?
+OFFSET ?
+`,
+	query.ItemGetRated: `
+SELECT
+    id,
+    feed_id,
+    url,
+    timestamp,
+    headline,
+    description,
+    rating
+FROM item
+WHERE rating <> 0
+ORDER BY timestamp DESC
+`,
+	query.ItemRate:   "UPDATE item SET rating = ? WHERE id = ?",
+	query.ItemUnrate: "UPDATE item SET rating = 0 WHERE id = ?",
 }

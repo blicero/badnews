@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 19. 09. 2024 by Benjamin Walkenhorst
 // (c) 2024 Benjamin Walkenhorst
-// Time-stamp: <2024-09-21 20:41:42 krylon>
+// Time-stamp: <2024-09-23 21:36:05 krylon>
 
 // Package database provides persistence.
 package database
@@ -1041,3 +1041,406 @@ EXEC_QUERY:
 	status = true
 	return nil
 } // func (db *Database) FeedDelete(f *model.Feed) error
+
+// ItemAdd adds a news item to the database.
+func (db *Database) ItemAdd(i *model.Item) error {
+	const qid query.ID = query.ItemAdd
+	var (
+		err    error
+		msg    string
+		stmt   *sql.Stmt
+		tx     *sql.Tx
+		status bool
+	)
+
+	if stmt, err = db.getQuery(qid); err != nil {
+		db.log.Printf("[ERROR] Cannot prepare query %s: %s\n",
+			qid,
+			err.Error())
+		return err
+	} else if db.tx != nil {
+		tx = db.tx
+	} else {
+		// db.log.Printf("[INFO] Start ad-hoc transaction for adding Feed %s\n",
+		// 	f.Title)
+	BEGIN_AD_HOC:
+		if tx, err = db.db.Begin(); err != nil {
+			if worthARetry(err) {
+				waitForRetry()
+				goto BEGIN_AD_HOC
+			} else {
+				msg = fmt.Sprintf("Error starting transaction: %s\n",
+					err.Error())
+				db.log.Printf("[ERROR] %s\n", msg)
+				return errors.New(msg)
+			}
+
+		} else {
+			defer func() {
+				var err2 error
+				if status {
+					if err2 = tx.Commit(); err2 != nil {
+						db.log.Printf("[ERROR] Failed to commit ad-hoc transaction: %s\n",
+							err2.Error())
+					}
+				} else if err2 = tx.Rollback(); err2 != nil {
+					db.log.Printf("[ERROR] Rollback of ad-hoc transaction failed: %s\n",
+						err2.Error())
+				}
+			}()
+		}
+	}
+
+	stmt = tx.Stmt(stmt)
+	var rows *sql.Rows
+
+EXEC_QUERY:
+	if rows, err = stmt.Query(i.FeedID, i.URL.String(), i.Timestamp.Unix(), i.Headline, i.Description); err != nil {
+		if worthARetry(err) {
+			waitForRetry()
+			goto EXEC_QUERY
+		} else {
+			err = fmt.Errorf("Cannot add Item %s to database: %s",
+				i.Headline,
+				err.Error())
+			db.log.Printf("[ERROR] %s\n", err.Error())
+			return err
+		}
+	} else {
+		var id int64
+
+		defer rows.Close()
+
+		if !rows.Next() {
+			// CANTHAPPEN
+			db.log.Printf("[ERROR] Query %s did not return a value\n",
+				qid)
+			return fmt.Errorf("Query %s did not return a value", qid)
+		} else if err = rows.Scan(&id); err != nil {
+			msg = fmt.Sprintf("Failed to get ID for newly added host %s: %s",
+				i.Headline,
+				err.Error())
+			db.log.Printf("[ERROR] %s\n", msg)
+			return errors.New(msg)
+		}
+
+		i.ID = id
+		status = true
+		return nil
+	}
+} // func (db *Database) ItemAdd(i *model.Item) error
+
+// ItemGetRecent loads all items newer than the given timestamp.
+func (db *Database) ItemGetRecent(begin time.Time) ([]model.Item, error) {
+	const qid query.ID = query.ItemGetRecent
+	var (
+		err  error
+		msg  string
+		stmt *sql.Stmt
+	)
+
+	if stmt, err = db.getQuery(qid); err != nil {
+		db.log.Printf("[ERROR] Cannot prepare query %s: %s\n",
+			qid,
+			err.Error())
+		return nil, err
+	} else if db.tx != nil {
+		stmt = db.tx.Stmt(stmt)
+	}
+
+	var rows *sql.Rows
+
+EXEC_QUERY:
+	if rows, err = stmt.Query(begin.Unix()); err != nil {
+		if worthARetry(err) {
+			waitForRetry()
+			goto EXEC_QUERY
+		}
+
+		return nil, err
+	}
+
+	defer rows.Close() // nolint: errcheck,gosec
+	var items = make([]model.Item, 0, 16)
+
+	for rows.Next() {
+		var (
+			timestamp int64
+			ustr      string
+			i         model.Item
+		)
+
+		if err = rows.Scan(&i.ID, &i.FeedID, &ustr, &timestamp, &i.Headline, &i.Description, &i.Rating); err != nil {
+			msg = fmt.Sprintf("Error scanning row for Feed: %s",
+				err.Error())
+			db.log.Printf("[ERROR] %s\n", msg)
+			return nil, errors.New(msg)
+		} else if i.URL, err = url.Parse(ustr); err != nil {
+			db.log.Printf("[ERROR] Cannot parse URL %q: %s\n",
+				ustr,
+				err.Error())
+			return nil, err
+		}
+
+		i.Timestamp = time.Unix(timestamp, 0)
+		items = append(items, i)
+	}
+
+	return items, nil
+} // func (db *Database) ItemGetRecent(begin time.Time) ([]model.Item, error)
+
+// ItemGetByFeed loads items from the given Feed.
+func (db *Database) ItemGetByFeed(f *model.Feed, limit, offset int64) ([]model.Item, error) {
+	const qid query.ID = query.ItemGetByFeed
+	var (
+		err  error
+		msg  string
+		stmt *sql.Stmt
+	)
+
+	if stmt, err = db.getQuery(qid); err != nil {
+		db.log.Printf("[ERROR] Cannot prepare query %s: %s\n",
+			qid,
+			err.Error())
+		return nil, err
+	} else if db.tx != nil {
+		stmt = db.tx.Stmt(stmt)
+	}
+
+	var rows *sql.Rows
+
+EXEC_QUERY:
+	if rows, err = stmt.Query(f.ID, limit, offset); err != nil {
+		if worthARetry(err) {
+			waitForRetry()
+			goto EXEC_QUERY
+		}
+
+		return nil, err
+	}
+
+	defer rows.Close() // nolint: errcheck,gosec
+	var items = make([]model.Item, 0, 16)
+
+	for rows.Next() {
+		var (
+			timestamp int64
+			ustr      string
+			i         model.Item
+		)
+
+		if err = rows.Scan(&i.ID, &i.FeedID, &ustr, &timestamp, &i.Headline, &i.Description, &i.Rating); err != nil {
+			msg = fmt.Sprintf("Error scanning row for Feed: %s",
+				err.Error())
+			db.log.Printf("[ERROR] %s\n", msg)
+			return nil, errors.New(msg)
+		} else if i.URL, err = url.Parse(ustr); err != nil {
+			db.log.Printf("[ERROR] Cannot parse URL %q: %s\n",
+				ustr,
+				err.Error())
+			return nil, err
+		}
+
+		i.Timestamp = time.Unix(timestamp, 0)
+		items = append(items, i)
+	}
+
+	return items, nil
+} // func (db *Database) ItemGetByFeed(f *model.Feed, limit, offset int64) ([]model.Item, error)
+
+// ItemGetRated loads all items that have been manually rated.
+func (db *Database) ItemGetRated() ([]model.Item, error) {
+	const qid query.ID = query.ItemGetRated
+	var (
+		err  error
+		msg  string
+		stmt *sql.Stmt
+	)
+
+	if stmt, err = db.getQuery(qid); err != nil {
+		db.log.Printf("[ERROR] Cannot prepare query %s: %s\n",
+			qid,
+			err.Error())
+		return nil, err
+	} else if db.tx != nil {
+		stmt = db.tx.Stmt(stmt)
+	}
+
+	var rows *sql.Rows
+
+EXEC_QUERY:
+	if rows, err = stmt.Query(); err != nil {
+		if worthARetry(err) {
+			waitForRetry()
+			goto EXEC_QUERY
+		}
+
+		return nil, err
+	}
+
+	defer rows.Close() // nolint: errcheck,gosec
+	var items = make([]model.Item, 0, 16)
+
+	for rows.Next() {
+		var (
+			timestamp int64
+			ustr      string
+			i         model.Item
+		)
+
+		if err = rows.Scan(&i.ID, &i.FeedID, &ustr, &timestamp, &i.Headline, &i.Description, &i.Rating); err != nil {
+			msg = fmt.Sprintf("Error scanning row for Feed: %s",
+				err.Error())
+			db.log.Printf("[ERROR] %s\n", msg)
+			return nil, errors.New(msg)
+		} else if i.URL, err = url.Parse(ustr); err != nil {
+			db.log.Printf("[ERROR] Cannot parse URL %q: %s\n",
+				ustr,
+				err.Error())
+			return nil, err
+		}
+
+		i.Timestamp = time.Unix(timestamp, 0)
+		items = append(items, i)
+	}
+
+	return items, nil
+} // func (db *Database) ItemGetRated() ([]model.Item, error)
+
+func (db *Database) ItemRate(i *model.Item, r int8) error {
+	const qid query.ID = query.ItemRate
+	var (
+		err    error
+		msg    string
+		stmt   *sql.Stmt
+		tx     *sql.Tx
+		status bool
+	)
+
+	if stmt, err = db.getQuery(qid); err != nil {
+		db.log.Printf("[ERROR] Cannot prepare query %s: %s\n",
+			qid,
+			err.Error())
+		return err
+	} else if db.tx != nil {
+		tx = db.tx
+	} else {
+		// db.log.Printf("[INFO] Start ad-hoc transaction for adding Feed %s\n",
+		// 	f.Title)
+	BEGIN_AD_HOC:
+		if tx, err = db.db.Begin(); err != nil {
+			if worthARetry(err) {
+				waitForRetry()
+				goto BEGIN_AD_HOC
+			} else {
+				msg = fmt.Sprintf("Error starting transaction: %s\n",
+					err.Error())
+				db.log.Printf("[ERROR] %s\n", msg)
+				return errors.New(msg)
+			}
+
+		} else {
+			defer func() {
+				var err2 error
+				if status {
+					if err2 = tx.Commit(); err2 != nil {
+						db.log.Printf("[ERROR] Failed to commit ad-hoc transaction: %s\n",
+							err2.Error())
+					}
+				} else if err2 = tx.Rollback(); err2 != nil {
+					db.log.Printf("[ERROR] Rollback of ad-hoc transaction failed: %s\n",
+						err2.Error())
+				}
+			}()
+		}
+	}
+
+	stmt = tx.Stmt(stmt)
+
+EXEC_QUERY:
+	if _, err = stmt.Exec(r, i.ID); err != nil {
+		if worthARetry(err) {
+			waitForRetry()
+			goto EXEC_QUERY
+		} else {
+			err = fmt.Errorf("Cannot add Item %s to database: %s",
+				i.Headline,
+				err.Error())
+			db.log.Printf("[ERROR] %s\n", err.Error())
+			return err
+		}
+	}
+
+	i.Rating = r
+	status = true
+	return nil
+} // func (db *Database) ItemRate(i *model.Item, r int64) error
+
+func (db *Database) ItemUnrate(i *model.Item) error {
+	const qid query.ID = query.ItemUnrate
+	var (
+		err    error
+		msg    string
+		stmt   *sql.Stmt
+		tx     *sql.Tx
+		status bool
+	)
+
+	if stmt, err = db.getQuery(qid); err != nil {
+		db.log.Printf("[ERROR] Cannot prepare query %s: %s\n",
+			qid,
+			err.Error())
+		return err
+	} else if db.tx != nil {
+		tx = db.tx
+	} else {
+		// db.log.Printf("[INFO] Start ad-hoc transaction for adding Feed %s\n",
+		// 	f.Title)
+	BEGIN_AD_HOC:
+		if tx, err = db.db.Begin(); err != nil {
+			if worthARetry(err) {
+				waitForRetry()
+				goto BEGIN_AD_HOC
+			} else {
+				msg = fmt.Sprintf("Error starting transaction: %s\n",
+					err.Error())
+				db.log.Printf("[ERROR] %s\n", msg)
+				return errors.New(msg)
+			}
+
+		} else {
+			defer func() {
+				var err2 error
+				if status {
+					if err2 = tx.Commit(); err2 != nil {
+						db.log.Printf("[ERROR] Failed to commit ad-hoc transaction: %s\n",
+							err2.Error())
+					}
+				} else if err2 = tx.Rollback(); err2 != nil {
+					db.log.Printf("[ERROR] Rollback of ad-hoc transaction failed: %s\n",
+						err2.Error())
+				}
+			}()
+		}
+	}
+
+	stmt = tx.Stmt(stmt)
+
+EXEC_QUERY:
+	if _, err = stmt.Query(i.ID); err != nil {
+		if worthARetry(err) {
+			waitForRetry()
+			goto EXEC_QUERY
+		} else {
+			err = fmt.Errorf("Cannot add Item %s to database: %s",
+				i.Headline,
+				err.Error())
+			db.log.Printf("[ERROR] %s\n", err.Error())
+			return err
+		}
+	}
+
+	i.Rating = 0
+	status = true
+	return nil
+} // func (db *Database) ItemUnrate(i *model.Item, r int64) error
