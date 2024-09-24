@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 19. 09. 2024 by Benjamin Walkenhorst
 // (c) 2024 Benjamin Walkenhorst
-// Time-stamp: <2024-09-24 14:43:47 krylon>
+// Time-stamp: <2024-09-24 18:54:40 krylon>
 
 // Package database provides persistence.
 package database
@@ -1129,6 +1129,57 @@ EXEC_QUERY:
 		return nil
 	}
 } // func (db *Database) ItemAdd(i *model.Item) error
+
+// ItemExists checks if the given Item is already in the database.
+func (db *Database) ItemExists(i *model.Item) (bool, error) {
+	const qid query.ID = query.ItemExists
+	var (
+		err  error
+		msg  string
+		stmt *sql.Stmt
+	)
+
+	if stmt, err = db.getQuery(qid); err != nil {
+		db.log.Printf("[ERROR] Cannot prepare query %s: %s\n",
+			qid,
+			err.Error())
+		return false, err
+	} else if db.tx != nil {
+		stmt = db.tx.Stmt(stmt)
+	}
+
+	var rows *sql.Rows
+
+EXEC_QUERY:
+	if rows, err = stmt.Query(i.URL.String()); err != nil {
+		if worthARetry(err) {
+			waitForRetry()
+			goto EXEC_QUERY
+		}
+
+		return false, err
+	}
+
+	defer rows.Close() // nolint: errcheck,gosec
+
+	if rows.Next() {
+		var cnt int64
+
+		if err = rows.Scan(&cnt); err != nil {
+			msg = fmt.Sprintf("Error scanning row for Feed: %s",
+				err.Error())
+			db.log.Printf("[ERROR] %s\n", msg)
+			return false, errors.New(msg)
+		}
+
+		return cnt > 0, nil
+	}
+
+	db.log.Printf("[CANTHAPPEN] Query %s did not return any data looking for Item %q\n",
+		qid,
+		i.URL)
+	return false, nil
+} // func (db *Database) ItemExists(i *model.Item) (bool, error)
 
 // ItemGetRecent loads all items newer than the given timestamp.
 func (db *Database) ItemGetRecent(begin time.Time) ([]model.Item, error) {

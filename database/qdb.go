@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 19. 09. 2024 by Benjamin Walkenhorst
 // (c) 2024 Benjamin Walkenhorst
-// Time-stamp: <2024-09-23 21:16:42 krylon>
+// Time-stamp: <2024-09-24 18:44:37 krylon>
 
 package database
 
@@ -64,6 +64,7 @@ INSERT INTO item (feed_id, url, timestamp, headline, description, rating)
           VALUES (      ?,   ?,         ?,        ?,           ?,      ?)
 RETURNING id
 `,
+	query.ItemExists: "SELECT COUNT(id) FROM item WHERE url = ?",
 	query.ItemGetRecent: `
 SELECT
     id,
