@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 19. 09. 2024 by Benjamin Walkenhorst
 // (c) 2024 Benjamin Walkenhorst
-// Time-stamp: <2024-09-22 10:05:44 krylon>
+// Time-stamp: <2024-09-24 20:04:54 krylon>
 
 // Package model provides the data types used across the application.
 package model
@@ -33,6 +33,26 @@ func (f *Feed) String() string {
 		f.UpdateInterval,
 		f.LastRefresh,
 		f.Active)
+}
+
+// IsDue returns true if the Feed is due for a refresh.
+func (f *Feed) IsDue() bool {
+	return time.Now().After(f.LastRefresh.Add(f.UpdateInterval))
+} // func (f *Feed) IsDue() bool
+
+// Clone returns a shallow copy of the Feed
+func (f *Feed) Clone() *Feed {
+	var c = &Feed{
+		ID:             f.ID,
+		Title:          f.Title,
+		URL:            f.URL,
+		Homepage:       f.Homepage,
+		UpdateInterval: f.UpdateInterval,
+		LastRefresh:    f.LastRefresh,
+		Active:         f.Active,
+	}
+
+	return c
 }
 
 // Item is a single news item
