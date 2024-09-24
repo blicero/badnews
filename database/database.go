@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 19. 09. 2024 by Benjamin Walkenhorst
 // (c) 2024 Benjamin Walkenhorst
-// Time-stamp: <2024-09-23 21:36:05 krylon>
+// Time-stamp: <2024-09-24 14:43:47 krylon>
 
 // Package database provides persistence.
 package database
@@ -1307,6 +1307,7 @@ EXEC_QUERY:
 	return items, nil
 } // func (db *Database) ItemGetRated() ([]model.Item, error)
 
+// ItemRate sets an Item's rating to the given value
 func (db *Database) ItemRate(i *model.Item, r int8) error {
 	const qid query.ID = query.ItemRate
 	var (
@@ -1376,6 +1377,7 @@ EXEC_QUERY:
 	return nil
 } // func (db *Database) ItemRate(i *model.Item, r int64) error
 
+// ItemUnrate resets an Item's rating to zero.
 func (db *Database) ItemUnrate(i *model.Item) error {
 	const qid query.ID = query.ItemUnrate
 	var (
