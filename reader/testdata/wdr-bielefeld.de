@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xmlns:app="http://www.wdr.de/rss/1.0/modules/app/1.0/" xmlns:dc="http://purl.org/dc/elements/1.1/">
+  <title>Nachrichten - WDR.de</title>
+  <link rel="alternate" type="text/html" href="https://www1.wdr.de/nachrichten/bielefeld-nachrichten-100.html" />
+  <link rel="self" href="https://www1.wdr.de/nachrichten/bielefeld-nachrichten-100.feed" />
+  <updated>2024-09-24T17:00:00Z</updated>
+  <dc:date>2024-09-24T17:00:00Z</dc:date>
+  <app:tags>Bielefeld, Studio Bielefeld, Nachrichten, Überblick</app:tags>
+  <entry>
+    <title>Nachrichten live erleben - in Ennigerloh, Hückeswagen und Warburg</title>
+    <link rel="alternate" href="https://www1.wdr.de/nachrichten/wdr-aktuell-tour-ennigerloh-hueckeswagen-warburg-2024-100.html" />
+    <author>
+      <name>WDR</name>
+    </author>
+    <id>https://www1.wdr.de/nachrichten/wdr-aktuell-tour-ennigerloh-hueckeswagen-warburg-2024-100.html</id>
+    <updated>2024-09-24T17:00:00Z</updated>
+    <published>2024-09-24T17:00:00Z</published>
+    <content type="html">Ennigerloh, Hückeswagen und Warburg: Wir berichten online, im Radio und Fernsehen direkt von vor Ort. Im September und Oktober heißt es "WDR aktuell auf Tour - Nachrichten live erleben". Seid dabei, schaut uns über die Schulter und erzählt uns von euren Themen!</content>
+    <summary>Ennigerloh, Hückeswagen und Warburg: Wir berichten online, im Radio und Fernsehen direkt von vor Ort. Im September und Oktober heißt es "WDR aktuell auf Tour - Nachrichten live erleben". Seid dabei, schaut uns über die Schulter und erzählt uns von euren Themen!</summary>
+    <dc:creator>WDR</dc:creator>
+    <dc:date>2024-09-24T17:00:00Z</dc:date>
+    <dc:type>Nachricht - WDR</dc:type>
+    <app:tags>WDR aktuell, Tour, Newsroom, Newsroomtour, 2024, Aktuelle Stunde, Ennigerloh, Hückeswagen, Warburg, App</app:tags>
+    <app:teasertyp>teaserEinklappbar</app:teasertyp>
+    <app:componentid>-7351929169977383641</app:componentid>
+    <app:componenttitle>Heute</app:componenttitle>
+    <app:highlight>nein</app:highlight>
+  </entry>
+  <entry>
+    <title>Mostereien in NRW: Sehr unterschiedliche Obsternte</title>
+    <link rel="alternate" href="https://www1.wdr.de/nachrichten/westfalen-lippe/mostereien-obst-engpass-preis-owl-100.html" />
+    <author>
+      <name>WDR</name>
+    </author>
+    <id>https://www1.wdr.de/nachrichten/westfalen-lippe/mostereien-obst-engpass-preis-owl-100.html</id>
+    <updated>2024-09-24T14:05:00Z</updated>
+    <published>2024-09-24T18:28:40Z</published>
+    <content type="html">Die Mostereien in &lt;abbr title="Ostwestfalen-Lippe"&gt;OWL&lt;/abbr&gt; bekommen derzeit weniger Obst angeliefert. Andere haben dagegen mehr Glück mit ihrer Ernte.</content>
+    <summary>Die Mostereien in OWL bekommen derzeit weniger Obst angeliefert. Andere haben dagegen mehr Glück mit ihrer Ernte.</summary>
+    <dc:creator>WDR</dc:creator>
+    <dc:date>2024-09-24T18:28:40Z</dc:date>
+    <dc:type>Nachricht - Westfalen-Lippe</dc:type>
+    <app:tags>24.09.24, Online-Beitrag, Mostereien, OWL, Saft, Obst, Engpass,</app:tags>
+    <app:teasertyp>teaserEinklappbar</app:teasertyp>
+    <app:componentid>-7351929169977383641</app:componentid>
+    <app:componenttitle>Heute</app:componenttitle>
+    <app:highlight>nein</app:highlight>
+  </entry>
+  <entry>
+    <title>Nach schwerem Unfall: Autobahn 2 in Ostwestfalen wieder frei</title>
+    <link rel="alternate" href="https://www1.wdr.de/nachrichten/westfalen-lippe/unfall-sperrung-autobahn-zwei-owl-100.html" />
+    <author>
+      <name>WDR</name>
+    </author>
+    <id>https://www1.wdr.de/nachrichten/westfalen-lippe/unfall-sperrung-autobahn-zwei-owl-100.html</id>
+    <updated>2024-09-24T13:45:00Z</updated>
+    <published>2024-09-24T14:06:18Z</published>
+    <content type="html">Die A2 zwischen Ostwestfalen/Lippe und Herford/Bad Salzuflen ist nach einem Unfall wieder frei. Ein Mann schwebt in Lebensgefahr.</content>
+    <summary>Die A2 zwischen Ostwestfalen/Lippe und Herford/Bad Salzuflen ist nach einem Unfall wieder frei. Ein Mann schwebt in Lebensgefahr.</summary>
+    <dc:creator>WDR</dc:creator>
+    <dc:date>2024-09-24T14:06:18Z</dc:date>
+    <dc:type>Nachricht - Westfalen-Lippe</dc:type>
+    <app:tags>24.09.2024, Regio-Beitrag, Unfall, A2, Sperrung, Ostwestfalen/Lippe, Herford/Bad Salzuflen</app:tags>
+    <app:teasertyp>teaserEinklappbar</app:teasertyp>
+    <app:componentid>-7351929169977383641</app:componentid>
+    <app:componenttitle>Heute</app:componenttitle>
+    <app:highlight>nein</app:highlight>
+  </entry>
+  <entry>
+    <title>Brot und Brötchen: Trend geht zur Selbstbedienung</title>
+    <link rel="alternate" href="https://www1.wdr.de/nachrichten/westfalen-lippe/baeckereien-mehr-selbstbedienung-hoehere-umsaetze-100.html" />
+    <author>
+      <name>WDR</name>
+    </author>
+    <id>https://www1.wdr.de/nachrichten/westfalen-lippe/baeckereien-mehr-selbstbedienung-hoehere-umsaetze-100.html</id>
+    <updated>2024-09-23T13:39:00Z</updated>
+    <published>2024-09-24T08:53:43Z</published>
+    <content type="html">Weniger Bäckereien verkaufen mehr Backwaren. Der Verband Deutscher Großbäckereien mit Sitz in Düsseldorf ist insgesamt zufrieden.</content>
+    <summary>Weniger Bäckereien verkaufen mehr Backwaren. Der Verband Deutscher Großbäckereien mit Sitz in Düsseldorf ist insgesamt zufrieden.</summary>
+    <dc:creator>WDR</dc:creator>
+    <dc:date>2024-09-24T08:53:43Z</dc:date>
+    <dc:type>Nachricht - Westfalen-Lippe</dc:type>
+    <app:tags>Regio-Beitrag, 23.09.2024, Lokalzeit, WDR, Ostwestfalen, Lippe, OWL, wdr.de, Westdeutscher Rundfunk, Studio Bielefeld, Gütersloh, Bäckereien, Großbäckereien, Brot, Brötchen, Backwaren, Personalkosten</app:tags>
+    <app:teasertyp>teaserEinklappbar</app:teasertyp>
+    <app:componentid>6779241087591983032</app:componentid>
+    <app:componenttitle>Gestern</app:componenttitle>
+    <app:highlight>nein</app:highlight>
+  </entry>
+</feed>
+
+
+
+
+
+
+
+
+
+
+
+	
+	
+	    
+	    
+	    
+	    
+	
+
