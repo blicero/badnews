@@ -1,5 +1,5 @@
 # -*- mode: org; fill-column: 78; -*-
-# Time-stamp: <2024-09-23 21:37:14 krylon>
+# Time-stamp: <2024-09-24 14:44:12 krylon>
 #
 #+TAGS: internals(i) ui(u) bug(b) feature(f)
 #+TAGS: database(d) design(e), meditation(m)
@@ -12,15 +12,15 @@
   BadNews is an RSS reader
 ** Clock table
    #+BEGIN: clocktable :scope file :maxlevel 202 :emphasize t
-   #+CAPTION: Clock summary at [2024-09-23 Mo 21:37]
+   #+CAPTION: Clock summary at [2024-09-24 Di 14:44]
    | Headline               | Time   |        |      |
    |------------------------+--------+--------+------|
-   | *Total time*           | *8:44* |        |      |
+   | *Total time*           | *8:46* |        |      |
    |------------------------+--------+--------+------|
-   | *BadNews*              | *8:44* |        |      |
-   | \_  /Components [0/0]/ |        | /8:44/ |      |
+   | *BadNews*              | *8:46* |        |      |
+   | \_  /Components [0/0]/ |        | /8:46/ |      |
    | \_    Data model [0/0] |        |        | 0:27 |
-   | \_    Database [0/0]   |        |        | 8:17 |
+   | \_    Database [0/0]   |        |        | 8:19 |
    #+END:
 ** Journal
 ** Features [0/0]
@@ -47,6 +47,7 @@
     :VISIBILITY: children
     :END:
     :LOGBOOK:
+    CLOCK: [2024-09-24 Di 14:42]--[2024-09-24 Di 14:44] =>  0:02
     CLOCK: [2024-09-23 Mo 20:45]--[2024-09-23 Mo 21:37] =>  0:52
     CLOCK: [2024-09-21 Sa 20:35]--[2024-09-21 Sa 20:42] =>  0:07
     CLOCK: [2024-09-21 Sa 15:52]--[2024-09-21 Sa 16:00] =>  0:08
