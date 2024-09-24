@@ -1,5 +1,5 @@
 # -*- mode: org; fill-column: 78; -*-
-# Time-stamp: <2024-09-24 14:44:12 krylon>
+# Time-stamp: <2024-09-24 15:26:00 krylon>
 #
 #+TAGS: internals(i) ui(u) bug(b) feature(f)
 #+TAGS: database(d) design(e), meditation(m)
@@ -12,15 +12,16 @@
   BadNews is an RSS reader
 ** Clock table
    #+BEGIN: clocktable :scope file :maxlevel 202 :emphasize t
-   #+CAPTION: Clock summary at [2024-09-24 Di 14:44]
-   | Headline               | Time   |        |      |
-   |------------------------+--------+--------+------|
-   | *Total time*           | *8:46* |        |      |
-   |------------------------+--------+--------+------|
-   | *BadNews*              | *8:46* |        |      |
-   | \_  /Components [0/0]/ |        | /8:46/ |      |
-   | \_    Data model [0/0] |        |        | 0:27 |
-   | \_    Database [0/0]   |        |        | 8:19 |
+   #+CAPTION: Clock summary at [2024-09-24 Di 15:25]
+   | Headline                          | Time   |        |      |
+   |-----------------------------------+--------+--------+------|
+   | *Total time*                      | *9:26* |        |      |
+   |-----------------------------------+--------+--------+------|
+   | *BadNews*                         | *9:26* |        |      |
+   | \_  /Components [0/0]/            |        | /9:26/ |      |
+   | \_    Data model [0/0]            |        |        | 0:27 |
+   | \_    Database [0/0]              |        |        | 8:19 |
+   | \_    Feed catcher / parser [0/0] |        |        | 0:40 |
    #+END:
 ** Journal
 ** Features [0/0]
@@ -60,6 +61,9 @@
     :PROPERTIES:
     :COOKIE_DATA: todo recursive
     :VISIBILITY: children
+    :END:
+    :LOGBOOK:
+    CLOCK: [2024-09-24 Di 14:45]--[2024-09-24 Di 15:25] =>  0:40
     :END:
 ** Bugs [0/0]
    :PROPERTIES:
