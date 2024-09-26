@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 24. 09. 2024 by Benjamin Walkenhorst
 // (c) 2024 Benjamin Walkenhorst
-// Time-stamp: <2024-09-24 20:09:43 krylon>
+// Time-stamp: <2024-09-26 20:04:59 krylon>
 
 package reader
 
@@ -26,6 +26,13 @@ func TestMain(m *testing.M) {
 		fmt.Printf("Cannot set base directory to %s: %s\n",
 			baseDir,
 			err.Error())
+		os.Exit(1)
+	} else if err = prepare(); err != nil {
+		fmt.Fprintf(
+			os.Stderr,
+			"Failed to prepare database: %s\n",
+			err.Error(),
+		)
 		os.Exit(1)
 	} else if result = m.Run(); result == 0 {
 		// If any test failed, we keep the test directory (and the
