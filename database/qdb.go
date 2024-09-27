@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 19. 09. 2024 by Benjamin Walkenhorst
 // (c) 2024 Benjamin Walkenhorst
-// Time-stamp: <2024-09-24 18:44:37 krylon>
+// Time-stamp: <2024-09-27 16:34:30 krylon>
 
 package database
 
@@ -60,8 +60,8 @@ WHERE id = ?
 `,
 	query.FeedDelete: "DELETE FROM feed WHERE id = ?",
 	query.ItemAdd: `
-INSERT INTO item (feed_id, url, timestamp, headline, description, rating)
-          VALUES (      ?,   ?,         ?,        ?,           ?,      ?)
+INSERT INTO item (feed_id, url, timestamp, headline, description)
+          VALUES (      ?,   ?,         ?,        ?,           ?)
 RETURNING id
 `,
 	query.ItemExists: "SELECT COUNT(id) FROM item WHERE url = ?",
