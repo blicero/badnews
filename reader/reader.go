@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 24. 09. 2024 by Benjamin Walkenhorst
 // (c) 2024 Benjamin Walkenhorst
-// Time-stamp: <2024-09-24 20:02:35 krylon>
+// Time-stamp: <2024-09-27 17:06:26 krylon>
 
 // Package reader implements the fetching and parsing of RSS/Atom feeds.
 package reader
@@ -72,7 +72,7 @@ func (r *Reader) Start() {
 	for i := 0; i < r.workerCnt; i++ {
 		go r.worker(i + 1)
 	}
-}
+} // func (r *Reader) Start()
 
 func (r *Reader) getPendingFeeds() ([]model.Feed, error) {
 	var db = r.pool.Get()
@@ -194,6 +194,13 @@ func (r *Reader) process(f model.Feed) error {
 				err.Error())
 			continue
 		}
+	}
+
+	if err = db.FeedUpdateRefresh(&f, time.Now()); err != nil {
+		r.log.Printf("[ERROR] Failed to set LastRefresh on Feed %s (%d): %s\n",
+			f.Title,
+			f.ID,
+			err.Error())
 	}
 
 	return nil

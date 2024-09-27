@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 26. 09. 2024 by Benjamin Walkenhorst
 // (c) 2024 Benjamin Walkenhorst
-// Time-stamp: <2024-09-26 19:58:10 krylon>
+// Time-stamp: <2024-09-27 19:41:08 krylon>
 
 package reader
 
@@ -36,21 +36,21 @@ var testFeeds = []*model.Feed{
 		Title:          "DLF Nachrichten",
 		URL:            purl("https://www.deutschlandfunk.de/die-nachrichten.353.de.rss"),
 		Homepage:       purl("https://www.dlf.de/"),
-		UpdateInterval: time.Second * 10,
+		UpdateInterval: time.Minute * 10,
 		Active:         true,
 	},
 	{
 		Title:          "Tagesschau Nachrichten",
 		URL:            purl("http://www.tagesschau.de/xml/rss2"),
 		Homepage:       purl("https://www.tagesschau.de/"),
-		UpdateInterval: time.Second * 10,
+		UpdateInterval: time.Minute * 10,
 		Active:         true,
 	},
 	{
 		Title:          "WDR Nachrichten Bielefeld",
 		URL:            purl("https://www1.wdr.de/nachrichten/bielefeld-nachrichten-100.feed"),
 		Homepage:       purl("https://www1.wdr.de/nachrichten/"),
-		UpdateInterval: time.Second * 10,
+		UpdateInterval: time.Minute * 10,
 		Active:         true,
 	},
 }

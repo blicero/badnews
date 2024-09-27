@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 24. 09. 2024 by Benjamin Walkenhorst
 // (c) 2024 Benjamin Walkenhorst
-// Time-stamp: <2024-09-26 20:04:59 krylon>
+// Time-stamp: <2024-09-27 17:04:04 krylon>
 
 package reader
 
@@ -19,7 +19,7 @@ func TestMain(m *testing.M) {
 	var (
 		err     error
 		result  int
-		baseDir = time.Now().Format("/tmp/scrollmaster_logreader_test_20060102_150405")
+		baseDir = time.Now().Format("/tmp/badnews_rssreader_test_20060102_150405")
 	)
 
 	if err = common.SetBaseDir(baseDir); err != nil {
@@ -39,9 +39,9 @@ func TestMain(m *testing.M) {
 		// database inside it) around, so we can manually inspect it
 		// if needed.
 		// If all tests pass, OTOH, we can safely remove the directory.
-		fmt.Printf("Removing BaseDir %s\n",
+		fmt.Printf("NOT Removing BaseDir %s\n",
 			baseDir)
-		_ = os.RemoveAll(baseDir)
+		// _ = os.RemoveAll(baseDir)
 	} else {
 		fmt.Printf(">>> TEST DIRECTORY: %s\n", baseDir)
 	}
