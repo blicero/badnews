@@ -1,0 +1,173 @@
+/* Time-stamp: <2024-09-13 17:50:35 krylon> */
+
+body { 
+    font-family: Arial,Helvetica,sans-serif;
+    background-color: #D4D4D4;
+    color: #000000;
+}
+
+h1 {
+    text-align: center;
+    text-decoration: underline;
+    font-size: 36pt;
+}
+
+h2 {
+    text-decoration: underline;
+    text-align: center;
+    font-size: 24pt;
+}
+
+*.footer {
+    text-align: center;
+    font-size: 10pt;
+}
+
+*.error {
+    color: #FF0000;
+}
+
+*.boring {
+    filter: opacity(50%);
+}
+
+*.read {
+    filter: blur(2px);
+}
+
+*.suggest {
+    font-family: Monospace;
+    font-size: smaller;
+}
+
+*.cmd {
+    font-family: Courier;
+    text-align: left;
+}
+
+*.urgent {
+    font-size: larger;
+    font-weight: bold;
+    text-decoration: underline;
+}
+
+*.debug {
+    font-family: Courier;
+    font-weight: bold;
+    text-align: left;
+}
+
+#beacon { padding: 10pt; }
+
+#log {
+    font-family: Courier;
+}
+
+*.box {
+    border-width: thin;
+    border-style: solid;
+    margin: 10pt;
+    padding: 5pt;
+    border: 1;
+}
+
+*.center { text-align: center; }
+
+*.editor { font-size: 14pt; }
+
+#title { font-size: 22pt; }
+
+*.even { background-color: #e0e0e0; }
+*.odd  { background-color: #ffffff; }
+
+div.menubar {
+    font-size: 13pt;
+    font-weight: bold;
+    background-color: #BAF9B5;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    margin-top: 5px;
+}
+
+div.menubar a:link { color: #000000; }
+div.menubar a:visited { color: #6E6E6E; }
+
+*.rc {
+    background-color: #f8f7c2;
+}
+
+table { font-size: 12pt; }
+
+table.horizontal * th { text-align: right; }
+table.horizontal * td { text-align: left; }
+
+table.note_edit td {
+    border-width: thin;
+    border-style: solid;
+    vertical-align: top;
+}
+
+table.notes {
+    border-width: medium;
+    border-style: solid;
+}
+
+table.spaced th { padding-left: 20px; padding-right: 20px; }
+table.spaced td { padding-left: 20pt; padding-right: 20px; }
+
+table.notes * th {
+    padding-left: 5px;
+    padding-right: 8px;
+    border-width: thin;
+    border-style: solid;
+}
+
+table.notes * td {
+    padding-left: 5px;
+    padding-right: 8px;
+    border-width: thin;
+    border-style: solid;
+}
+
+*.small { font-size: 9pt; }
+
+div.messages {
+    font-size: 14pt;
+}
+
+*.search {
+    font-size: 11pt;
+    text-align: right;
+}
+
+div.body {
+    margin-top: 30pt;
+    margin-bottom: 30pt;
+    margin-left: 30pt;
+    margin-right: 30pt;
+}
+
+*.important {
+    font-size: 18pt;
+}
+
+*.placeholder {
+    font-family: monospace;
+    font-weight: bold;
+}
+
+*.tag_link_form {
+    font-size: smaller;
+}
+
+input.cluster {
+    width: 150px;
+}
+
+div#search_filters {
+    background-color: #8B8B8B;
+}
+
+div#results {
+    background-color: #9E9C9C;
+}

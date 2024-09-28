@@ -1,0 +1,31 @@
+{{ define "intro" }}
+{{/* Time-stamp: <2024-09-05 21:10:51 krylon> */}}
+<h1 id="page_title">{{ .Title }}</h1>
+<hr />
+
+{{ if .Debug }}
+<script>
+ $(document).ready(function() {
+   if (!settings.beacon.active) {
+     $("#beacon")[0].innerHTML = "Beacon is suspended";
+   }
+ });
+</script>
+
+<div class="debug container-fluid">
+  {{ app_string }} running on {{ hostname }} (built on {{ app_build }})<br />
+  Template rendered on <time>{{ now }}</time><br />
+  <div id="beacon" class="debug" onclick="beaconToggle();">
+    Beacon
+  </div>
+</div>
+{{ end }}
+
+{{ template "menu" . }}
+
+<p>
+  &nbsp;
+</p>
+
+<hr />
+{{ end }}

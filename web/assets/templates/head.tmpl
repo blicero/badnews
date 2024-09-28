@@ -1,0 +1,31 @@
+{{ define "head" }}
+{{/* Time-stamp: <2024-09-07 15:22:33 krylon> */}}
+<head>
+  <title>{{ app_string }}@{{ hostname  }} - {{ .Title }}</title>
+  
+  <meta charset="utf-8">
+
+  <link rel="stylesheet" href="/static/bootstrap.min.css" />
+  <link rel="stylesheet" href="/static/bootstrap.rtl.min.css" />
+  <link rel="stylesheet" href="/static/bootstrap-reboot.min.css" />
+  <link rel="stylesheet" href="/static/bootstrap-utilities.min.css" />
+
+  <link rel="stylesheet" href="/static/style.css" />
+
+  <script src="/static/jquery-3.7.1.min.js"></script>
+  <script src="/static/bootstrap.bundle.min.js"></script>
+  <script src="/static/underscore.js"></script>
+  <script src="/static/sha512.min.js"></script>
+  <script src="/static/settings.js"></script>
+  <script src="/static/interact.js"></script>
+
+  <script>
+   $(document).ready(function() {
+     initSettings();
+
+     // Start the heartbeat loop
+     beaconLoop();
+   });
+  </script>
+</head>
+{{ end }}

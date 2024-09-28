@@ -1,0 +1,18 @@
+{{ define "main" }}
+{{/* Created on 10. 06. 2024 */}}
+{{/* Time-stamp: <2024-06-10 19:09:40 krylon> */}}
+<!DOCTYPE html>
+<html>
+  {{ template "head" . }}
+
+  <body>
+    {{ template "intro" . }}
+
+    <h2>Hosts</h2>
+
+    {{ template "hosts_table" . }}
+
+    {{ template "footer" . }}
+  </body>
+</html>
+{{ end }}

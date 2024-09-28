@@ -1,0 +1,88 @@
+{{ define "records" }}
+{{/* Created on 05. 09. 2024 */}}
+{{/* Time-stamp: <2024-09-06 18:09:52 krylon> */}}
+
+<div class="filter">
+  <table class="horizontal">
+    <thead>
+      <tr>
+        <th>Host</th>
+        <td>Visible?</td>
+      </tr>
+    </thead>
+    {{ range .Hosts }}
+    <tr>
+      <th>{{ .NameShort }}</th>
+      <td>
+        <input id="show_{{ .ID }}"
+               type="checkbox"
+               checked="true"
+               ontoggle="toggle_visibility({{ .ID }});" />
+      </td>
+    </tr>
+    {{ end }}
+  </table>
+
+  <details>
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Source</th>
+          <th>Visible?</th>
+        </tr>
+        <tr>
+          <th>All</th>
+          <th>
+            <input id="filter_toggle_all"
+                   type="checkbox"
+                   checked="true"
+                   onclick="toggle_visibility_all()" />
+          </th>
+        </tr>
+      </thead>
+
+      <tbody id="sources_list">
+        {{ range .Sources }}
+        <tr>
+          <td>{{ . }}</td>
+          <td>
+            <input id="filter_src_{{ . }}"
+                   class="filter_src_check"
+                   type="checkbox"
+                   checked="true"
+                   onclick="filter_source('{{ . }}');" />
+          </td>
+        </tr>
+        {{ end }}
+      </tbody>
+    </table>
+  </details>
+</div>
+
+<p>
+  &nbsp;
+</p>
+
+<table class="table">
+  <thead>
+    <tr>
+      <th>Host</th>
+      <th>Time</th>
+      <th>Source</th>
+      <th>Message</th>
+    </tr>
+  </thead>
+  <tbody id="records">
+    {{ $hosts := .Hostnames }}
+    {{ range .Records }}
+    <tr class="Host{{ .HostID }} src_{{ .Source }}">
+      <td>{{ index $hosts .HostID }}</td>
+      <td>{{ fmt_time .Time }}</td>
+      <td>{{ .Source }}</td>
+      <td>{{ .Message }}</td>
+    </tr>
+    {{ end }}
+  </tbody>
+</table>
+
+{{ end }}

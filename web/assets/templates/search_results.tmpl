@@ -1,0 +1,37 @@
+{{ define "search_results" }}
+{{/* Created on 09. 09. 2024 */}}
+{{/* Time-stamp: <2024-09-12 19:33:19 krylon> */}}
+<div style="text-align: center;">
+{{ if (gt .Page 1) }}
+<input type="button"
+       value="&lt;&lt;"
+       onclick="search_load_results({{.ID}}, {{ dec .Page }})" />
+{{ end }}Page {{ .Page  }} of {{ .MaxPage }}{{ if (lt .Page .MaxPage) }}
+<input type="button"
+       value="&gt;&gt;"
+       onclick="search_load_results({{ .ID }}, {{ inc .Page }})" />
+{{ end }}
+</div>
+<p />
+<table class="table table-striped">
+  <thead>
+    <tr>
+      <th>Host</th>
+      <th>Time</th>
+      <th>Source</th>
+      <th>Message</th>
+    </tr>
+  </thead>
+  <tbody id="records">
+    {{ $hosts := .Hostnames }}
+    {{ range .Records }}
+    <tr class="Host{{ .HostID }} src_{{ .Source }}">
+      <td>{{ index $hosts .HostID }}</td>
+      <td>{{ fmt_time .Time }}</td>
+      <td>{{ .Source }}</td>
+      <td>{{ .Message }}</td>
+    </tr>
+    {{ end }}
+  </tbody>
+</table>
+{{ end }}
