@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 04. 09. 2019 by Benjamin Walkenhorst
 // (c) 2019 Benjamin Walkenhorst
-// Time-stamp: <2024-09-28 15:53:28 krylon>
+// Time-stamp: <2024-09-29 18:18:49 krylon>
 //
 // Helper functions for use by the HTTP request handlers
 
@@ -97,7 +97,7 @@ func (srv *Server) baseData(title string, r *http.Request) tmplDataBase { // nol
 	}
 } // func (srv *Server) baseData(title string, r *http.Request) tmplDataBase
 
-func dumpSession(s *sessions.Session) string {
+func dumpSession(s *sessions.Session) string { // nolint: unused
 	var (
 		result string
 		items      = make([]string, len(s.Values))

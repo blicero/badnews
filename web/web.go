@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 28. 09. 2024 by Benjamin Walkenhorst
 // (c) 2024 Benjamin Walkenhorst
-// Time-stamp: <2024-09-28 15:49:55 krylon>
+// Time-stamp: <2024-09-30 13:36:28 krylon>
 
 // Package web provides the web interface.
 package web
@@ -21,10 +21,12 @@ import (
 	"slices"
 	"sync"
 	"text/template"
+	"time"
 
 	"github.com/blicero/badnews/common"
 	"github.com/blicero/badnews/common/path"
 	"github.com/blicero/badnews/database"
+	"github.com/blicero/badnews/logdomain"
 	"github.com/gorilla/mux"
 	"github.com/gorilla/sessions"
 )
@@ -91,7 +93,7 @@ func Create(addr string) (*Server, error) {
 
 	srv.store.(*sessions.FilesystemStore).MaxAge(sessionMaxAge)
 
-	if srv.log, err = common.GetLogger(logdomain.Server); err != nil {
+	if srv.log, err = common.GetLogger(logdomain.Web); err != nil {
 		fmt.Fprintf(
 			os.Stderr,
 			"Error creating Logger: %s\n",
@@ -152,21 +154,9 @@ func Create(addr string) (*Server, error) {
 	srv.router.HandleFunc("/favicon.ico", srv.handleFavIco)
 	srv.router.HandleFunc("/static/{file}", srv.handleStaticFile)
 	srv.router.HandleFunc("/{page:(?:index|main|start)?$}", srv.handleMain)
-	srv.router.HandleFunc("/log/recent/{cnt:(?:\\d+)?$}", srv.handleLogRecent)
-	srv.router.HandleFunc("/search", srv.handleSearch)
-
-	// Agent handlers
-	srv.router.HandleFunc("/ws/init/{hostname:(?:[^/]+$)}", srv.handleAgentInit)
-	srv.router.HandleFunc("/ws/submit_records", srv.handleSubmitRecords)
-	srv.router.HandleFunc("/ws/most_recent", srv.handleGetMostRecent)
 
 	// AJAX Handlers
 	srv.router.HandleFunc("/ajax/beacon", srv.handleBeacon)
-	srv.router.HandleFunc("/ajax/search/create", srv.handleAjaxSearchCreate)
-	srv.router.HandleFunc(
-		"/ajax/search/load/{id:(?:\\d+)}/{page:(?:\\d+)$}",
-		srv.handleAjaxSearchLoad)
-	srv.router.HandleFunc("/ajax/search/delete/{id:(?:\\d+)$}", srv.handleAjaxSearchDelete)
 
 	return srv, nil
 } // func Create(addr string) (*Server, error)
@@ -284,3 +274,83 @@ func (srv *Server) sendErrorMessage(w http.ResponseWriter, msg string) {
 	w.WriteHeader(500)
 	_, _ = w.Write([]byte(output)) // nolint: gosec
 } // func (srv *Server) sendErrorMessage(w http.ResponseWriter, msg string)
+
+func (srv *Server) handleMain(w http.ResponseWriter, r *http.Request) {
+	srv.log.Printf("[TRACE] Handle request for %s from %s\n",
+		r.URL.EscapedPath(),
+		r.RemoteAddr)
+	const tmplName = "main"
+	var (
+		err  error
+		msg  string
+		tmpl *template.Template
+		db   *database.Database
+		sess *sessions.Session
+		data = tmplDataIndex{
+			tmplDataBase: tmplDataBase{
+				Title: "Main",
+				Debug: true,
+				URL:   r.URL.EscapedPath(),
+			},
+		}
+	)
+
+	db = srv.pool.Get()
+	defer srv.pool.Put(db)
+
+	if sess, err = srv.store.Get(r, sessionNameFrontend); err != nil {
+		msg = fmt.Sprintf("Error getting client session from session store: %s",
+			err.Error())
+		srv.log.Println("[CRITICAL] " + msg)
+		srv.sendErrorMessage(w, msg)
+		return
+	} else if tmpl = srv.tmpl.Lookup(tmplName); tmpl == nil {
+		msg = fmt.Sprintf("Could not find template %q", tmplName)
+		srv.log.Println("[CRITICAL] " + msg)
+		srv.sendErrorMessage(w, msg)
+		return
+	} else if data.Feeds, err = db.FeedGetAll(); err != nil {
+		msg = fmt.Sprintf("Failed to load Feeds: %s", err.Error())
+		srv.log.Println("[CRITICAL] " + msg)
+		srv.sendErrorMessage(w, msg)
+		return
+	}
+
+	if err = sess.Save(r, w); err != nil {
+		srv.log.Printf("[ERROR] Failed to set session cookie: %s\n",
+			err.Error())
+	}
+	w.Header().Set("Cache-Control", "no-store, max-age=0")
+	w.Header().Set("Content-Type", "text/html")
+	w.WriteHeader(200)
+	if err = tmpl.Execute(w, &data); err != nil {
+		msg = fmt.Sprintf("Error rendering template %q: %s",
+			tmplName,
+			err.Error())
+		srv.sendErrorMessage(w, msg)
+	}
+} // func (srv *Server) handleMain(w http.ResponseWriter, r *http.Request)
+
+////////////////////////////////////////////////////////////////////////////////
+//// Ajax handlers /////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+// const success = "Success"
+
+func (srv *Server) handleBeacon(w http.ResponseWriter, r *http.Request) {
+	// srv.log.Printf("[TRACE] Handle %s from %s\n",
+	// 	r.URL,
+	// 	r.RemoteAddr)
+	var timestamp = time.Now().Format(common.TimestampFormat)
+	const appName = common.AppName + " " + common.Version
+	var jstr = fmt.Sprintf(`{ "Status": true, "Message": "%s", "Timestamp": "%s", "Hostname": "%s" }`,
+		appName,
+		timestamp,
+		hostname())
+	var response = []byte(jstr)
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Cache-Control", "no-store, max-age=0")
+	w.WriteHeader(200)
+	w.Write(response) // nolint: errcheck,gosec
+} // func (srv *Web) handleBeacon(w http.ResponseWriter, r *http.Request)

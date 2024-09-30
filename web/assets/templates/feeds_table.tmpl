@@ -1,0 +1,24 @@
+{{ define "feeds_table" }}
+{{/* Created on 30. 09. 2024 */}}
+{{/* Time-stamp: <2024-09-30 13:44:44 krylon> */}}
+<table class="table-primary" table-striped>
+  <thead>
+    <tr>
+      <th>Title</th>
+      <th>Update interval</th>
+      <th>Last Refresh</th>
+      <th>Active</th>
+    </tr>
+  </thead>
+  <tbody>
+    {{ range .Feeds }}
+    <tr>
+      <td>{{ .Title }}</td>
+      <td>{{ .UpdateInterval }}</td>
+      <td>{{ fmt_time .LastRefresh }}</td>
+      <td>{{ if .Active }}Active{{ else }}Suspended{{ end }}</td>
+    </tr>
+    {{ end }}
+  </tbody>
+</table>
+{{ end }}

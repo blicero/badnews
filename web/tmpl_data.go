@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 06. 05. 2020 by Benjamin Walkenhorst
 // (c) 2020 Benjamin Walkenhorst
-// Time-stamp: <2024-09-28 15:54:11 krylon>
+// Time-stamp: <2024-09-29 19:41:58 krylon>
 //
 // This file contains data structures to be passed to HTML templates.
 
@@ -14,6 +14,7 @@ import (
 	"time"
 
 	"github.com/blicero/badnews/common"
+	"github.com/blicero/badnews/model"
 
 	"github.com/hashicorp/logutils"
 )
@@ -43,15 +44,14 @@ func (m *message) Checksum() string { // nolint: unused
 } // func (m *message) Checksum() string
 
 type tmplDataBase struct { // nolint: unused
-	Title      string
-	Messages   []message
-	Debug      bool
-	TestMsgGen bool
-	URL        string
+	Title string
+	Debug bool
+	URL   string
 }
 
 type tmplDataIndex struct { // nolint: unused,deadcode
 	tmplDataBase
+	Feeds []model.Feed
 }
 
 // Local Variables:  //
