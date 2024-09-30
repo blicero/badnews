@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 01. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2024-09-19 16:51:12 krylon>
+// Time-stamp: <2024-09-30 18:17:08 krylon>
 
 //go:build ignore
 // +build ignore
@@ -66,27 +66,43 @@ var candidates = map[string][]string{
 		"common/path",
 		"common",
 		"logdomain",
+		"database/query",
 	},
 	"test": {
 		"common",
+		"database",
+		"reader",
+		"web",
 	},
 	"vet": {
 		"common/path",
 		"common",
 		"logdomain",
+		"database/query",
+		"database",
 		"model",
+		"reader",
+		"web",
 	},
 	"lint": {
 		"common/path",
 		"common",
 		"logdomain",
+		"database/query",
+		"database",
 		"model",
+		"reader",
+		"web",
 	},
 	"nilaway": {
 		"common/path",
 		"common",
 		"logdomain",
+		"database/query",
+		"database",
 		"model",
+		"reader",
+		"web",
 	},
 }
 
