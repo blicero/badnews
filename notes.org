@@ -1,5 +1,5 @@
 # -*- mode: org; fill-column: 78; -*-
-# Time-stamp: <2024-09-30 13:46:44 krylon>
+# Time-stamp: <2024-09-30 18:21:30 krylon>
 #
 #+TAGS: internals(i) ui(u) bug(b) feature(f)
 #+TAGS: database(d) design(e), meditation(m)
@@ -12,19 +12,19 @@
   BadNews is an RSS reader
 ** Clock table
    #+BEGIN: clocktable :scope file :maxlevel 202 :emphasize t
-   #+CAPTION: Clock summary at [2024-09-30 Mo 13:46]
+   #+CAPTION: Clock summary at [2024-09-30 Mo 18:21]
    | Headline                            | Time    |         |      |      |
    |-------------------------------------+---------+---------+------+------|
-   | *Total time*                        | *15:01* |         |      |      |
+   | *Total time*                        | *15:32* |         |      |      |
    |-------------------------------------+---------+---------+------+------|
-   | *BadNews*                           | *15:01* |         |      |      |
-   | \_  /Components [0/0]/              |         | /15:01/ |      |      |
+   | *BadNews*                           | *15:32* |         |      |      |
+   | \_  /Components [0/0]/              |         | /15:32/ |      |      |
    | \_    Data model [0/0]              |         |         | 0:27 |      |
    | \_    Database [1/1]                |         |         | 8:22 |      |
    | \_      Queries respect transaction |         |         |      | 0:03 |
    | \_    Feed catcher / parser [0/0]   |         |         | 5:41 |      |
    | \_      Testing                     |         |         |      | 2:16 |
-   | \_    Web Interface [0/0]           |         |         | 0:31 |      |
+   | \_    Web Interface [0/0]           |         |         | 1:02 |      |
    #+END:
 ** Journal
 ** Features [0/0]
@@ -91,6 +91,7 @@
     :VISIBILITY: children
     :END:
     :LOGBOOK:
+    CLOCK: [2024-09-30 Mo 17:50]--[2024-09-30 Mo 18:21] =>  0:31
     CLOCK: [2024-09-30 Mo 13:35]--[2024-09-30 Mo 13:46] =>  0:11
     CLOCK: [2024-09-29 So 16:10]--[2024-09-29 So 16:30] =>  0:20
     :END:
