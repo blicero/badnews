@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 18. 09. 2024 by Benjamin Walkenhorst
 // (c) 2024 Benjamin Walkenhorst
-// Time-stamp: <2024-09-20 18:13:59 krylon>
+// Time-stamp: <2024-09-30 13:50:09 krylon>
 
 package common
 
@@ -44,7 +44,7 @@ const (
 	TimestampFormatForm      = "2006-01-02T15:04:05"
 	HeartBeat                = time.Millisecond * 500
 	RCTimeout                = time.Millisecond * 10
-	Port                     = 5102
+	Port                     = 8086
 )
 
 // LogLevels are the names of the log levels supported by the logger.
