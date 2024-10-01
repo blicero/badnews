@@ -1,5 +1,5 @@
 {{ define "menu" }}
-{{/* Time-stamp: <2024-09-30 18:15:25 krylon> */}}
+{{/* Time-stamp: <2024-10-01 18:00:44 krylon> */}}
 <nav class="navbar navbar-expand-lg navbar-light" style="background-color: #D4D4D4">
   <div class="container-fluid">
     <div class="collapse navbar-collapse" id="navbarNavDropdown">
@@ -20,7 +20,41 @@
           </a>
           <ul class="dropdown-menu" aria-labelledby="subscribeMenuLink">
             <li>
-              <form class="dropdown-item" action="/feed/subscribe" method="post">
+              <script>
+               function clear_form() {
+                 const form = $("#subscribeForm")[0]
+                 form.reset()
+               }
+
+               function get_subscribe_field(name) {
+                 const id = `#${name}`
+                 return $(id)[0].value
+               }
+
+               function subscribe() {
+                 let data = {
+                   "title": get_subscribe_field("name"),
+                   "url": get_subscribe_field("url"),
+                   "homepage": get_subscribe_field("homepage"),
+                   "interval": get_subscribe_field("interval"),
+                 }
+
+                 const req = $.post('/ajax/subscribe',
+                                    data,
+                                    (res) => {
+                   if (res.status) {
+                     clear_form()
+                   } else {
+                     const msg = `Failed to add Feed ${data.title}: ${res.message}`
+                     console.log(msg)
+                     alert(msg)
+                   }
+                 },
+                                    'json'
+                                    )
+               }
+              </script>
+              <form class="dropdown-item" action="/feed/subscribe" method="post" id="subscribeForm">
                 <table class="horizontal">
                   <tr>
                     <th>Name</th>
@@ -57,8 +91,8 @@
                     </td>
                   </tr>
                   <tr>
-                    <th><input type="reset" value="Reset" /></th>
-                    <td><input type="submit" value="OK" /></td>
+                    <th><input type="button" onclick="clear_form();" value="Reset" /></th>
+                    <td><input type="button" onclick="subscribe();" value="OK" /></td>
                   </tr>
                 </table>
               </form>
@@ -67,7 +101,7 @@
         </li>
 
         <li class="nav-item">
-          <a class="nav-link" href="/items/0">Recent News</a>
+          <a class="nav-link" href="/items/250">Recent News</a>
         </li>
 
       </ul>
