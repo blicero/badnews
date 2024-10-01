@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 19. 09. 2024 by Benjamin Walkenhorst
 // (c) 2024 Benjamin Walkenhorst
-// Time-stamp: <2024-09-24 20:04:54 krylon>
+// Time-stamp: <2024-09-30 18:38:10 krylon>
 
 // Package model provides the data types used across the application.
 package model
@@ -15,13 +15,13 @@ import (
 
 // Feed is an RSS feed. Duh.
 type Feed struct {
-	ID             int64
-	Title          string
-	URL            *url.URL
-	Homepage       *url.URL
-	UpdateInterval time.Duration
-	LastRefresh    time.Time
-	Active         bool
+	ID             int64         `json:"id,omitempty"`
+	Title          string        `json:"title"`
+	URL            *url.URL      `json:"url"`
+	Homepage       *url.URL      `json:"homepage"`
+	UpdateInterval time.Duration `json:"interval"`
+	LastRefresh    time.Time     `json:"last_refresh,omitempty"`
+	Active         bool          `json:"active,omitempty"`
 }
 
 func (f *Feed) String() string {
