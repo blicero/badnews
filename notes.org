@@ -1,5 +1,5 @@
 # -*- mode: org; fill-column: 78; -*-
-# Time-stamp: <2024-09-30 18:21:30 krylon>
+# Time-stamp: <2024-10-01 18:51:04 krylon>
 #
 #+TAGS: internals(i) ui(u) bug(b) feature(f)
 #+TAGS: database(d) design(e), meditation(m)
@@ -12,19 +12,20 @@
   BadNews is an RSS reader
 ** Clock table
    #+BEGIN: clocktable :scope file :maxlevel 202 :emphasize t
-   #+CAPTION: Clock summary at [2024-09-30 Mo 18:21]
+   #+CAPTION: Clock summary at [2024-10-01 Di 18:51]
    | Headline                            | Time    |         |      |      |
    |-------------------------------------+---------+---------+------+------|
-   | *Total time*                        | *15:32* |         |      |      |
+   | *Total time*                        | *23:31* |         |      |      |
    |-------------------------------------+---------+---------+------+------|
-   | *BadNews*                           | *15:32* |         |      |      |
-   | \_  /Components [0/0]/              |         | /15:32/ |      |      |
+   | *BadNews*                           | *23:31* |         |      |      |
+   | \_  /Components [0/0]/              |         | /23:31/ |      |      |
    | \_    Data model [0/0]              |         |         | 0:27 |      |
-   | \_    Database [1/1]                |         |         | 8:22 |      |
+   | \_    Database [1/1]                |         |         | 8:30 |      |
    | \_      Queries respect transaction |         |         |      | 0:03 |
    | \_    Feed catcher / parser [0/0]   |         |         | 5:41 |      |
    | \_      Testing                     |         |         |      | 2:16 |
-   | \_    Web Interface [0/0]           |         |         | 1:02 |      |
+   | \_    Web Interface [0/0]           |         |         | 8:53 |      |
+   | \_      AJAX FTW [0/0]              |         |         |      | 2:28 |
    #+END:
 ** Journal
 ** Features [0/0]
@@ -51,6 +52,7 @@
     :VISIBILITY: children
     :END:
     :LOGBOOK:
+    CLOCK: [2024-10-01 Di 18:27]--[2024-10-01 Di 18:35] =>  0:08
     CLOCK: [2024-09-24 Di 14:42]--[2024-09-24 Di 14:44] =>  0:02
     CLOCK: [2024-09-23 Mo 20:45]--[2024-09-23 Mo 21:37] =>  0:52
     CLOCK: [2024-09-21 Sa 20:35]--[2024-09-21 Sa 20:42] =>  0:07
@@ -91,11 +93,26 @@
     :VISIBILITY: children
     :END:
     :LOGBOOK:
+    CLOCK: [2024-09-30 Mo 18:27]--[2024-09-30 Mo 23:50] =>  5:23
     CLOCK: [2024-09-30 Mo 17:50]--[2024-09-30 Mo 18:21] =>  0:31
     CLOCK: [2024-09-30 Mo 13:35]--[2024-09-30 Mo 13:46] =>  0:11
     CLOCK: [2024-09-29 So 16:10]--[2024-09-29 So 16:30] =>  0:20
     :END:
     For an RSS reader, a web interface is the obvious approach, isn't it?
+**** AJAX FTW [0/0]
+     :PROPERTIES:
+     :COOKIE_DATA: todo recursive
+     :VISIBILITY: children
+     :END:
+     :LOGBOOK:
+     CLOCK: [2024-10-01 Di 18:35]--[2024-10-01 Di 18:51] =>  0:16
+     CLOCK: [2024-10-01 Di 17:25]--[2024-10-01 Di 18:27] =>  1:02
+     CLOCK: [2024-10-01 Di 14:15]--[2024-10-01 Di 15:25] =>  1:10
+     :END:
+     In my current news reader, loading the items views takes about forever,
+     and one main goal of the rewrite is to make it at least feel more
+     responsive. So I am going to try and load as much of the content as
+     possible via Ajax.
 ** Bugs [0/0]
    :PROPERTIES:
    :COOKIE_DATA: todo recursive
