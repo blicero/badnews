@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 28. 09. 2024 by Benjamin Walkenhorst
 // (c) 2024 Benjamin Walkenhorst
-// Time-stamp: <2024-10-01 18:47:23 krylon>
+// Time-stamp: <2024-10-01 19:09:49 krylon>
 
 // Package web provides the web interface.
 package web
@@ -584,6 +584,10 @@ func (srv *Server) handleAjaxItems(w http.ResponseWriter, r *http.Request) {
 		goto SEND_RESPONSE
 	}
 
+	srv.log.Printf("[DEBUG] Load %d items, offset %d",
+		cnt,
+		offset)
+
 	db = srv.pool.Get()
 	defer srv.pool.Put(db)
 
@@ -623,6 +627,7 @@ func (srv *Server) handleAjaxItems(w http.ResponseWriter, r *http.Request) {
 
 	res.Payload = map[string]string{
 		"content": buf.String(),
+		"count":   strconv.Itoa(len(data.Items)),
 	}
 	res.Status = true
 
