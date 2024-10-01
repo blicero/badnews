@@ -1,5 +1,5 @@
 # -*- mode: org; fill-column: 78; -*-
-# Time-stamp: <2024-10-01 18:51:04 krylon>
+# Time-stamp: <2024-10-01 19:29:16 krylon>
 #
 #+TAGS: internals(i) ui(u) bug(b) feature(f)
 #+TAGS: database(d) design(e), meditation(m)
@@ -12,20 +12,20 @@
   BadNews is an RSS reader
 ** Clock table
    #+BEGIN: clocktable :scope file :maxlevel 202 :emphasize t
-   #+CAPTION: Clock summary at [2024-10-01 Di 18:51]
-   | Headline                            | Time    |         |      |      |
-   |-------------------------------------+---------+---------+------+------|
-   | *Total time*                        | *23:31* |         |      |      |
-   |-------------------------------------+---------+---------+------+------|
-   | *BadNews*                           | *23:31* |         |      |      |
-   | \_  /Components [0/0]/              |         | /23:31/ |      |      |
-   | \_    Data model [0/0]              |         |         | 0:27 |      |
-   | \_    Database [1/1]                |         |         | 8:30 |      |
-   | \_      Queries respect transaction |         |         |      | 0:03 |
-   | \_    Feed catcher / parser [0/0]   |         |         | 5:41 |      |
-   | \_      Testing                     |         |         |      | 2:16 |
-   | \_    Web Interface [0/0]           |         |         | 8:53 |      |
-   | \_      AJAX FTW [0/0]              |         |         |      | 2:28 |
+   #+CAPTION: Clock summary at [2024-10-01 Di 19:29]
+   | Headline                            | Time      |           |      |      |
+   |-------------------------------------+-----------+-----------+------+------|
+   | *Total time*                        | *1d 0:05* |           |      |      |
+   |-------------------------------------+-----------+-----------+------+------|
+   | *BadNews*                           | *1d 0:05* |           |      |      |
+   | \_  /Components [0/0]/              |           | /1d 0:05/ |      |      |
+   | \_    Data model [0/0]              |           |           | 0:27 |      |
+   | \_    Database [1/1]                |           |           | 8:30 |      |
+   | \_      Queries respect transaction |           |           |      | 0:03 |
+   | \_    Feed catcher / parser [0/0]   |           |           | 5:41 |      |
+   | \_      Testing                     |           |           |      | 2:16 |
+   | \_    Web Interface [0/0]           |           |           | 9:27 |      |
+   | \_      AJAX FTW [0/0]              |           |           |      | 3:02 |
    #+END:
 ** Journal
 ** Features [0/0]
@@ -105,6 +105,7 @@
      :VISIBILITY: children
      :END:
      :LOGBOOK:
+     CLOCK: [2024-10-01 Di 18:55]--[2024-10-01 Di 19:29] =>  0:34
      CLOCK: [2024-10-01 Di 18:35]--[2024-10-01 Di 18:51] =>  0:16
      CLOCK: [2024-10-01 Di 17:25]--[2024-10-01 Di 18:27] =>  1:02
      CLOCK: [2024-10-01 Di 14:15]--[2024-10-01 Di 15:25] =>  1:10
