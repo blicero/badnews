@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 19. 09. 2024 by Benjamin Walkenhorst
 // (c) 2024 Benjamin Walkenhorst
-// Time-stamp: <2024-09-27 16:34:30 krylon>
+// Time-stamp: <2024-10-01 18:30:37 krylon>
 
 package database
 
@@ -77,6 +77,20 @@ SELECT
 FROM item
 WHERE timestamp > ?
 ORDER BY timestamp DESC
+`,
+	query.ItemGetRecentPaged: `
+SELECT
+    id,
+    feed_id,
+    url,
+    timestamp,
+    headline,
+    description,
+    rating
+FROM item
+ORDER BY timestamp DESC
+LIMIT ?
+OFFSET ?
 `,
 	query.ItemGetByFeed: `
 SELECT
