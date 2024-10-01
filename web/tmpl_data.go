@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 06. 05. 2020 by Benjamin Walkenhorst
 // (c) 2020 Benjamin Walkenhorst
-// Time-stamp: <2024-09-29 19:41:58 krylon>
+// Time-stamp: <2024-10-01 18:09:12 krylon>
 //
 // This file contains data structures to be passed to HTML templates.
 
@@ -52,6 +52,19 @@ type tmplDataBase struct { // nolint: unused
 type tmplDataIndex struct { // nolint: unused,deadcode
 	tmplDataBase
 	Feeds []model.Feed
+}
+
+type tmplDataItems struct {
+	tmplDataBase
+	ReqCnt   int64
+	MaxItems int64
+	Feeds    map[int64]model.Feed
+}
+
+type tmplDataItemView struct {
+	tmplDataBase
+	Feeds map[int64]model.Feed
+	Items []model.Item
 }
 
 // Local Variables:  //

@@ -1,0 +1,77 @@
+{{ define "items" }}
+{{/* Created on 30. 09. 2024 */}}
+{{/* Time-stamp: <2024-10-01 18:14:43 krylon> */}}
+<!DOCTYPE html>
+<html>
+  {{ template "head" . }}
+
+  <body>
+    {{ template "intro" . }}
+
+    <h2>Recent News</h2>
+
+    <script>
+     let item_cnt = 0;
+     const max_cnt = {{ .MaxItems }}
+     const feeds = {
+       {{ range .Feeds }}
+       {{ .ID }}: {
+         "ID": {{ .ID }},
+         "Title": "{{ .Title }}",
+         "URL": "{{ .URL }}",
+         "Homepage": "{{ .Homepage }}",
+         "UpdateInterval": "{{ .UpdateInterval }}",
+         "LastRefresh": new Date("{{ fmt_time .LastRefresh }}"),
+         "Active": {{ .Active }},
+       },
+       {{ end }}
+     }
+     
+     function load_items(cnt) {
+       const url = `/ajax/items/${item_cnt}/${cnt}`
+
+       const req = $.get(url,
+                         {},
+                         (res) => {
+         if (res.status) {
+           const tbody = $('#items')[0]
+           tbody.innerHTML += res.payload.content
+           item_cnt += cnt
+
+           if (res.payload.count == cnt && item_cnt < max_cnt) {
+             window.setTimeout(load_items, 500, {{ .ReqCnt }})
+           }
+         } else {
+           console.log(res.message)
+           alert(res.message)
+         }
+       },
+                         'json'
+                         )
+
+       req.fail(() => {
+         alert("Error loading items")
+       })
+
+       $(document).ready(() => {
+         window.setTimeout(load_items, 1000, {{ .ReqCnt }})
+       })
+     } // function load_items(cnt)
+    </script>
+
+    <table class="table-info table-striped">
+      <thead>
+        <tr>
+          <th>Time</th>
+          <th>Title</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody id="items">
+      </tbody>
+    </table>
+
+    {{ template "footer" . }}
+  </body>
+</html>
+{{ end }}

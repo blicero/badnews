@@ -2,23 +2,27 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 28. 09. 2024 by Benjamin Walkenhorst
 // (c) 2024 Benjamin Walkenhorst
-// Time-stamp: <2024-09-30 13:36:28 krylon>
+// Time-stamp: <2024-10-01 18:47:23 krylon>
 
 // Package web provides the web interface.
 package web
 
 import (
+	"bytes"
 	"embed"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
 	"io/fs"
 	"log"
 	"net/http"
+	"net/url"
 	"os"
 	"path/filepath"
 	"regexp"
 	"slices"
+	"strconv"
 	"sync"
 	"text/template"
 	"time"
@@ -27,6 +31,7 @@ import (
 	"github.com/blicero/badnews/common/path"
 	"github.com/blicero/badnews/database"
 	"github.com/blicero/badnews/logdomain"
+	"github.com/blicero/badnews/model"
 	"github.com/gorilla/mux"
 	"github.com/gorilla/sessions"
 )
@@ -154,9 +159,12 @@ func Create(addr string) (*Server, error) {
 	srv.router.HandleFunc("/favicon.ico", srv.handleFavIco)
 	srv.router.HandleFunc("/static/{file}", srv.handleStaticFile)
 	srv.router.HandleFunc("/{page:(?:index|main|start)?$}", srv.handleMain)
+	srv.router.HandleFunc("/items/{cnt:(?:\\d+)}", srv.handleItemPage)
 
 	// AJAX Handlers
 	srv.router.HandleFunc("/ajax/beacon", srv.handleBeacon)
+	srv.router.HandleFunc("/ajax/subscribe", srv.handleSubscribe)
+	srv.router.HandleFunc("/ajax/items/{offset:(?:\\d+)}/{cnt:(?:\\d+)}", srv.handleAjaxItems)
 
 	return srv, nil
 } // func Create(addr string) (*Server, error)
@@ -331,6 +339,83 @@ func (srv *Server) handleMain(w http.ResponseWriter, r *http.Request) {
 	}
 } // func (srv *Server) handleMain(w http.ResponseWriter, r *http.Request)
 
+func (srv *Server) handleItemPage(w http.ResponseWriter, r *http.Request) {
+	const tmplName = "items"
+	srv.log.Printf("[TRACE] Handle request for %s from %s\n",
+		r.URL.EscapedPath(),
+		r.RemoteAddr)
+	var (
+		err  error
+		msg  string
+		tmpl *template.Template
+		db   *database.Database
+		sess *sessions.Session
+		data = tmplDataItems{
+			tmplDataBase: tmplDataBase{
+				Title: "Items",
+				Debug: true,
+				URL:   r.URL.EscapedPath(),
+			},
+			ReqCnt: 25,
+		}
+		vars  map[string]string
+		feeds []model.Feed
+	)
+
+	vars = mux.Vars(r)
+
+	if data.MaxItems, err = strconv.ParseInt(vars["cnt"], 10, 64); err != nil {
+		msg = fmt.Sprintf("Cannot parse item count %q: %s",
+			vars["cnt"],
+			err.Error())
+		srv.log.Printf("[CANTHAPPEN] %s\n",
+			msg)
+		srv.sendErrorMessage(w, msg)
+		return
+	}
+
+	db = srv.pool.Get()
+	defer srv.pool.Put(db)
+
+	if sess, err = srv.store.Get(r, sessionNameFrontend); err != nil {
+		msg = fmt.Sprintf("Error getting client session from session store: %s",
+			err.Error())
+		srv.log.Println("[CRITICAL] " + msg)
+		srv.sendErrorMessage(w, msg)
+		return
+	} else if tmpl = srv.tmpl.Lookup(tmplName); tmpl == nil {
+		msg = fmt.Sprintf("Could not find template %q", tmplName)
+		srv.log.Println("[CRITICAL] " + msg)
+		srv.sendErrorMessage(w, msg)
+		return
+	} else if feeds, err = db.FeedGetAll(); err != nil {
+		msg = fmt.Sprintf("Failed to load Feeds: %s", err.Error())
+		srv.log.Println("[CRITICAL] " + msg)
+		srv.sendErrorMessage(w, msg)
+		return
+	}
+
+	data.Feeds = make(map[int64]model.Feed, len(feeds))
+
+	for _, f := range feeds {
+		data.Feeds[f.ID] = f
+	}
+
+	if err = sess.Save(r, w); err != nil {
+		srv.log.Printf("[ERROR] Failed to set session cookie: %s\n",
+			err.Error())
+	}
+	w.Header().Set("Cache-Control", "no-store, max-age=0")
+	w.Header().Set("Content-Type", "text/html")
+	w.WriteHeader(200)
+	if err = tmpl.Execute(w, &data); err != nil {
+		msg = fmt.Sprintf("Error rendering template %q: %s",
+			tmplName,
+			err.Error())
+		srv.sendErrorMessage(w, msg)
+	}
+} // func (srv *Server) handleItemPage(w http.ResponseWriter, r *http.Request)
+
 ////////////////////////////////////////////////////////////////////////////////
 //// Ajax handlers /////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -354,3 +439,213 @@ func (srv *Server) handleBeacon(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(200)
 	w.Write(response) // nolint: errcheck,gosec
 } // func (srv *Web) handleBeacon(w http.ResponseWriter, r *http.Request)
+
+func (srv *Server) handleSubscribe(w http.ResponseWriter, r *http.Request) {
+	srv.log.Printf("[TRACE] Handle request for %s from %s\n",
+		r.URL.EscapedPath(),
+		r.RemoteAddr)
+	var (
+		err      error
+		sess     *sessions.Session
+		feed     model.Feed
+		rbuf     []byte
+		db       *database.Database
+		interval int64
+		res      Reply
+		msg      string
+		hstatus  = 200
+	)
+
+	if sess, err = srv.store.Get(r, sessionNameFrontend); err != nil {
+		res.Message = fmt.Sprintf(
+			"Error getting/creating session %s: %s",
+			sessionNameFrontend,
+			err.Error())
+		srv.log.Printf("[ERROR] %s\n", res.Message)
+		sess = nil
+		hstatus = 403
+		goto SEND_RESPONSE
+	} else if err = r.ParseForm(); err != nil {
+		res.Message = fmt.Sprintf("Cannot parse form data: %s",
+			err.Error())
+		srv.log.Printf("[ERROR] %s\n", res.Message)
+		hstatus = 400
+		goto SEND_RESPONSE
+	} else if feed.URL, err = url.Parse(r.FormValue("url")); err != nil {
+		res.Message = fmt.Sprintf("Cannot parse URL %q: %s",
+			r.FormValue("url"),
+			err.Error())
+		srv.log.Printf("[ERROR] %s\n", res.Message)
+		hstatus = 500
+		goto SEND_RESPONSE
+	} else if feed.Homepage, err = url.Parse(r.FormValue("homepage")); err != nil {
+		res.Message = fmt.Sprintf("Cannot parse Homepage %q: %s",
+			r.FormValue("homepage"),
+			err.Error())
+		srv.log.Printf("[ERROR] %s\n", res.Message)
+		hstatus = 500
+		goto SEND_RESPONSE
+	} else if interval, err = strconv.ParseInt(r.FormValue("interval"), 10, 64); err != nil {
+		res.Message = fmt.Sprintf("Cannot parse refresh interval %q: %s",
+			r.FormValue("interval"),
+			err.Error())
+		srv.log.Printf("[ERROR] %s\n", res.Message)
+		hstatus = 500
+		goto SEND_RESPONSE
+	}
+
+	feed.Title = r.FormValue("title")
+	feed.UpdateInterval = time.Second * time.Duration(interval)
+	db = srv.pool.Get()
+	defer srv.pool.Put(db)
+
+	if err = db.FeedAdd(&feed); err != nil {
+		res.Message = fmt.Sprintf("Error adding feed %s to database: %s",
+			feed.Title,
+			err.Error())
+		srv.log.Printf("[ERROR] %s\n", res.Message)
+		hstatus = 500
+		goto SEND_RESPONSE
+	}
+
+	res.Message = fmt.Sprintf("Successfully added Feed %s to database",
+		feed.Title)
+	res.Status = true
+	res.Payload = map[string]string{
+		"id": strconv.Itoa(int(feed.ID)),
+	}
+
+SEND_RESPONSE:
+	if sess != nil {
+		if err = sess.Save(r, w); err != nil {
+			srv.log.Printf("[ERROR] Failed to set session cookie: %s\n",
+				err.Error())
+		}
+	}
+	res.Timestamp = time.Now()
+	if rbuf, err = json.Marshal(&res); err != nil {
+		srv.log.Printf("[ERROR] Error serializing response: %s\n",
+			err.Error())
+		rbuf = errJSON(err.Error())
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Cache-Control", "no-store, max-age=0")
+	w.WriteHeader(hstatus)
+	if _, err = w.Write(rbuf); err != nil {
+		msg = fmt.Sprintf("Failed to send result: %s",
+			err.Error())
+		srv.log.Println("[ERROR] " + msg)
+	}
+} // func (srv *Server) handleSubscribe(w http.ResponseWriter, r *http.Request)
+
+func (srv *Server) handleAjaxItems(w http.ResponseWriter, r *http.Request) {
+	srv.log.Printf("[TRACE] Handle request for %s from %s\n",
+		r.URL.EscapedPath(),
+		r.RemoteAddr)
+
+	const tmplName = "item_view"
+	var (
+		err         error
+		sess        *sessions.Session
+		rbuf        []byte
+		db          *database.Database
+		buf         bytes.Buffer
+		tmpl        *template.Template
+		cnt, offset int64
+		res         Reply
+		msg         string
+		feeds       []model.Feed
+		vars        map[string]string
+		hstatus     = 200
+		data        = tmplDataItemView{
+			tmplDataBase: tmplDataBase{
+				Debug: common.Debug,
+				URL:   r.URL.String(),
+			},
+		}
+	)
+
+	vars = mux.Vars(r)
+
+	if cnt, err = strconv.ParseInt(vars["cnt"], 10, 64); err != nil {
+		res.Message = fmt.Sprintf("Cannot parse item count %q: %s",
+			vars["cnt"],
+			err.Error())
+		srv.log.Printf("[CANTHAPPEN] %s\n", res.Message)
+		hstatus = 400
+		goto SEND_RESPONSE
+	} else if offset, err = strconv.ParseInt(vars["offset"], 10, 64); err != nil {
+		res.Message = fmt.Sprintf("Cannot parse offset %q: %s",
+			vars["offset"],
+			err.Error())
+		srv.log.Printf("[CANTHAPPEN] %s\n", res.Message)
+		hstatus = 400
+		goto SEND_RESPONSE
+	}
+
+	db = srv.pool.Get()
+	defer srv.pool.Put(db)
+
+	if data.Items, err = db.ItemGetRecentPaged(cnt, offset); err != nil {
+		res.Message = fmt.Sprintf("Failed to load recent items: %s",
+			err.Error())
+		srv.log.Printf("[CANTHAPPEN] %s\n", res.Message)
+		hstatus = 500
+		goto SEND_RESPONSE
+	} else if feeds, err = db.FeedGetAll(); err != nil {
+		res.Message = fmt.Sprintf("Failed to load all Feeds from database: %s",
+			err.Error())
+		srv.log.Printf("[CANTHAPPEN] %s\n", res.Message)
+		hstatus = 500
+		goto SEND_RESPONSE
+	} else if tmpl = srv.tmpl.Lookup(tmplName); tmpl == nil {
+		res.Message = fmt.Sprintf("Could not find template %q", tmplName)
+		srv.log.Printf("[CANTHAPPEN] %s\n", res.Message)
+		hstatus = 500
+		goto SEND_RESPONSE
+	}
+
+	data.Feeds = make(map[int64]model.Feed, len(feeds))
+
+	for _, f := range feeds {
+		data.Feeds[f.ID] = f
+	}
+
+	if err = tmpl.Execute(&buf, &data); err != nil {
+		res.Message = fmt.Sprintf("Failed to render template %q: %s",
+			tmplName,
+			err.Error())
+		srv.log.Printf("[CANTHAPPEN] %s\n", res.Message)
+		hstatus = 500
+		goto SEND_RESPONSE
+	}
+
+	res.Payload = map[string]string{
+		"content": buf.String(),
+	}
+	res.Status = true
+
+SEND_RESPONSE:
+	if sess != nil {
+		if err = sess.Save(r, w); err != nil {
+			srv.log.Printf("[ERROR] Failed to set session cookie: %s\n",
+				err.Error())
+		}
+	}
+	res.Timestamp = time.Now()
+	if rbuf, err = json.Marshal(&res); err != nil {
+		srv.log.Printf("[ERROR] Error serializing response: %s\n",
+			err.Error())
+		rbuf = errJSON(err.Error())
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Cache-Control", "no-store, max-age=0")
+	w.WriteHeader(hstatus)
+	if _, err = w.Write(rbuf); err != nil {
+		msg = fmt.Sprintf("Failed to send result: %s",
+			err.Error())
+		srv.log.Println("[ERROR] " + msg)
+	}
+} // func (srv *Server) handleAjaxItems(w http.ResponseWriter, r *http.Request)
