@@ -1,4 +1,4 @@
-// Time-stamp: <2024-09-13 19:42:14 krylon>
+// Time-stamp: <2024-10-02 18:38:23 krylon>
 // -*- mode: javascript; coding: utf-8; -*-
 // Copyright 2015-2020 Benjamin Walkenhorst <krylon@gmx.net>
 //
@@ -258,3 +258,34 @@ function search_delete(id) {
                            console.log(`Error searching: ${status_text} ${reply} ${xhr}`)
                        })
 } // function search_delete(id)
+
+function scale_images() {
+    const selector = '#items img'
+    const maxHeight = 300
+    const maxWidth = 300
+
+    $(selector).each(function () {
+        const img = $(this)[0]
+        if (img.width > maxWidth || img.height > maxHeight) {
+            const size = shrink_img(img.width, img.height, maxWidth, maxHeight)
+
+            img.width = size.width
+            img.height = size.height
+        }
+    })
+} // function scale_images()
+
+// Found here: https://stackoverflow.com/questions/3971841/how-to-resize-images-proportionally-keeping-the-aspect-ratio#14731922
+function shrink_img (srcWidth, srcHeight, maxWidth, maxHeight) {
+    const ratio = Math.min(maxWidth / srcWidth, maxHeight / srcHeight)
+
+    return { width: srcWidth * ratio, height: srcHeight * ratio }
+} // function shrink_img(srcWidth, srcHeight, maxWidth, maxHeight)
+
+function fix_links() {
+    let links = $('#items a')
+
+    for (var l of links) {
+        l.target = '_blank'
+    }
+} // function fix_links()

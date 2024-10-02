@@ -1,11 +1,28 @@
 {{ define "item_view" }}
 {{/* Created on 01. 10. 2024 */}}
-{{/* Time-stamp: <2024-10-01 15:07:44 krylon> */}}
-{{ range .Items }}
+{{/* Time-stamp: <2024-10-02 18:19:45 krylon> */}}
+{{ $feeds := .Feeds }}
+{{ range $id, $item := .Items }}
 <tr>
-  <td>{{ fmt_time_minute .Timestamp }}</td>
-  <td><a href="{{ .URL }}">{{ .Headline }}</a></td>
-  <td>{{ .Description }}</td>
+  <td>{{ fmt_time_minute $item.Timestamp }}</td>
+  <td><a href="/feed/{{ $item.FeedID }}">{{ (index $feeds $item.FeedID).Title }}</a>
+  <td><a href="{{ $item.URL }}">{{ $item.Headline }}</a></td>
+  <td>
+    {{ if gt (len .Description) 500 }}
+    <button class="btn btn-primary"
+            data-bs-toggle="collapse"
+            href="#collapse_item_{{ .ID }}"
+            aria-expanded="false"
+            aria-controls="#collapse_item_{{ .ID }}">
+      Description
+    </button>
+    <div class="collapse" id="collapse_item_{{ .ID }}">
+      {{ .Description }}
+    </div>
+    {{ else }}
+    {{ .Description }}
+    {{ end }}
+  </td>
 </tr>
 {{ end }}
 {{ end }}

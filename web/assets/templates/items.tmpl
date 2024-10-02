@@ -1,6 +1,6 @@
 {{ define "items" }}
 {{/* Created on 30. 09. 2024 */}}
-{{/* Time-stamp: <2024-10-01 19:17:14 krylon> */}}
+{{/* Time-stamp: <2024-10-02 18:25:31 krylon> */}}
 <!DOCTYPE html>
 <html>
   {{ template "head" . }}
@@ -42,6 +42,9 @@
              console.log(`${item_cnt} Items already loaded, loading ${cnt} more items.`)
              window.setTimeout(load_items, 200, cnt)
            }
+
+           window.setTimeout(fix_links, 10)
+           window.setTimeout(scale_images, 50)
          } else {
            console.log(res.message)
            alert(res.message)
@@ -61,10 +64,11 @@
      })
     </script>
 
-    <table class="table-info table-striped">
+    <table class="table table-info table-striped">
       <thead>
         <tr>
           <th>Time</th>
+          <th>Feed</th>
           <th>Title</th>
           <th>Description</th>
         </tr>
