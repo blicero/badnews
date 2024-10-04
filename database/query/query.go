@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 19. 09. 2024 by Benjamin Walkenhorst
 // (c) 2024 Benjamin Walkenhorst
-// Time-stamp: <2024-10-01 18:28:07 krylon>
+// Time-stamp: <2024-10-04 19:13:53 krylon>
 
 // Package query provides symbolic constants to identify database queries.
 package query
@@ -24,6 +24,7 @@ const (
 	ItemExists
 	ItemGetRecent
 	ItemGetRecentPaged
+	ItemGetByID
 	ItemGetByFeed
 	ItemGetRated
 	ItemRate
@@ -44,6 +45,7 @@ func AllQueries() []ID {
 		ItemExists,
 		ItemGetRecent,
 		ItemGetRecentPaged,
+		ItemGetByID,
 		ItemGetByFeed,
 		ItemGetRated,
 		ItemRate,

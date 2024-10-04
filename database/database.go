@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 19. 09. 2024 by Benjamin Walkenhorst
 // (c) 2024 Benjamin Walkenhorst
-// Time-stamp: <2024-10-01 18:33:50 krylon>
+// Time-stamp: <2024-10-04 19:17:58 krylon>
 
 // Package database provides persistence.
 package database
@@ -1299,6 +1299,64 @@ EXEC_QUERY:
 
 	return items, nil
 } // func (db *Database) ItemGetRecentPaged(cnt, offset int64) ([]model.Item, error)
+
+// ItemGetByID loads an Item by its ID
+func (db *Database) ItemGetByID(id int64) (*model.Item, error) {
+	const qid query.ID = query.ItemGetByID
+	var (
+		err  error
+		msg  string
+		stmt *sql.Stmt
+	)
+
+	if stmt, err = db.getQuery(qid); err != nil {
+		db.log.Printf("[ERROR] Cannot prepare query %s: %s\n",
+			qid,
+			err.Error())
+		return nil, err
+	} else if db.tx != nil {
+		stmt = db.tx.Stmt(stmt)
+	}
+
+	var rows *sql.Rows
+
+EXEC_QUERY:
+	if rows, err = stmt.Query(id); err != nil {
+		if worthARetry(err) {
+			waitForRetry()
+			goto EXEC_QUERY
+		}
+
+		return nil, err
+	}
+
+	defer rows.Close() // nolint: errcheck,gosec
+
+	if rows.Next() {
+		var (
+			timestamp int64
+			ustr      string
+			i         = &model.Item{ID: id}
+		)
+
+		if err = rows.Scan(&i.FeedID, &ustr, &timestamp, &i.Headline, &i.Description, &i.Rating); err != nil {
+			msg = fmt.Sprintf("Error scanning row for Feed: %s",
+				err.Error())
+			db.log.Printf("[ERROR] %s\n", msg)
+			return nil, errors.New(msg)
+		} else if i.URL, err = url.Parse(ustr); err != nil {
+			db.log.Printf("[ERROR] Cannot parse URL %q: %s\n",
+				ustr,
+				err.Error())
+			return nil, err
+		}
+
+		i.Timestamp = time.Unix(timestamp, 0)
+		return i, nil
+	}
+
+	return nil, nil
+} // func (db *Database) ItemGetByID(id int64) (*model.Item, error)
 
 // ItemGetByFeed loads items from the given Feed.
 func (db *Database) ItemGetByFeed(f *model.Feed, limit, offset int64) ([]model.Item, error) {
