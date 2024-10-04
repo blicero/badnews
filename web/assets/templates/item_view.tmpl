@@ -1,6 +1,6 @@
 {{ define "item_view" }}
 {{/* Created on 01. 10. 2024 */}}
-{{/* Time-stamp: <2024-10-04 18:23:50 krylon> */}}
+{{/* Time-stamp: <2024-10-04 19:58:28 krylon> */}}
 {{ $feeds := .Feeds }}
 {{ range $id, $item := .Items }}
 <tr>
@@ -19,9 +19,9 @@
       Boring
     </button>
     {{ else if (eq $item.Rating -1) }}
-    <img src="/static/face-tired.png" />
+    <img src="/static/face-tired.png" onclick="unrate_item({{ $item.ID }});" />
     {{ else if (eq $item.Rating 1) }}
-    <img src="/static/face-glasses.png" />
+    <img src="/static/face-glasses.png" onclick="unrate_item({{ $item.ID }});" />
     {{ end }}
   </td>
   <td><a href="{{ $item.URL }}">{{ $item.Headline }}</a></td>

@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 28. 09. 2024 by Benjamin Walkenhorst
 // (c) 2024 Benjamin Walkenhorst
-// Time-stamp: <2024-10-04 19:24:11 krylon>
+// Time-stamp: <2024-10-04 20:02:05 krylon>
 
 // Package web provides the web interface.
 package web
@@ -166,6 +166,7 @@ func Create(addr string) (*Server, error) {
 	srv.router.HandleFunc("/ajax/subscribe", srv.handleSubscribe)
 	srv.router.HandleFunc("/ajax/items/{offset:(?:\\d+)}/{cnt:(?:\\d+)}", srv.handleAjaxItems)
 	srv.router.HandleFunc("/ajax/item_rate", srv.handleAjaxRateItem)
+	srv.router.HandleFunc("/ajax/item_unrate/{id:(?:\\d+)$}", srv.handleAjaxUnrateItem)
 
 	return srv, nil
 } // func Create(addr string) (*Server, error)
@@ -757,3 +758,104 @@ SEND_RESPONSE:
 		srv.log.Println("[ERROR] " + msg)
 	}
 } // func (srv *Server) handleAjaxRateItem(w http.ResponseWriter, r *http.Request)
+
+func (srv *Server) handleAjaxUnrateItem(w http.ResponseWriter, r *http.Request) {
+	srv.log.Printf("[TRACE] Handle request for %s from %s\n",
+		r.URL.EscapedPath(),
+		r.RemoteAddr)
+
+	var (
+		err     error
+		sess    *sessions.Session
+		rbuf    []byte
+		db      *database.Database
+		idstr   string
+		id      int64
+		item    *model.Item
+		res     = Reply{Payload: make(map[string]string, 2)}
+		msg     string
+		vars    map[string]string
+		hstatus = 200
+	)
+
+	vars = mux.Vars(r)
+
+	idstr = vars["id"]
+
+	if id, err = strconv.ParseInt(idstr, 10, 64); err != nil {
+		res.Message = fmt.Sprintf("Cannot parse item ID %q: %s",
+			idstr,
+			err.Error())
+		srv.log.Printf("[ERROR] %s\n",
+			res.Message)
+		hstatus = 500
+		goto SEND_RESPONSE
+	}
+
+	db = srv.pool.Get()
+	defer srv.pool.Put(db)
+
+	if item, err = db.ItemGetByID(id); err != nil {
+		res.Message = fmt.Sprintf("Failed to lookup Item %d in database: %s",
+			id,
+			err.Error())
+		srv.log.Printf("[ERROR] %s\n",
+			res.Message)
+		hstatus = 500
+		goto SEND_RESPONSE
+	} else if item == nil {
+		res.Message = fmt.Sprintf("Item %d does not exist in database", id)
+		srv.log.Printf("[ERROR] %s\n",
+			res.Message)
+		hstatus = 400
+		goto SEND_RESPONSE
+	} else if err = db.ItemUnrate(item); err != nil {
+		res.Message = fmt.Sprintf("Failed to rate Item %q (%d): %s",
+			item.Headline,
+			item.ID,
+			err.Error())
+		srv.log.Printf("[ERROR] %s\n",
+			res.Message)
+		hstatus = 500
+		goto SEND_RESPONSE
+	}
+
+	res.Status = true
+	res.Message = "Success"
+	res.Payload["cell"] = fmt.Sprintf(`
+    <button type="button"
+            class="btn btn-primary"
+            onclick="rate_item(%d, 1);" >
+      Interesting
+    </button>
+    <button type="button"
+            class="btn btn-secondary"
+            onclick="rate_item(%d, -1);" >
+      Boring
+    </button>
+`,
+		id, id)
+
+SEND_RESPONSE:
+	if sess != nil {
+		if err = sess.Save(r, w); err != nil {
+			srv.log.Printf("[ERROR] Failed to set session cookie: %s\n",
+				err.Error())
+		}
+	}
+	res.Timestamp = time.Now()
+	if rbuf, err = json.Marshal(&res); err != nil {
+		srv.log.Printf("[ERROR] Error serializing response: %s\n",
+			err.Error())
+		rbuf = errJSON(err.Error())
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Cache-Control", "no-store, max-age=0")
+	w.WriteHeader(hstatus)
+	if _, err = w.Write(rbuf); err != nil {
+		msg = fmt.Sprintf("Failed to send result: %s",
+			err.Error())
+		srv.log.Println("[ERROR] " + msg)
+	}
+} // func (srv *Server) handleAjaxUnrateItem(w http.ResponseWriter, r *http.Request)
