@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 21. 08. 2024 by Benjamin Walkenhorst
 // (c) 2024 Benjamin Walkenhorst
-// Time-stamp: <2024-08-31 14:37:27 krylon>
+// Time-stamp: <2024-10-07 12:17:56 krylon>
 
 package path
 
@@ -17,4 +17,6 @@ const (
 	AgentConfig
 	SessionStore
 	Cookiejar
+	Judge
+	JudgeCache
 )

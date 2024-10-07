@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 19. 09. 2024 by Benjamin Walkenhorst
 // (c) 2024 Benjamin Walkenhorst
-// Time-stamp: <2024-10-04 19:17:58 krylon>
+// Time-stamp: <2024-10-07 14:40:45 krylon>
 
 // Package database provides persistence.
 package database
@@ -1182,7 +1182,7 @@ EXEC_QUERY:
 } // func (db *Database) ItemExists(i *model.Item) (bool, error)
 
 // ItemGetRecent loads all items newer than the given timestamp.
-func (db *Database) ItemGetRecent(begin time.Time) ([]model.Item, error) {
+func (db *Database) ItemGetRecent(begin time.Time) ([]*model.Item, error) {
 	const qid query.ID = query.ItemGetRecent
 	var (
 		err  error
@@ -1212,13 +1212,13 @@ EXEC_QUERY:
 	}
 
 	defer rows.Close() // nolint: errcheck,gosec
-	var items = make([]model.Item, 0, 16)
+	var items = make([]*model.Item, 0, 16)
 
 	for rows.Next() {
 		var (
 			timestamp int64
 			ustr      string
-			i         model.Item
+			i         = new(model.Item)
 		)
 
 		if err = rows.Scan(&i.ID, &i.FeedID, &ustr, &timestamp, &i.Headline, &i.Description, &i.Rating); err != nil {
@@ -1242,7 +1242,7 @@ EXEC_QUERY:
 
 // ItemGetRecentPaged fetches up to cnt of the most recent news items, skipping the first offset items,
 // in descending chronological order.
-func (db *Database) ItemGetRecentPaged(cnt, offset int64) ([]model.Item, error) {
+func (db *Database) ItemGetRecentPaged(cnt, offset int64) ([]*model.Item, error) {
 	const qid query.ID = query.ItemGetRecentPaged
 	var (
 		err  error
@@ -1272,13 +1272,13 @@ EXEC_QUERY:
 	}
 
 	defer rows.Close() // nolint: errcheck,gosec
-	var items = make([]model.Item, 0, cnt)
+	var items = make([]*model.Item, 0, cnt)
 
 	for rows.Next() {
 		var (
 			timestamp int64
 			ustr      string
-			i         model.Item
+			i         = new(model.Item)
 		)
 
 		if err = rows.Scan(&i.ID, &i.FeedID, &ustr, &timestamp, &i.Headline, &i.Description, &i.Rating); err != nil {

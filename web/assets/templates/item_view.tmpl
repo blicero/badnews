@@ -1,6 +1,6 @@
 {{ define "item_view" }}
 {{/* Created on 01. 10. 2024 */}}
-{{/* Time-stamp: <2024-10-04 19:58:28 krylon> */}}
+{{/* Time-stamp: <2024-10-07 13:47:31 krylon> */}}
 {{ $feeds := .Feeds }}
 {{ range $id, $item := .Items }}
 <tr>
@@ -8,6 +8,14 @@
   <td><a href="/feed/{{ $item.FeedID }}">{{ (index $feeds $item.FeedID).Title }}</a></td>
   <td id="item_rating_{{ $item.ID }}"> {{/* Rating */}}
     {{ if (eq $item.Rating 0) }}
+    {{ if (ne $item.Guessed 0) }}
+    {{ if (eq $item.Guessed -1) }}
+    <small>(boring)</small>
+    {{ else if (eq $item.Guessed 1) }}
+    <small>(interesting)</small>
+    {{ end }}
+    <br />
+    {{ end }}
     <button type="button"
             class="btn btn-primary"
             onclick="rate_item({{ $item.ID }}, 1);" >

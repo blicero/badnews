@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 18. 09. 2024 by Benjamin Walkenhorst
 // (c) 2024 Benjamin Walkenhorst
-// Time-stamp: <2024-10-02 18:38:35 krylon>
+// Time-stamp: <2024-10-07 12:18:32 krylon>
 
 package common
 
@@ -100,6 +100,14 @@ func Path(p path.Path) string {
 		return filepath.Join(
 			BaseDir,
 			"cookiejar.dat")
+	case path.Judge:
+		return filepath.Join(
+			BaseDir,
+			"judge")
+	case path.JudgeCache:
+		return filepath.Join(
+			BaseDir,
+			"jcache.db")
 	default:
 		panic(fmt.Sprintf("Invalid Path value: %s", p))
 	}
@@ -179,6 +187,11 @@ func InitApp() error {
 	} else if err = os.Mkdir(Path(path.SessionStore), 0700); err != nil && !os.IsExist(err) {
 		fmt.Printf("Error creating session store %s: %s",
 			Path(path.SessionStore),
+			err.Error())
+		return err
+	} else if err = os.Mkdir(Path(path.Judge), 0700); err != nil && !os.IsExist(err) {
+		fmt.Printf("Error creating Judge store %s: %s",
+			Path(path.Judge),
 			err.Error())
 		return err
 	}

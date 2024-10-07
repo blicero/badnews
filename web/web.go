@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 28. 09. 2024 by Benjamin Walkenhorst
 // (c) 2024 Benjamin Walkenhorst
-// Time-stamp: <2024-10-04 20:02:05 krylon>
+// Time-stamp: <2024-10-07 15:21:13 krylon>
 
 // Package web provides the web interface.
 package web
@@ -30,6 +30,7 @@ import (
 	"github.com/blicero/badnews/common"
 	"github.com/blicero/badnews/common/path"
 	"github.com/blicero/badnews/database"
+	"github.com/blicero/badnews/judge"
 	"github.com/blicero/badnews/logdomain"
 	"github.com/blicero/badnews/model"
 	"github.com/gorilla/mux"
@@ -59,7 +60,8 @@ type Server struct {
 	tmpl      *template.Template
 	web       http.Server
 	mimeTypes map[string]string
-	store     sessions.Store // nolint: unused,structcheck
+	store     sessions.Store
+	judge     *judge.Judge
 }
 
 // Create creates and returns a new Server.
@@ -111,6 +113,15 @@ func Create(addr string) (*Server, error) {
 	} else if srv.pool == nil {
 		srv.log.Printf("[CANTHAPPEN] Database pool is nil!\n")
 		return nil, errors.New("Database pool is nil")
+	} else if srv.judge, err = judge.New(); err != nil {
+		srv.log.Printf("[ERROR] Failed to create Judge: %s\n",
+			err.Error())
+		srv.pool.Close() // nolint: errcheck
+		return nil, err
+	} else if err = srv.judge.Train(); err != nil {
+		srv.log.Printf("[CRITICAL] Failed to train classifier: %s\n",
+			err.Error())
+		return nil, err
 	}
 
 	const tmplFolder = "assets/templates"
@@ -556,7 +567,7 @@ func (srv *Server) handleAjaxItems(w http.ResponseWriter, r *http.Request) {
 		tmpl        *template.Template
 		cnt, offset int64
 		res         Reply
-		msg         string
+		msg, rating string
 		feeds       []model.Feed
 		vars        map[string]string
 		hstatus     = 200
@@ -610,6 +621,33 @@ func (srv *Server) handleAjaxItems(w http.ResponseWriter, r *http.Request) {
 		srv.log.Printf("[CANTHAPPEN] %s\n", res.Message)
 		hstatus = 500
 		goto SEND_RESPONSE
+	}
+
+	for _, i := range data.Items {
+		if i.EffectiveRating() == 0 {
+			srv.log.Printf("[TRACE] Using classifier to guess rating for item %q (%d)\n",
+				i.Headline,
+				i.ID)
+			if rating, err = srv.judge.Rate(i); err != nil {
+				srv.log.Printf("[ERROR] Failed to rate Item %q (%d): %s\n",
+					i.Headline,
+					i.ID,
+					err.Error())
+				continue
+			}
+
+			srv.log.Printf("[TRACE] Item %q (%d) has been classified as %q\n",
+				i.Headline,
+				i.ID,
+				rating)
+
+			switch rating {
+			case "boring":
+				i.Guessed = -1
+			case "interesting":
+				i.Guessed = 1
+			}
+		}
 	}
 
 	data.Feeds = make(map[int64]model.Feed, len(feeds))
@@ -723,6 +761,15 @@ func (srv *Server) handleAjaxRateItem(w http.ResponseWriter, r *http.Request) {
 		goto SEND_RESPONSE
 	} else if err = db.ItemRate(item, int8(rating)); err != nil {
 		res.Message = fmt.Sprintf("Failed to rate Item %q (%d): %s",
+			item.Headline,
+			item.ID,
+			err.Error())
+		srv.log.Printf("[ERROR] %s\n",
+			res.Message)
+		hstatus = 500
+		goto SEND_RESPONSE
+	} else if err = srv.judge.Learn(item); err != nil {
+		res.Message = fmt.Sprintf("Failed to train classifier on Item %q (%d): %s",
 			item.Headline,
 			item.ID,
 			err.Error())

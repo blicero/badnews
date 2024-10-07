@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 19. 09. 2024 by Benjamin Walkenhorst
 // (c) 2024 Benjamin Walkenhorst
-// Time-stamp: <2024-09-30 18:38:10 krylon>
+// Time-stamp: <2024-10-07 13:24:36 krylon>
 
 // Package model provides the data types used across the application.
 package model
@@ -10,7 +10,12 @@ package model
 import (
 	"fmt"
 	"net/url"
+	"regexp"
+	"strconv"
+	"strings"
 	"time"
+
+	"github.com/jaytaylor/html2text"
 )
 
 // Feed is an RSS feed. Duh.
@@ -64,4 +69,59 @@ type Item struct {
 	Headline    string
 	Description string
 	Rating      int8
+	Guessed     int8
+	_idstr      string
+	_plain      string
 }
+
+var whitespace *regexp.Regexp = regexp.MustCompile(`[\s\t\n\r]+`)
+
+// EffectiveRating returns the Item's Rating, *if* it has been rated, the guessed
+// Rating, if one is stored in the Item, else zero.
+func (i *Item) EffectiveRating() int8 {
+	if i.Rating != 0 {
+		return i.Rating
+	} else if i.Guessed != 0 {
+		return i.Guessed
+	}
+
+	return 0
+} // func (i *Item) EffectiveRating() int8
+
+// Plaintext returns the complete text of the Item, cleansed of any HTML.
+func (i *Item) Plaintext() string {
+	var tmp = make([]string, 2)
+	var err error
+
+	if i._plain != "" {
+		return i._plain
+	}
+
+	if tmp[0], err = html2text.FromString(i.Headline); err != nil {
+		tmp[0] = i.Headline
+	}
+
+	if tmp[1], err = html2text.FromString(i.Description); err != nil {
+		tmp[1] = i.Description
+	}
+
+	if tmp[1] == "Comments" { // Hacker News
+		tmp[1] = ""
+	}
+
+	tmp[0] = whitespace.ReplaceAllString(tmp[0], " ")
+	tmp[1] = whitespace.ReplaceAllString(tmp[1], " ")
+
+	i._plain = strings.Join(tmp, " ")
+	return i._plain
+} // func (i *Item) Plaintext() string
+
+// Returns the ID as a string
+func (i *Item) IDString() string {
+	if i._idstr != "" {
+		return i._idstr
+	}
+
+	i._idstr = strconv.FormatInt(i.ID, 10)
+	return i._idstr
+} // func (i *Item) IDString() string
