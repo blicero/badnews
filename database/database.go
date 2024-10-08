@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 19. 09. 2024 by Benjamin Walkenhorst
 // (c) 2024 Benjamin Walkenhorst
-// Time-stamp: <2024-10-07 14:40:45 krylon>
+// Time-stamp: <2024-10-08 18:57:49 krylon>
 
 // Package database provides persistence.
 package database
@@ -1615,3 +1615,396 @@ EXEC_QUERY:
 	status = true
 	return nil
 } // func (db *Database) ItemUnrate(i *model.Item, r int64) error
+
+// TagAdd adds a new Tag to the database.
+func (db *Database) TagAdd(t *model.Tag) error {
+	const qid query.ID = query.TagAdd
+	var (
+		err    error
+		msg    string
+		stmt   *sql.Stmt
+		tx     *sql.Tx
+		status bool
+	)
+
+	if stmt, err = db.getQuery(qid); err != nil {
+		db.log.Printf("[ERROR] Cannot prepare query %s: %s\n",
+			qid,
+			err.Error())
+		return err
+	} else if db.tx != nil {
+		tx = db.tx
+	} else {
+		// db.log.Printf("[INFO] Start ad-hoc transaction for adding Feed %s\n",
+		// 	f.Title)
+	BEGIN_AD_HOC:
+		if tx, err = db.db.Begin(); err != nil {
+			if worthARetry(err) {
+				waitForRetry()
+				goto BEGIN_AD_HOC
+			} else {
+				msg = fmt.Sprintf("Error starting transaction: %s\n",
+					err.Error())
+				db.log.Printf("[ERROR] %s\n", msg)
+				return errors.New(msg)
+			}
+
+		} else {
+			defer func() {
+				var err2 error
+				if status {
+					if err2 = tx.Commit(); err2 != nil {
+						db.log.Printf("[ERROR] Failed to commit ad-hoc transaction: %s\n",
+							err2.Error())
+					}
+				} else if err2 = tx.Rollback(); err2 != nil {
+					db.log.Printf("[ERROR] Rollback of ad-hoc transaction failed: %s\n",
+						err2.Error())
+				}
+			}()
+		}
+	}
+
+	stmt = tx.Stmt(stmt)
+	var (
+		rows   *sql.Rows
+		parent *int64
+	)
+
+	if t.Parent != 0 {
+		parent = &t.Parent
+	}
+
+EXEC_QUERY:
+	if rows, err = stmt.Query(t.Name, parent); err != nil {
+		if worthARetry(err) {
+			waitForRetry()
+			goto EXEC_QUERY
+		} else {
+			err = fmt.Errorf("Cannot add Tag %s to database: %s",
+				t.Name,
+				err.Error())
+			db.log.Printf("[ERROR] %s\n", err.Error())
+			return err
+		}
+	} else {
+		var id int64
+
+		defer rows.Close()
+
+		if !rows.Next() {
+			// CANTHAPPEN
+			db.log.Printf("[ERROR] Query %s did not return a value\n",
+				qid)
+			return fmt.Errorf("Query %s did not return a value", qid)
+		} else if err = rows.Scan(&id); err != nil {
+			msg = fmt.Sprintf("Failed to get ID for newly added Tag %s: %s",
+				t.Name,
+				err.Error())
+			db.log.Printf("[ERROR] %s\n", msg)
+			return errors.New(msg)
+		}
+
+		t.ID = id
+		status = true
+		return nil
+	}
+} // func (db *Database) TagAdd(t *model.Tag) error
+
+// TagGetByID loads a Tag by its ID
+func (db *Database) TagGetByID(id int64) (*model.Tag, error) {
+	const qid query.ID = query.TagGetByID
+	var (
+		err  error
+		msg  string
+		stmt *sql.Stmt
+	)
+
+	if stmt, err = db.getQuery(qid); err != nil {
+		db.log.Printf("[ERROR] Cannot prepare query %s: %s\n",
+			qid,
+			err.Error())
+		return nil, err
+	} else if db.tx != nil {
+		stmt = db.tx.Stmt(stmt)
+	}
+
+	var rows *sql.Rows
+
+EXEC_QUERY:
+	if rows, err = stmt.Query(id); err != nil {
+		if worthARetry(err) {
+			waitForRetry()
+			goto EXEC_QUERY
+		}
+
+		return nil, err
+	}
+
+	defer rows.Close() // nolint: errcheck,gosec
+
+	if rows.Next() {
+		var (
+			parent *int64
+			t      = &model.Tag{ID: id}
+		)
+
+		if err = rows.Scan(&t.Name, &parent); err != nil {
+			msg = fmt.Sprintf("Error scanning row for Feed: %s",
+				err.Error())
+			db.log.Printf("[ERROR] %s\n", msg)
+			return nil, errors.New(msg)
+		} else if parent != nil {
+			t.Parent = *parent
+		}
+
+		return t, nil
+	}
+
+	return nil, nil
+} // func (db *Database) TagGetByID(id int64) (*model.Tag, error)
+
+// TagGetChildren loads all Tags that are immediate children of the given Tag.
+func (db *Database) TagGetChildren(t *model.Tag) ([]*model.Tag, error) {
+	const qid query.ID = query.TagGetChildren
+	var (
+		err  error
+		msg  string
+		stmt *sql.Stmt
+	)
+
+	if stmt, err = db.getQuery(qid); err != nil {
+		db.log.Printf("[ERROR] Cannot prepare query %s: %s\n",
+			qid,
+			err.Error())
+		return nil, err
+	} else if db.tx != nil {
+		stmt = db.tx.Stmt(stmt)
+	}
+
+	var rows *sql.Rows
+
+EXEC_QUERY:
+	if rows, err = stmt.Query(); err != nil {
+		if worthARetry(err) {
+			waitForRetry()
+			goto EXEC_QUERY
+		}
+
+		return nil, err
+	}
+
+	defer rows.Close() // nolint: errcheck,gosec
+	var tags = make([]*model.Tag, 0, 16)
+
+	for rows.Next() {
+		var (
+			t = &model.Tag{Parent: t.ID}
+		)
+
+		if err = rows.Scan(&t.ID, &t.Name); err != nil {
+			msg = fmt.Sprintf("Error scanning row for Feed: %s",
+				err.Error())
+			db.log.Printf("[ERROR] %s\n", msg)
+			return nil, errors.New(msg)
+		}
+
+		tags = append(tags, t)
+	}
+
+	return tags, nil
+} // func (db *Database) TagGetChildren(t *model.Tag) ([]*model.Tag, error)
+
+// TagGetAll loads ALL Tags from the database.
+func (db *Database) TagGetAll() ([]*model.Tag, error) {
+	const qid query.ID = query.TagGetAll
+	var (
+		err  error
+		msg  string
+		stmt *sql.Stmt
+	)
+
+	if stmt, err = db.getQuery(qid); err != nil {
+		db.log.Printf("[ERROR] Cannot prepare query %s: %s\n",
+			qid,
+			err.Error())
+		return nil, err
+	} else if db.tx != nil {
+		stmt = db.tx.Stmt(stmt)
+	}
+
+	var rows *sql.Rows
+
+EXEC_QUERY:
+	if rows, err = stmt.Query(); err != nil {
+		if worthARetry(err) {
+			waitForRetry()
+			goto EXEC_QUERY
+		}
+
+		return nil, err
+	}
+
+	defer rows.Close() // nolint: errcheck,gosec
+	var tags = make([]*model.Tag, 0, 16)
+
+	for rows.Next() {
+		var (
+			parent *int64
+			t      = new(model.Tag)
+		)
+
+		if err = rows.Scan(&t.ID, &parent, &t.Name); err != nil {
+			msg = fmt.Sprintf("Error scanning row for Feed: %s",
+				err.Error())
+			db.log.Printf("[ERROR] %s\n", msg)
+			return nil, errors.New(msg)
+		} else if parent != nil {
+			t.Parent = *parent
+		}
+
+		tags = append(tags, t)
+	}
+
+	return tags, nil
+} // func (db *Database) TagGetAll() ([]*model.Tag, error)
+
+// TagRename changes a Tag's name.
+func (db *Database) TagRename(t *model.Tag, name string) error {
+	const qid query.ID = query.TagRename
+	var (
+		err    error
+		msg    string
+		stmt   *sql.Stmt
+		tx     *sql.Tx
+		status bool
+	)
+
+	if stmt, err = db.getQuery(qid); err != nil {
+		db.log.Printf("[ERROR] Cannot prepare query %s: %s\n",
+			qid,
+			err.Error())
+		return err
+	} else if db.tx != nil {
+		tx = db.tx
+	} else {
+		// db.log.Printf("[INFO] Start ad-hoc transaction for adding Feed %s\n",
+		// 	f.Title)
+	BEGIN_AD_HOC:
+		if tx, err = db.db.Begin(); err != nil {
+			if worthARetry(err) {
+				waitForRetry()
+				goto BEGIN_AD_HOC
+			} else {
+				msg = fmt.Sprintf("Error starting transaction: %s\n",
+					err.Error())
+				db.log.Printf("[ERROR] %s\n", msg)
+				return errors.New(msg)
+			}
+
+		} else {
+			defer func() {
+				var err2 error
+				if status {
+					if err2 = tx.Commit(); err2 != nil {
+						db.log.Printf("[ERROR] Failed to commit ad-hoc transaction: %s\n",
+							err2.Error())
+					}
+				} else if err2 = tx.Rollback(); err2 != nil {
+					db.log.Printf("[ERROR] Rollback of ad-hoc transaction failed: %s\n",
+						err2.Error())
+				}
+			}()
+		}
+	}
+
+	stmt = tx.Stmt(stmt)
+
+EXEC_QUERY:
+	if _, err = stmt.Exec(name, t.ID); err != nil {
+		if worthARetry(err) {
+			waitForRetry()
+			goto EXEC_QUERY
+		} else {
+			err = fmt.Errorf("Cannot rename Tag %s to %s: %s",
+				t.Name,
+				name,
+				err.Error())
+			db.log.Printf("[ERROR] %s\n", err.Error())
+			return err
+		}
+	}
+
+	t.Name = name
+	status = true
+	return nil
+} // func (db *Database) TagRename(t *model.Tag, name string) error
+
+// TagDelete removes a Tag from the database.
+func (db *Database) TagDelete(t *model.Tag) error {
+	const qid query.ID = query.TagDelete
+	var (
+		err    error
+		msg    string
+		stmt   *sql.Stmt
+		tx     *sql.Tx
+		status bool
+	)
+
+	if stmt, err = db.getQuery(qid); err != nil {
+		db.log.Printf("[ERROR] Cannot prepare query %s: %s\n",
+			qid,
+			err.Error())
+		return err
+	} else if db.tx != nil {
+		tx = db.tx
+	} else {
+		// db.log.Printf("[INFO] Start ad-hoc transaction for adding Feed %s\n",
+		// 	f.Title)
+	BEGIN_AD_HOC:
+		if tx, err = db.db.Begin(); err != nil {
+			if worthARetry(err) {
+				waitForRetry()
+				goto BEGIN_AD_HOC
+			} else {
+				msg = fmt.Sprintf("Error starting transaction: %s\n",
+					err.Error())
+				db.log.Printf("[ERROR] %s\n", msg)
+				return errors.New(msg)
+			}
+
+		} else {
+			defer func() {
+				var err2 error
+				if status {
+					if err2 = tx.Commit(); err2 != nil {
+						db.log.Printf("[ERROR] Failed to commit ad-hoc transaction: %s\n",
+							err2.Error())
+					}
+				} else if err2 = tx.Rollback(); err2 != nil {
+					db.log.Printf("[ERROR] Rollback of ad-hoc transaction failed: %s\n",
+						err2.Error())
+				}
+			}()
+		}
+	}
+
+	stmt = tx.Stmt(stmt)
+
+EXEC_QUERY:
+	if _, err = stmt.Exec(t.ID); err != nil {
+		if worthARetry(err) {
+			waitForRetry()
+			goto EXEC_QUERY
+		} else {
+			err = fmt.Errorf("Cannot delete Tag %s: %s",
+				t.Name,
+				err.Error())
+			db.log.Printf("[ERROR] %s\n", err.Error())
+			return err
+		}
+	}
+
+	status = true
+	return nil
+} // func (db *Database) TagDelete(t *model.Tag) error

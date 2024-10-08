@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 19. 09. 2024 by Benjamin Walkenhorst
 // (c) 2024 Benjamin Walkenhorst
-// Time-stamp: <2024-10-08 15:28:42 krylon>
+// Time-stamp: <2024-10-08 18:55:26 krylon>
 
 package database
 
@@ -44,7 +44,9 @@ CREATE TABLE tag (
     id		INTEGER PRIMARY KEY,
     parent	INTEGER,
     name	TEXT NOT NULL,
-    FOREIGN KEY (parent) REFERENCES tag (id),
+    FOREIGN KEY (parent) REFERENCES tag (id)
+       ON UPDATE RESTRICT
+       ON DELETE CASCADE,
     UNIQUE (name, parent),
     CHECK (name <> '')
 ) STRICT`,
@@ -55,8 +57,12 @@ CREATE TABLE tag_link (
     id		INTEGER PRIMARY KEY,
     tag_id	INTEGER NOT NULL,
     item_id	INTEGER NOT NULL,
-    FOREIGN KEY (tag_id) REFERENCES tag (id),
-    FOREIGN KEY (item_id) REFERENCES item (id),
+    FOREIGN KEY (tag_id) REFERENCES tag (id)
+        ON UPDATE RESTRICT
+        ON DELETE CASCADE,
+    FOREIGN KEY (item_id) REFERENCES item (id)
+        ON UPDATE RESTRICT
+        ON DELETE CASCADE,
     UNIQUE (tag_id, item_id)
 ) STRICT
 `,

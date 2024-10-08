@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 19. 09. 2024 by Benjamin Walkenhorst
 // (c) 2024 Benjamin Walkenhorst
-// Time-stamp: <2024-10-08 15:30:49 krylon>
+// Time-stamp: <2024-10-08 18:55:59 krylon>
 
 package database
 
@@ -132,8 +132,13 @@ ORDER BY timestamp DESC
 `,
 	query.ItemRate:   "UPDATE item SET rating = ? WHERE id = ?",
 	query.ItemUnrate: "UPDATE item SET rating = 0 WHERE id = ?",
-	query.TagAdd:     "INSERT INTO tag (name) VALUES (?) RETURNING id",
+	query.TagAdd: `
+INSERT INTO tag (name, parent)
+         VALUES (   ?,      ?)
+RETURNING id
+`,
 	query.TagGetByID: "SELECT parent, name FROM tag WHERE id = ?",
+	// TODO Recursively fetch grandchildren etc.
 	query.TagGetChildren: `
 SELECT
     id,
@@ -141,13 +146,14 @@ SELECT
 FROM tag
 WHERE parent = ?
 `,
+	// TODO Can I order the tags hierarchically right here?
 	query.TagGetAll: `
 SELECT
     id,
     parent,
     name
 FROM tag
-ORDER BY id
+ORDER BY COALESCE(parent, 0), id
 `,
 	query.TagRename:    "UPDATE tag SET name = ? WHERE id = ?",
 	query.TagSetParent: "UPDATE tag SET parent = ? WHERE id = ?",
