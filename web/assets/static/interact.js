@@ -1,4 +1,4 @@
-// Time-stamp: <2024-10-04 19:54:20 krylon>
+// Time-stamp: <2024-10-08 14:51:58 krylon>
 // -*- mode: javascript; coding: utf-8; -*-
 // Copyright 2015-2020 Benjamin Walkenhorst <krylon@gmx.net>
 //
@@ -316,7 +316,7 @@ function rate_item(item_id, rating) {
                                const src = `/static/${icon}.png`
                                const cell = $(`#item_rating_${item_id}`)[0]
 
-                               cell.innerHTML = `<img src="${src}" />`
+                               cell.innerHTML = `<img src="${src}" onclick="unrate_item(${item_id});" />`
                            } else {
                                alert(res.message)
                            }
