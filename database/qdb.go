@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 19. 09. 2024 by Benjamin Walkenhorst
 // (c) 2024 Benjamin Walkenhorst
-// Time-stamp: <2024-10-04 19:15:03 krylon>
+// Time-stamp: <2024-10-08 15:30:49 krylon>
 
 package database
 
@@ -132,4 +132,44 @@ ORDER BY timestamp DESC
 `,
 	query.ItemRate:   "UPDATE item SET rating = ? WHERE id = ?",
 	query.ItemUnrate: "UPDATE item SET rating = 0 WHERE id = ?",
+	query.TagAdd:     "INSERT INTO tag (name) VALUES (?) RETURNING id",
+	query.TagGetByID: "SELECT parent, name FROM tag WHERE id = ?",
+	query.TagGetChildren: `
+SELECT
+    id,
+    name
+FROM tag
+WHERE parent = ?
+`,
+	query.TagGetAll: `
+SELECT
+    id,
+    parent,
+    name
+FROM tag
+ORDER BY id
+`,
+	query.TagRename:    "UPDATE tag SET name = ? WHERE id = ?",
+	query.TagSetParent: "UPDATE tag SET parent = ? WHERE id = ?",
+	query.TagDelete:    "DELETE FROM tag WHERE id = ?",
+	query.TagLinkAdd: `
+INSERT INTO tag_link (tag_id, item_id)
+              VALUES (     ?,       ?)
+RETURNING id
+`,
+	query.TagLinkDelete: "DELETE FROM tag_link WHERE id = ?",
+	query.TagLinkGetByItem: `
+SELECT
+    id,
+    tag_id
+FROM tag_link
+WHERE item_id = ?
+`,
+	query.TagLinkGetByTag: `
+SELECT
+    id,
+    item_id
+FROM tag_link
+WHERE tag_id = ?
+`,
 }

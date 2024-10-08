@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 19. 09. 2024 by Benjamin Walkenhorst
 // (c) 2024 Benjamin Walkenhorst
-// Time-stamp: <2024-09-23 20:57:06 krylon>
+// Time-stamp: <2024-10-08 15:28:42 krylon>
 
 package database
 
@@ -38,4 +38,28 @@ CREATE TABLE item (
 	"CREATE INDEX item_time_idx ON item (timestamp)",
 	"CREATE INDEX item_headline_idx ON item (headline)",
 	"CREATE INDEX item_rating_idx ON item (rating)",
+
+	`
+CREATE TABLE tag (
+    id		INTEGER PRIMARY KEY,
+    parent	INTEGER,
+    name	TEXT NOT NULL,
+    FOREIGN KEY (parent) REFERENCES tag (id),
+    UNIQUE (name, parent),
+    CHECK (name <> '')
+) STRICT`,
+	"CREATE INDEX tag_parent_idx ON tag (parent)",
+
+	`
+CREATE TABLE tag_link (
+    id		INTEGER PRIMARY KEY,
+    tag_id	INTEGER NOT NULL,
+    item_id	INTEGER NOT NULL,
+    FOREIGN KEY (tag_id) REFERENCES tag (id),
+    FOREIGN KEY (item_id) REFERENCES item (id),
+    UNIQUE (tag_id, item_id)
+) STRICT
+`,
+	"CREATE INDEX tl_tag_idx ON tag_link (tag_id)",
+	"CREATE INDEX tl_item_idx ON tag_link (item_id)",
 }

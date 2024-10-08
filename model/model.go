@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 19. 09. 2024 by Benjamin Walkenhorst
 // (c) 2024 Benjamin Walkenhorst
-// Time-stamp: <2024-10-07 13:24:36 krylon>
+// Time-stamp: <2024-10-08 14:58:42 krylon>
 
 // Package model provides the data types used across the application.
 package model
@@ -125,3 +125,11 @@ func (i *Item) IDString() string {
 	i._idstr = strconv.FormatInt(i.ID, 10)
 	return i._idstr
 } // func (i *Item) IDString() string
+
+// Tag is a label that can be attached to an Item. A Tag can also have
+// a Parent Tag, which allows to organize them in a hierarchy.
+type Tag struct {
+	ID     int64  `json:"id"`
+	Parent int64  `json:"parent,omitempty"`
+	Name   string `json:"name"`
+}
