@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 19. 09. 2024 by Benjamin Walkenhorst
 // (c) 2024 Benjamin Walkenhorst
-// Time-stamp: <2024-10-08 18:55:59 krylon>
+// Time-stamp: <2024-10-09 15:54:02 krylon>
 
 package database
 
@@ -161,21 +161,28 @@ ORDER BY COALESCE(parent, 0), id
 	query.TagLinkAdd: `
 INSERT INTO tag_link (tag_id, item_id)
               VALUES (     ?,       ?)
-RETURNING id
 `,
-	query.TagLinkDelete: "DELETE FROM tag_link WHERE id = ?",
+	query.TagLinkDelete: "DELETE FROM tag_link WHERE tag_id = ? AND item_id = ?",
 	query.TagLinkGetByItem: `
 SELECT
-    id,
-    tag_id
-FROM tag_link
-WHERE item_id = ?
+    t.id,
+    t.parent,
+    t.name
+FROM tag_link l
+INNER JOIN tag t ON l.tag_id = t.id
+WHERE l.item_id = ?
 `,
 	query.TagLinkGetByTag: `
 SELECT
-    id,
-    item_id
-FROM tag_link
+    i.id,
+    i.feed_id,
+    i.url,
+    i.timestamp,
+    i.headline,
+    i.description,
+    i.rating
+FROM tag_link l
+INNER JOIN item i ON l.item_id = i.id
 WHERE tag_id = ?
 `,
 }

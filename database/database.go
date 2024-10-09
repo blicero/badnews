@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 19. 09. 2024 by Benjamin Walkenhorst
 // (c) 2024 Benjamin Walkenhorst
-// Time-stamp: <2024-10-08 18:57:49 krylon>
+// Time-stamp: <2024-10-09 15:56:50 krylon>
 
 // Package database provides persistence.
 package database
@@ -2008,3 +2008,261 @@ EXEC_QUERY:
 	status = true
 	return nil
 } // func (db *Database) TagDelete(t *model.Tag) error
+
+// TagLinkAdd attaches the given Tag to the given Item.
+func (db *Database) TagLinkAdd(item *model.Item, tag *model.Tag) error {
+	const qid query.ID = query.TagLinkAdd
+	var (
+		err    error
+		msg    string
+		stmt   *sql.Stmt
+		tx     *sql.Tx
+		status bool
+	)
+
+	if stmt, err = db.getQuery(qid); err != nil {
+		db.log.Printf("[ERROR] Cannot prepare query %s: %s\n",
+			qid,
+			err.Error())
+		return err
+	} else if db.tx != nil {
+		tx = db.tx
+	} else {
+	BEGIN_AD_HOC:
+		if tx, err = db.db.Begin(); err != nil {
+			if worthARetry(err) {
+				waitForRetry()
+				goto BEGIN_AD_HOC
+			} else {
+				msg = fmt.Sprintf("Error starting transaction: %s\n",
+					err.Error())
+				db.log.Printf("[ERROR] %s\n", msg)
+				return errors.New(msg)
+			}
+
+		} else {
+			defer func() {
+				var err2 error
+				if status {
+					if err2 = tx.Commit(); err2 != nil {
+						db.log.Printf("[ERROR] Failed to commit ad-hoc transaction: %s\n",
+							err2.Error())
+					}
+				} else if err2 = tx.Rollback(); err2 != nil {
+					db.log.Printf("[ERROR] Rollback of ad-hoc transaction failed: %s\n",
+						err2.Error())
+				}
+			}()
+		}
+	}
+
+	stmt = tx.Stmt(stmt)
+
+EXEC_QUERY:
+	if _, err = stmt.Exec(tag.ID, item.ID); err != nil {
+		if worthARetry(err) {
+			waitForRetry()
+			goto EXEC_QUERY
+		} else {
+			err = fmt.Errorf("Cannot add Tag %s to Item %q (%d): %s",
+				tag.Name,
+				item.Headline,
+				item.ID,
+				err.Error())
+			db.log.Printf("[ERROR] %s\n", err.Error())
+			return err
+		}
+	}
+
+	status = true
+	return nil
+} // func (db *Database) TagLinkAdd(item *model.Item, tag *model.Tag) error
+
+// TagLinkDelete removes a Tag from the given Item.
+func (db *Database) TagLinkDelete(item *model.Item, tag *model.Tag) error {
+	const qid query.ID = query.TagLinkDelete
+	var (
+		err    error
+		msg    string
+		stmt   *sql.Stmt
+		tx     *sql.Tx
+		status bool
+	)
+
+	if stmt, err = db.getQuery(qid); err != nil {
+		db.log.Printf("[ERROR] Cannot prepare query %s: %s\n",
+			qid,
+			err.Error())
+		return err
+	} else if db.tx != nil {
+		tx = db.tx
+	} else {
+	BEGIN_AD_HOC:
+		if tx, err = db.db.Begin(); err != nil {
+			if worthARetry(err) {
+				waitForRetry()
+				goto BEGIN_AD_HOC
+			} else {
+				msg = fmt.Sprintf("Error starting transaction: %s\n",
+					err.Error())
+				db.log.Printf("[ERROR] %s\n", msg)
+				return errors.New(msg)
+			}
+
+		} else {
+			defer func() {
+				var err2 error
+				if status {
+					if err2 = tx.Commit(); err2 != nil {
+						db.log.Printf("[ERROR] Failed to commit ad-hoc transaction: %s\n",
+							err2.Error())
+					}
+				} else if err2 = tx.Rollback(); err2 != nil {
+					db.log.Printf("[ERROR] Rollback of ad-hoc transaction failed: %s\n",
+						err2.Error())
+				}
+			}()
+		}
+	}
+
+	stmt = tx.Stmt(stmt)
+
+EXEC_QUERY:
+	if _, err = stmt.Exec(tag.ID, item.ID); err != nil {
+		if worthARetry(err) {
+			waitForRetry()
+			goto EXEC_QUERY
+		} else {
+			err = fmt.Errorf("Cannot remove Tag %s from Item %s (%d): %s",
+				tag.Name,
+				item.Headline,
+				item.ID,
+				err.Error())
+			db.log.Printf("[ERROR] %s\n", err.Error())
+			return err
+		}
+	}
+
+	status = true
+	return nil
+} // func (db *Database) TagLinkDelete(item *model.Item, tag *model.Tag) error
+
+// TagLinkGetByItem loads all Tags that are attached to the given Item.
+func (db *Database) TagLinkGetByItem(item *model.Item) ([]*model.Tag, error) {
+	const qid query.ID = query.TagLinkGetByItem
+	var (
+		err  error
+		msg  string
+		stmt *sql.Stmt
+	)
+
+	if stmt, err = db.getQuery(qid); err != nil {
+		db.log.Printf("[ERROR] Cannot prepare query %s: %s\n",
+			qid,
+			err.Error())
+		return nil, err
+	} else if db.tx != nil {
+		stmt = db.tx.Stmt(stmt)
+	}
+
+	var rows *sql.Rows
+
+EXEC_QUERY:
+	if rows, err = stmt.Query(item.ID); err != nil {
+		if worthARetry(err) {
+			waitForRetry()
+			goto EXEC_QUERY
+		}
+
+		return nil, err
+	}
+
+	defer rows.Close() // nolint: errcheck,gosec
+	var tags = make([]*model.Tag, 0, 16)
+
+	for rows.Next() {
+		var (
+			parent *int64
+			t      = new(model.Tag)
+		)
+
+		if err = rows.Scan(&t.ID, &parent, &t.Name); err != nil {
+			msg = fmt.Sprintf("Error scanning row for Feed: %s",
+				err.Error())
+			db.log.Printf("[ERROR] %s\n", msg)
+			return nil, errors.New(msg)
+		}
+
+		if parent != nil {
+			t.Parent = *parent
+		}
+
+		tags = append(tags, t)
+	}
+
+	return tags, nil
+} // func (db *Database) TagLinkGetByItem(item *model.Item) ([]*model.Tag, error)
+
+// TagLinkGetByTag loads all Items that have the given Tag attached to them.
+func (db *Database) TagLinkGetByTag(tag *model.Tag) ([]*model.Item, error) {
+	const qid query.ID = query.TagLinkGetByTag
+	var (
+		err  error
+		msg  string
+		stmt *sql.Stmt
+	)
+
+	if stmt, err = db.getQuery(qid); err != nil {
+		db.log.Printf("[ERROR] Cannot prepare query %s: %s\n",
+			qid,
+			err.Error())
+		return nil, err
+	} else if db.tx != nil {
+		stmt = db.tx.Stmt(stmt)
+	}
+
+	var rows *sql.Rows
+
+EXEC_QUERY:
+	if rows, err = stmt.Query(); err != nil {
+		if worthARetry(err) {
+			waitForRetry()
+			goto EXEC_QUERY
+		}
+
+		return nil, err
+	}
+
+	defer rows.Close() // nolint: errcheck,gosec
+	var items = make([]*model.Item, 0, 16)
+
+	for rows.Next() {
+		var (
+			rating, stamp int64
+			ustr          string
+			item          = new(model.Item)
+		)
+
+		if err = rows.Scan(&item.ID, &item.FeedID, &ustr, &stamp, &item.Headline, &item.Description, &rating); err != nil {
+			msg = fmt.Sprintf("Error scanning row for Item: %s",
+				err.Error())
+			db.log.Printf("[ERROR] %s\n", msg)
+			return nil, errors.New(msg)
+		}
+
+		item.Rating = int8(rating)
+		item.Timestamp = time.Unix(stamp, 0)
+		if item.URL, err = url.Parse(ustr); err != nil {
+			db.log.Printf("[ERROR] Invalid URL for Item %q (%d): %s\n\t%s\n",
+				item.Headline,
+				item.ID,
+				err.Error(),
+				ustr)
+			return nil, err
+		}
+
+		items = append(items, item)
+	}
+
+	return items, nil
+} // func (db *Database) TagLinkGetByTag(tag *model.Tag) ([]*model.Item, error)
