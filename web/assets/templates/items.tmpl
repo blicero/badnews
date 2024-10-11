@@ -1,6 +1,6 @@
 {{ define "items" }}
 {{/* Created on 30. 09. 2024 */}}
-{{/* Time-stamp: <2024-10-04 18:06:45 krylon> */}}
+{{/* Time-stamp: <2024-10-09 16:33:05 krylon> */}}
 <!DOCTYPE html>
 <html>
   {{ template "head" . }}
@@ -11,7 +11,6 @@
     <h2>Recent News</h2>
 
     <script>
-     var item_cnt = 0
      const max_cnt = {{ .MaxItems }}
      const feeds = {
        {{ range .Feeds }}
@@ -26,37 +25,6 @@
        },
        {{ end }}
      }
-     
-     function load_items(cnt) {
-       const url = `/ajax/items/${item_cnt}/${cnt}`
-
-       const req = $.get(url,
-                         {},
-                         (res) => {
-         if (res.status) {
-           const tbody = $('#items')[0]
-           tbody.innerHTML += res.payload.content
-           item_cnt += cnt
-
-           if (res.payload.count == cnt && item_cnt < max_cnt) {
-             console.log(`${item_cnt} Items already loaded, loading ${cnt} more items.`)
-             window.setTimeout(load_items, 200, cnt)
-           }
-
-           window.setTimeout(fix_links, 10)
-           window.setTimeout(scale_images, 50)
-         } else {
-           console.log(res.message)
-           alert(res.message)
-         }
-       },
-                         'json'
-                         )
-
-       req.fail(() => {
-         alert("Error loading items")
-       })
-     } // function load_items(cnt)
 
      $(document).ready(function() {
        console.log("Starting to load Items...")

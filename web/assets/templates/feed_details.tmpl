@@ -1,0 +1,74 @@
+{{ define "feed_details" }}
+{{/* Created on 09. 10. 2024 */}}
+{{/* Time-stamp: <2024-10-11 15:15:14 krylon> */}}
+<!DOCTYPE html>
+<html>
+  {{ template "head" . }}
+
+  <body>
+    {{ template "intro" . }}
+
+    <h2>{{ .Feed.Title }}</h2>
+
+    <table class="table table-striped">
+      <tr>
+        <th>URL</th>
+        <td><a href="{{ .Feed.URL }}">{{ .Feed.URL }}</a></td>
+      </tr>
+      <tr>
+        <th>Homepage</th>
+        <td><a href="{{ .Feed.Homepage }}">{{ .Feed.Homepage }}</a></td>
+      </tr>
+      <tr>
+        <th>Update Interval</th>
+        <td>{{ .Feed.UpdateInterval }}</td>
+      </tr>
+      <tr>
+        <th>Last Refresh</th>
+        <td>{{ fmt_time_minute .Feed.LastRefresh }}</td>
+      </tr>
+    </table>
+
+    <hr />
+
+    <h2>Recent Items</h2>
+
+    <script>
+     $(document).ready(() => {
+       const url = `/ajax/feed_items/{{ .Feed.ID }}`
+       const req = $.get(url,
+                         {},
+                         (res) => {
+         if (res.status) {
+           const tbody = $('#items')[0]
+           tbody.innerHTML = res.payload["items"]
+         } else {
+           const msg = `Error fetching items: ${res.Message}`
+           console.log(msg)
+           alert(msg)
+         }
+       },
+                         'json'
+                         )
+     })
+    </script>
+
+    <table class="table table-info table-striped">
+      <thead>
+        <tr>
+          <th>Time</th>
+          <th>Feed</th>
+          <th>Rating</th>
+          <th>Title</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody id="items">
+      </tbody>
+    </table>
+
+    {{ template "footer" . }}
+
+  </body>
+</html>
+{{ end }}

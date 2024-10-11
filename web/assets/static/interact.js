@@ -1,4 +1,4 @@
-// Time-stamp: <2024-10-08 14:51:58 krylon>
+// Time-stamp: <2024-10-09 16:32:40 krylon>
 // -*- mode: javascript; coding: utf-8; -*-
 // Copyright 2015-2020 Benjamin Walkenhorst <krylon@gmx.net>
 //
@@ -340,3 +340,36 @@ function unrate_item(id) {
                       },
                       'json')
 } // function unrate_item(id)
+
+var item_cnt = 0
+
+function load_items(cnt) {
+    const url = `/ajax/items/${item_cnt}/${cnt}`
+
+    const req = $.get(url,
+                      {},
+                      (res) => {
+                          if (res.status) {
+                              const tbody = $('#items')[0]
+                              tbody.innerHTML += res.payload.content
+                              item_cnt += cnt
+
+                              if (res.payload.count == cnt && item_cnt < max_cnt) {
+                                  console.log(`${item_cnt} Items already loaded, loading ${cnt} more items.`)
+                                  window.setTimeout(load_items, 200, cnt)
+                              }
+
+                              window.setTimeout(fix_links, 10)
+                              window.setTimeout(scale_images, 50)
+                          } else {
+                              console.log(res.message)
+                              alert(res.message)
+                          }
+                      },
+                      'json'
+                     )
+
+    req.fail(() => {
+        alert("Error loading items")
+    })
+} // function load_items(cnt)
