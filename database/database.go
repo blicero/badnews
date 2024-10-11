@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 19. 09. 2024 by Benjamin Walkenhorst
 // (c) 2024 Benjamin Walkenhorst
-// Time-stamp: <2024-10-09 15:56:50 krylon>
+// Time-stamp: <2024-10-11 15:21:18 krylon>
 
 // Package database provides persistence.
 package database
@@ -1359,7 +1359,7 @@ EXEC_QUERY:
 } // func (db *Database) ItemGetByID(id int64) (*model.Item, error)
 
 // ItemGetByFeed loads items from the given Feed.
-func (db *Database) ItemGetByFeed(f *model.Feed, limit, offset int64) ([]model.Item, error) {
+func (db *Database) ItemGetByFeed(f *model.Feed, limit, offset int64) ([]*model.Item, error) {
 	const qid query.ID = query.ItemGetByFeed
 	var (
 		err  error
@@ -1389,16 +1389,16 @@ EXEC_QUERY:
 	}
 
 	defer rows.Close() // nolint: errcheck,gosec
-	var items = make([]model.Item, 0, 16)
+	var items = make([]*model.Item, 0, 16)
 
 	for rows.Next() {
 		var (
 			timestamp int64
 			ustr      string
-			i         model.Item
+			i         = &model.Item{FeedID: f.ID}
 		)
 
-		if err = rows.Scan(&i.ID, &i.FeedID, &ustr, &timestamp, &i.Headline, &i.Description, &i.Rating); err != nil {
+		if err = rows.Scan(&i.ID, &ustr, &timestamp, &i.Headline, &i.Description, &i.Rating); err != nil {
 			msg = fmt.Sprintf("Error scanning row for Feed: %s",
 				err.Error())
 			db.log.Printf("[ERROR] %s\n", msg)
@@ -1415,7 +1415,7 @@ EXEC_QUERY:
 	}
 
 	return items, nil
-} // func (db *Database) ItemGetByFeed(f *model.Feed, limit, offset int64) ([]model.Item, error)
+} // func (db *Database) ItemGetByFeed(f *model.Feed, limit, offset int64) ([]*model.Item, error)
 
 // ItemGetRated loads all items that have been manually rated.
 func (db *Database) ItemGetRated() ([]model.Item, error) {
