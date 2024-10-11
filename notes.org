@@ -1,5 +1,5 @@
 # -*- mode: org; fill-column: 78; -*-
-# Time-stamp: <2024-10-08 21:41:51 krylon>
+# Time-stamp: <2024-10-11 15:31:31 krylon>
 #
 #+TAGS: internals(i) ui(u) bug(b) feature(f)
 #+TAGS: database(d) design(e), meditation(m)
@@ -12,25 +12,26 @@
   BadNews is an RSS reader
 ** Clock table
    #+BEGIN: clocktable :scope file :maxlevel 202 :emphasize t
-   #+CAPTION: Clock summary at [2024-10-08 Di 21:41]
+   #+CAPTION: Clock summary at [2024-10-11 Fr 15:31]
    | Headline                            | Time       |           |       |      |      |
    |-------------------------------------+------------+-----------+-------+------+------|
-   | *Total time*                        | *1d 12:26* |           |       |      |      |
+   | *Total time*                        | *1d 17:18* |           |       |      |      |
    |-------------------------------------+------------+-----------+-------+------+------|
-   | *BadNews*                           | *1d 12:26* |           |       |      |      |
-   | \_  /Features [1/2]/                |            | /8:33/    |       |      |      |
-   | \_    Rating and Tagging [1/2]      |            |           |  8:33 |      |      |
+   | *BadNews*                           | *1d 17:18* |           |       |      |      |
+   | \_  /Features [1/2]/                |            | /12:44/   |       |      |      |
+   | \_    Rating and Tagging [1/2]      |            |           | 12:44 |      |      |
    | \_      Rating [1/1]                |            |           |       | 6:30 |      |
    | \_        Caching results           |            |           |       |      | 0:27 |
-   | \_      Tags [0/0]                  |            |           |       | 2:02 |      |
-   | \_  /Components [4/4]/              |            | /1d 3:53/ |       |      |      |
+   | \_      Tags [0/0]                  |            |           |       | 6:13 |      |
+   | \_  /Components [4/4]/              |            | /1d 4:34/ |       |      |      |
    | \_    Data model [0/0]              |            |           |  0:27 |      |      |
    | \_    Database [1/1]                |            |           |  8:30 |      |      |
    | \_      Queries respect transaction |            |           |       | 0:03 |      |
    | \_    Feed catcher / parser [0/0]   |            |           |  5:41 |      |      |
    | \_      Testing                     |            |           |       | 2:16 |      |
-   | \_    Web Interface [3/3]           |            |           | 13:15 |      |      |
-   | \_      Appearances matter [3/3]    |            |           |       | 3:43 |      |
+   | \_    Web Interface [4/4]           |            |           | 13:56 |      |      |
+   | \_      Appearances matter [4/4]    |            |           |       | 4:24 |      |
+   | \_        Feed Details              |            |           |       |      | 0:41 |
    | \_        Images                    |            |           |       |      | 0:12 |
    | \_        Hide long descriptions    |            |           |       |      | 0:20 |
    | \_        Fix Links                 |            |           |       |      | 0:03 |
@@ -82,6 +83,7 @@
      :VISIBILITY: children
      :END:
      :LOGBOOK:
+     CLOCK: [2024-10-09 Mi 15:34]--[2024-10-09 Mi 19:45] =>  4:11
      CLOCK: [2024-10-08 Di 18:14]--[2024-10-08 Di 19:41] =>  1:27
      CLOCK: [2024-10-08 Di 14:56]--[2024-10-08 Di 15:31] =>  0:35
      :END:
@@ -139,7 +141,7 @@
      :LOGBOOK:
      CLOCK: [2024-09-26 Do 17:56]--[2024-09-26 Do 20:12] =>  2:16
      :END:
-*** Web Interface [3/3]
+*** Web Interface [4/4]
     :PROPERTIES:
     :COOKIE_DATA: todo recursive
     :VISIBILITY: children
@@ -152,7 +154,7 @@
     CLOCK: [2024-09-29 So 16:10]--[2024-09-29 So 16:30] =>  0:20
     :END:
     For an RSS reader, a web interface is the obvious approach, isn't it?
-**** Appearances matter [3/3]
+**** Appearances matter [4/4]
      :PROPERTIES:
      :COOKIE_DATA: todo recursive
      :VISIBILITY: children
@@ -160,6 +162,12 @@
      :LOGBOOK:
      CLOCK: [2024-10-01 Di 19:39]--[2024-10-01 Di 22:47] =>  3:08
      :END:
+***** DONE Feed Details
+     CLOSED: [2024-10-11 Fr 15:30]
+     :LOGBOOK:
+     CLOCK: [2024-10-11 Fr 14:49]--[2024-10-11 Fr 15:30] =>  0:41
+     :END:
+     
 ***** DONE Images
       CLOSED: [2024-10-02 Mi 18:14]
       :LOGBOOK:
