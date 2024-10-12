@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 19. 09. 2024 by Benjamin Walkenhorst
 // (c) 2024 Benjamin Walkenhorst
-// Time-stamp: <2024-10-09 16:01:29 krylon>
+// Time-stamp: <2024-10-12 16:23:38 krylon>
 
 package database
 
@@ -154,6 +154,21 @@ SELECT
     name
 FROM tag
 ORDER BY COALESCE(parent, 0), id
+`,
+	query.TagGetItemCnt: `
+WITH cnt_list (tag_id, cnt) AS (
+    SELECT
+        tag_id,
+        COUNT(tag_id)
+    FROM tag_link
+    GROUP BY tag_id
+)
+
+SELECT
+  t.id,
+  COALESCE(c.cnt, 0)
+FROM tag t
+LEFT OUTER JOIN cnt_list c ON t.id = c.tag_id
 `,
 	query.TagRename:    "UPDATE tag SET name = ? WHERE id = ?",
 	query.TagSetParent: "UPDATE tag SET parent = ? WHERE id = ?",

@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 19. 09. 2024 by Benjamin Walkenhorst
 // (c) 2024 Benjamin Walkenhorst
-// Time-stamp: <2024-10-11 15:21:18 krylon>
+// Time-stamp: <2024-10-12 16:51:03 krylon>
 
 // Package database provides persistence.
 package database
@@ -1868,6 +1868,58 @@ EXEC_QUERY:
 
 	return tags, nil
 } // func (db *Database) TagGetAll() ([]*model.Tag, error)
+
+// TagGetItemCnt returns a map of all Tag IDs and the number of Items that have
+// the Tag linked.
+func (db *Database) TagGetItemCnt() (map[int64]int64, error) {
+	const qid query.ID = query.TagGetItemCnt
+	var (
+		err  error
+		msg  string
+		stmt *sql.Stmt
+	)
+
+	if stmt, err = db.getQuery(qid); err != nil {
+		db.log.Printf("[ERROR] Cannot prepare query %s: %s\n",
+			qid,
+			err.Error())
+		return nil, err
+	} else if db.tx != nil {
+		stmt = db.tx.Stmt(stmt)
+	}
+
+	var rows *sql.Rows
+
+EXEC_QUERY:
+	if rows, err = stmt.Query(); err != nil {
+		if worthARetry(err) {
+			waitForRetry()
+			goto EXEC_QUERY
+		}
+
+		return nil, err
+	}
+
+	defer rows.Close() // nolint: errcheck,gosec
+	var tags = make(map[int64]int64, 16)
+
+	for rows.Next() {
+		var (
+			id, cnt int64
+		)
+
+		if err = rows.Scan(&id, &cnt); err != nil {
+			msg = fmt.Sprintf("Error scanning row for Feed: %s",
+				err.Error())
+			db.log.Printf("[ERROR] %s\n", msg)
+			return nil, errors.New(msg)
+		}
+
+		tags[id] = cnt
+	}
+
+	return tags, nil
+} // func (db *Database) TagGetItemCnt() (map[int64]int64, error)
 
 // TagRename changes a Tag's name.
 func (db *Database) TagRename(t *model.Tag, name string) error {

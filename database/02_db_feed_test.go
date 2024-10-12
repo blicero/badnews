@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 20. 09. 2024 by Benjamin Walkenhorst
 // (c) 2024 Benjamin Walkenhorst
-// Time-stamp: <2024-09-21 20:50:20 krylon>
+// Time-stamp: <2024-10-12 18:31:33 krylon>
 
 package database
 
@@ -19,8 +19,6 @@ func TestDBFeedAdd(t *testing.T) {
 	if db == nil {
 		t.SkipNow()
 	}
-
-	const feedCnt = 32
 
 	type testCase struct {
 		f           model.Feed
@@ -149,14 +147,3 @@ func TestDBFeedUpdateRefresh(t *testing.T) {
 			len(pending))
 	}
 } // func TestDBFeedUpdateRefresh(t *testing.T)
-
-// Helpers
-
-func feedEqual(f1, f2 *model.Feed) bool {
-	return f1.ID == f2.ID &&
-		f1.Title == f2.Title &&
-		f1.URL.String() == f2.URL.String() &&
-		f1.Homepage.String() == f2.Homepage.String() &&
-		f1.UpdateInterval == f2.UpdateInterval &&
-		f1.Active == f2.Active
-} // func feedEqual(f1, f2 *model.Feed) bool

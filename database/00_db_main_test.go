@@ -2,12 +2,13 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 20. 09. 2024 by Benjamin Walkenhorst
 // (c) 2024 Benjamin Walkenhorst
-// Time-stamp: <2024-09-21 20:49:44 krylon>
+// Time-stamp: <2024-10-12 19:49:37 krylon>
 
 package database
 
 import (
 	"fmt"
+	"net/url"
 	"os"
 	"testing"
 	"time"
@@ -16,16 +17,24 @@ import (
 	"github.com/blicero/badnews/model"
 )
 
+const (
+	feedCnt = 32
+	itemCnt = 32
+	tagCnt  = 16
+)
+
 var (
 	db    *Database
 	feeds []model.Feed
+	items []*model.Item
+	tags  []*model.Tag
 )
 
 func TestMain(m *testing.M) {
 	var (
 		err     error
 		result  int
-		baseDir = time.Now().Format("/tmp/scrollmaster_logreader_test_20060102_150405")
+		baseDir = time.Now().Format("/tmp/badnews_db_test_20060102_150405")
 	)
 
 	if err = common.SetBaseDir(baseDir); err != nil {
@@ -47,3 +56,27 @@ func TestMain(m *testing.M) {
 
 	os.Exit(result)
 } // func TestMain(m *testing.M)
+
+// Helpers
+
+func feedEqual(f1, f2 *model.Feed) bool {
+	return f1.ID == f2.ID &&
+		f1.Title == f2.Title &&
+		f1.URL.String() == f2.URL.String() &&
+		f1.Homepage.String() == f2.Homepage.String() &&
+		f1.UpdateInterval == f2.UpdateInterval &&
+		f1.Active == f2.Active
+} // func feedEqual(f1, f2 *model.Feed) bool
+
+func purl(ustr string) *url.URL {
+	var (
+		err error
+		u   *url.URL
+	)
+
+	if u, err = url.Parse(ustr); err != nil {
+		panic(u)
+	}
+
+	return u
+} // func purl(ustr string) *url.URL
