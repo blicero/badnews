@@ -1,11 +1,12 @@
 {{ define "item_view" }}
 {{/* Created on 01. 10. 2024 */}}
-{{/* Time-stamp: <2024-10-07 13:47:31 krylon> */}}
+{{/* Time-stamp: <2024-10-11 18:28:43 krylon> */}}
 {{ $feeds := .Feeds }}
 {{ range $id, $item := .Items }}
 <tr>
   <td>{{ fmt_time_minute $item.Timestamp }}</td>
   <td><a href="/feed/{{ $item.FeedID }}">{{ (index $feeds $item.FeedID).Title }}</a></td>
+  <td><a href="{{ $item.URL }}">{{ $item.Headline }}</a></td>
   <td id="item_rating_{{ $item.ID }}"> {{/* Rating */}}
     {{ if (eq $item.Rating 0) }}
     {{ if (ne $item.Guessed 0) }}
@@ -32,7 +33,7 @@
     <img src="/static/face-glasses.png" onclick="unrate_item({{ $item.ID }});" />
     {{ end }}
   </td>
-  <td><a href="{{ $item.URL }}">{{ $item.Headline }}</a></td>
+  <td></td>
   <td>
     {{ if gt (len .Description) 500 }}
     <button class="btn btn-primary"

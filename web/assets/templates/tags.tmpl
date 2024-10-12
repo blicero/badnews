@@ -1,0 +1,49 @@
+{{ define "tags" }}
+{{/* Created on 11. 10. 2024 */}}
+{{/* Time-stamp: <2024-10-12 21:22:31 krylon> */}}
+<!DOCTYPE html>
+<html>
+  {{ template "head" . }}
+
+  <body>
+    {{ template "intro" . }}
+
+    <h2>Tags</h2>
+
+    <script>
+     $(document).ready(() => {
+       const url = `/ajax/tag/all`
+       const req = $.get(url,
+                         {},
+                         (res) => {
+         if (res.status) {
+         } else {
+           const msg = `Error fetching Tags: ${res.message}`
+           console.log(msg)
+           alert(msg)
+         }
+       },
+                         'json')
+     })
+    </script>
+
+    <div id="tag_details">
+    </div>
+
+    <table class="table table-secondary table-striped">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Name</th>
+          <th># Items</th>
+          <th>&nbsp;</th>
+        </tr>
+      </thead>
+      <tbody id="tag_view">
+      </tbody>
+    </table>
+
+    {{ template "footer" . }}
+  </body>
+</html>
+{{ end }}

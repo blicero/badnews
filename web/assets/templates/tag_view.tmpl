@@ -1,0 +1,12 @@
+{{ define "tag_view" }}
+{{/* Created on 12. 10. 2024 */}}
+{{/* Time-stamp: <2024-10-12 21:15:03 krylon> */}}
+{{ $item_cnt := .ItemCnt }}
+{{ range $idx, $tag := .Tags }}
+<tr>
+  <td>{{ $tag.ID }}</td>
+  <td>{{ $tag.Name }}</td>
+  <td>{{ index $item_cnt $tag.ID }}</td>
+</tr>
+{{ end }}
+{{ end }}

@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 28. 09. 2024 by Benjamin Walkenhorst
 // (c) 2024 Benjamin Walkenhorst
-// Time-stamp: <2024-10-11 15:27:37 krylon>
+// Time-stamp: <2024-10-12 21:21:24 krylon>
 
 // Package web provides the web interface.
 package web
@@ -172,6 +172,7 @@ func Create(addr string) (*Server, error) {
 	srv.router.HandleFunc("/{page:(?:index|main|start)?$}", srv.handleMain)
 	srv.router.HandleFunc("/items/{cnt:(?:\\d+)}", srv.handleItemPage)
 	srv.router.HandleFunc("/feed/{id:(?:\\d+$)}", srv.handleFeedDetails)
+	srv.router.HandleFunc("/tags/all", srv.handleTagAll)
 
 	// AJAX Handlers
 	srv.router.HandleFunc("/ajax/beacon", srv.handleBeacon)
@@ -180,6 +181,7 @@ func Create(addr string) (*Server, error) {
 	srv.router.HandleFunc("/ajax/feed_items/{id:(?:\\d+)$}", srv.handleAjaxItemsByFeed)
 	srv.router.HandleFunc("/ajax/item_rate", srv.handleAjaxRateItem)
 	srv.router.HandleFunc("/ajax/item_unrate/{id:(?:\\d+)$}", srv.handleAjaxUnrateItem)
+	srv.router.HandleFunc("/ajax/tag/all", srv.handleAjaxTagView)
 
 	return srv, nil
 } // func Create(addr string) (*Server, error)
@@ -500,6 +502,58 @@ func (srv *Server) handleFeedDetails(w http.ResponseWriter, r *http.Request) {
 		srv.sendErrorMessage(w, msg)
 	}
 } // func (srv *Server) handleFeedDetails(w http.ResponseWriter, r *http.Request)
+
+func (srv *Server) handleTagAll(w http.ResponseWriter, r *http.Request) {
+	const tmplName = "tags"
+	srv.log.Printf("[TRACE] Handle request for %s from %s\n",
+		r.URL.EscapedPath(),
+		r.RemoteAddr)
+	var (
+		err  error
+		msg  string
+		tmpl *template.Template
+		sess *sessions.Session
+		data = tmplDataBase{
+			Title: "Items",
+			Debug: true,
+			URL:   r.URL.EscapedPath(),
+		}
+	)
+
+	// db = srv.pool.Get()
+	// defer srv.pool.Put(db)
+
+	if sess, err = srv.store.Get(r, sessionNameFrontend); err != nil {
+		msg = fmt.Sprintf("Error getting client session from session store: %s",
+			err.Error())
+		srv.log.Println("[CRITICAL] " + msg)
+		srv.sendErrorMessage(w, msg)
+		return
+	} else if tmpl = srv.tmpl.Lookup(tmplName); tmpl == nil {
+		msg = fmt.Sprintf("Could not find template %q", tmplName)
+		srv.log.Println("[CRITICAL] " + msg)
+		srv.sendErrorMessage(w, msg)
+		return
+	}
+
+	if err = sess.Save(r, w); err != nil {
+		srv.log.Printf("[ERROR] Failed to set session cookie: %s\n",
+			err.Error())
+	}
+	w.Header().Set("Cache-Control", "no-store, max-age=0")
+	w.Header().Set("Content-Type", "text/html")
+	w.WriteHeader(200)
+	if err = tmpl.Execute(w, &data); err != nil {
+		msg = fmt.Sprintf("Error rendering template %q: %s",
+			tmplName,
+			err.Error())
+		srv.sendErrorMessage(w, msg)
+	}
+} // func (srv *Server) handleTagAll(w http.ResponseWriter, r *http.Request)
+
+// func (srv *Server) handleTagDetails(w http.ResponseWriter, r *http.Request) {
+// 	const tmplName = "
+// } // func (srv *handleTagDetails(w http.ResponseWriter, r *http.Request)
 
 ////////////////////////////////////////////////////////////////////////////////
 //// Ajax handlers /////////////////////////////////////////////////////////////
@@ -1122,3 +1176,72 @@ SEND_RESPONSE:
 		srv.log.Println("[ERROR] " + msg)
 	}
 } // func (srv *Server) handleAjaxUnrateItem(w http.ResponseWriter, r *http.Request)
+
+func (srv *Server) handleAjaxTagView(w http.ResponseWriter, r *http.Request) {
+	const tmplName = "tag_view"
+	srv.log.Printf("[TRACE] Handle request for %s from %s\n",
+		r.URL.EscapedPath(),
+		r.RemoteAddr)
+	var (
+		err     error
+		sess    *sessions.Session
+		rbuf    []byte
+		db      *database.Database
+		res     = Reply{Payload: make(map[string]string, 2)}
+		msg     string
+		tmpl    *template.Template
+		hstatus = 200
+		data    = tmplDataTagAll{
+			tmplDataBase: tmplDataBase{
+				Title: "All Tags",
+				Debug: common.Debug,
+				URL:   r.URL.EscapedPath(),
+			},
+		}
+	)
+
+	db = srv.pool.Get()
+	defer srv.pool.Put(db)
+
+	if data.Tags, err = db.TagGetAll(); err != nil {
+		msg = fmt.Sprintf("Failed to load all Tags: %s", err.Error())
+		srv.log.Println("[CRITICAL] " + msg)
+		srv.sendErrorMessage(w, msg)
+		goto SEND_RESPONSE
+	} else if data.ItemCnt, err = db.TagGetItemCnt(); err != nil {
+		msg = fmt.Sprintf("Failed to get Item counts for Tags: %s",
+			err.Error())
+		srv.log.Println("[CRITICAL] " + msg)
+		srv.sendErrorMessage(w, msg)
+		goto SEND_RESPONSE
+	} else if tmpl = srv.tmpl.Lookup(tmplName); tmpl == nil {
+		msg = fmt.Sprintf("Failed to lookup template %s",
+			tmplName)
+		srv.log.Println("[CRITICAL] " + msg)
+		srv.sendErrorMessage(w, msg)
+		goto SEND_RESPONSE
+	}
+
+SEND_RESPONSE:
+	if sess != nil {
+		if err = sess.Save(r, w); err != nil {
+			srv.log.Printf("[ERROR] Failed to set session cookie: %s\n",
+				err.Error())
+		}
+	}
+	res.Timestamp = time.Now()
+	if rbuf, err = json.Marshal(&res); err != nil {
+		srv.log.Printf("[ERROR] Error serializing response: %s\n",
+			err.Error())
+		rbuf = errJSON(err.Error())
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Cache-Control", "no-store, max-age=0")
+	w.WriteHeader(hstatus)
+	if _, err = w.Write(rbuf); err != nil {
+		msg = fmt.Sprintf("Failed to send result: %s",
+			err.Error())
+		srv.log.Println("[ERROR] " + msg)
+	}
+} // func (srv *Server) handleAjaxTagView(w http.ResponseWriter, r *http.Request)
