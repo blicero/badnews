@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 19. 09. 2024 by Benjamin Walkenhorst
 // (c) 2024 Benjamin Walkenhorst
-// Time-stamp: <2024-10-12 16:23:38 krylon>
+// Time-stamp: <2024-10-13 20:05:57 krylon>
 
 package database
 
@@ -172,6 +172,7 @@ LEFT OUTER JOIN cnt_list c ON t.id = c.tag_id
 `,
 	query.TagRename:    "UPDATE tag SET name = ? WHERE id = ?",
 	query.TagSetParent: "UPDATE tag SET parent = ? WHERE id = ?",
+	query.TagUpdate:    "UPDATE tag SET name = ?, parent = ? WHERE id = ?",
 	query.TagDelete:    "DELETE FROM tag WHERE id = ?",
 	query.TagLinkAdd: `
 INSERT INTO tag_link (tag_id, item_id)

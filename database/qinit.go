@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 19. 09. 2024 by Benjamin Walkenhorst
 // (c) 2024 Benjamin Walkenhorst
-// Time-stamp: <2024-10-08 18:55:26 krylon>
+// Time-stamp: <2024-10-13 20:06:14 krylon>
 
 package database
 
@@ -48,7 +48,8 @@ CREATE TABLE tag (
        ON UPDATE RESTRICT
        ON DELETE CASCADE,
     UNIQUE (name, parent),
-    CHECK (name <> '')
+    CHECK (name <> ''),
+    CHECK (parent <> id)
 ) STRICT`,
 	"CREATE INDEX tag_parent_idx ON tag (parent)",
 

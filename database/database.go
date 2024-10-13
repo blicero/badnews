@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 19. 09. 2024 by Benjamin Walkenhorst
 // (c) 2024 Benjamin Walkenhorst
-// Time-stamp: <2024-10-12 16:51:03 krylon>
+// Time-stamp: <2024-10-13 20:09:22 krylon>
 
 // Package database provides persistence.
 package database
@@ -1991,6 +1991,151 @@ EXEC_QUERY:
 	status = true
 	return nil
 } // func (db *Database) TagRename(t *model.Tag, name string) error
+
+// TagSetParent updates a Tag's parent ID.
+func (db *Database) TagSetParent(t *model.Tag, parent int64) error {
+	const qid query.ID = query.TagSetParent
+	var (
+		err    error
+		msg    string
+		stmt   *sql.Stmt
+		tx     *sql.Tx
+		status bool
+	)
+
+	if stmt, err = db.getQuery(qid); err != nil {
+		db.log.Printf("[ERROR] Cannot prepare query %s: %s\n",
+			qid,
+			err.Error())
+		return err
+	} else if db.tx != nil {
+		tx = db.tx
+	} else {
+		// db.log.Printf("[INFO] Start ad-hoc transaction for adding Feed %s\n",
+		// 	f.Title)
+	BEGIN_AD_HOC:
+		if tx, err = db.db.Begin(); err != nil {
+			if worthARetry(err) {
+				waitForRetry()
+				goto BEGIN_AD_HOC
+			} else {
+				msg = fmt.Sprintf("Error starting transaction: %s\n",
+					err.Error())
+				db.log.Printf("[ERROR] %s\n", msg)
+				return errors.New(msg)
+			}
+
+		} else {
+			defer func() {
+				var err2 error
+				if status {
+					if err2 = tx.Commit(); err2 != nil {
+						db.log.Printf("[ERROR] Failed to commit ad-hoc transaction: %s\n",
+							err2.Error())
+					}
+				} else if err2 = tx.Rollback(); err2 != nil {
+					db.log.Printf("[ERROR] Rollback of ad-hoc transaction failed: %s\n",
+						err2.Error())
+				}
+			}()
+		}
+	}
+
+	stmt = tx.Stmt(stmt)
+
+EXEC_QUERY:
+	if _, err = stmt.Exec(parent, t.ID); err != nil {
+		if worthARetry(err) {
+			waitForRetry()
+			goto EXEC_QUERY
+		} else {
+			err = fmt.Errorf("Cannot update parent of Tag %s (%d) to %d: %s",
+				t.Name,
+				t.ID,
+				parent,
+				err.Error())
+			db.log.Printf("[ERROR] %s\n", err.Error())
+			return err
+		}
+	}
+
+	t.Parent = parent
+	status = true
+	return nil
+} // func (db *Database) TagSetParent(t *model.Tag, parent int64) error
+
+// TagUpdate updates a Tag's name and parent at once.
+func (db *Database) TagUpdate(t *model.Tag, name string, parent int64) error {
+	const qid query.ID = query.TagUpdate
+	var (
+		err    error
+		msg    string
+		stmt   *sql.Stmt
+		tx     *sql.Tx
+		status bool
+	)
+
+	if stmt, err = db.getQuery(qid); err != nil {
+		db.log.Printf("[ERROR] Cannot prepare query %s: %s\n",
+			qid,
+			err.Error())
+		return err
+	} else if db.tx != nil {
+		tx = db.tx
+	} else {
+		// db.log.Printf("[INFO] Start ad-hoc transaction for adding Feed %s\n",
+		// 	f.Title)
+	BEGIN_AD_HOC:
+		if tx, err = db.db.Begin(); err != nil {
+			if worthARetry(err) {
+				waitForRetry()
+				goto BEGIN_AD_HOC
+			} else {
+				msg = fmt.Sprintf("Error starting transaction: %s\n",
+					err.Error())
+				db.log.Printf("[ERROR] %s\n", msg)
+				return errors.New(msg)
+			}
+
+		} else {
+			defer func() {
+				var err2 error
+				if status {
+					if err2 = tx.Commit(); err2 != nil {
+						db.log.Printf("[ERROR] Failed to commit ad-hoc transaction: %s\n",
+							err2.Error())
+					}
+				} else if err2 = tx.Rollback(); err2 != nil {
+					db.log.Printf("[ERROR] Rollback of ad-hoc transaction failed: %s\n",
+						err2.Error())
+				}
+			}()
+		}
+	}
+
+	stmt = tx.Stmt(stmt)
+
+EXEC_QUERY:
+	if _, err = stmt.Exec(name, parent, t.ID); err != nil {
+		if worthARetry(err) {
+			waitForRetry()
+			goto EXEC_QUERY
+		} else {
+			err = fmt.Errorf("Cannot update parent of Tag %s (%d) to %d: %s",
+				t.Name,
+				t.ID,
+				parent,
+				err.Error())
+			db.log.Printf("[ERROR] %s\n", err.Error())
+			return err
+		}
+	}
+
+	t.Name = name
+	t.Parent = parent
+	status = true
+	return nil
+} // func (db *Database) TagUpdate(t *model.Tag, name string, parent int64) error
 
 // TagDelete removes a Tag from the database.
 func (db *Database) TagDelete(t *model.Tag) error {
