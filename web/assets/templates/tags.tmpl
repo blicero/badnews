@@ -1,6 +1,6 @@
 {{ define "tags" }}
 {{/* Created on 11. 10. 2024 */}}
-{{/* Time-stamp: <2024-10-12 21:22:31 krylon> */}}
+{{/* Time-stamp: <2024-10-13 14:48:56 krylon> */}}
 <!DOCTYPE html>
 <html>
   {{ template "head" . }}
@@ -28,7 +28,10 @@
     </script>
 
     <div id="tag_details">
+      {{ template "tag_form" . }}
     </div>
+
+    <hr />
 
     <table class="table table-secondary table-striped">
       <thead>

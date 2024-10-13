@@ -1,26 +1,61 @@
 {{ define "tag_form" }}
 {{/* Created on 11. 10. 2024 */}}
-{{/* Time-stamp: <2024-10-12 16:04:23 krylon> */}}
+{{/* Time-stamp: <2024-10-13 18:59:35 krylon> */}}
 <form id="tag_form">
+  <script>
+   function reset_form() {
+     const name = $("#tag_name")[0]
+     name.value = ""
+
+     const parent = $("#tag_parent")[0]
+     parent.value = "" // ???
+
+     const id = $("#tag_id")[0]
+     id.value = ""
+   } // function reset_form()
+
+   function submit_tag() {
+     const name = $("#tag_name")[0].value
+     const parent = $("#tag_parent")[0].value
+     const id = $("#tag_id")[0].value
+     const url = `/ajax/tag/submit`
+
+     const req = $.post(
+       url,
+       {
+         "name": name,
+         "parent": parent,
+         "id": id,
+       },
+       (res) => {
+       },
+       'json'
+     )
+   } // function submit_tag()
+  </script>
   <table class="horizontal">
     <tr>
       <th>Name</th>
-      <td><input id="tag_name" type="text" /></td>
+      <td><input id="tag_name" type="text" />{{ .Tag.Name }}</td>
     </tr>
     <tr>
       <th>Parent</th>
       <td>
         <select id="tag_parent">
+          {{ $tag := .Tag }}
           {{ range .Tags }}
-          <option value="{{ .ID }}">{{ .Name }}</option>
+          <option value="{{ .ID }}"
+                  {{ if (eq .ID $tag.ID) }}selected{{ end }}>
+            {{ .Name }}
+          </option>
           {{ end }}
         </select>
         <input type="hidden" name="id" id="tag_id" value="{{ .Tag.ID }}"/>
       </td>
     </tr>
     <tr>
-      <td><input type="reset" />Cancel</td>
-      <td><input type="button" onclick="submit_tag();" /></td>
+      <td><input type="button" onclick="reset_form();" />Cancel</td>
+      <td><input type="button" onclick="submit_tag();" />Submit</td>
     </tr>
   </table>
 </form>

@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 06. 05. 2020 by Benjamin Walkenhorst
 // (c) 2020 Benjamin Walkenhorst
-// Time-stamp: <2024-10-12 21:15:24 krylon>
+// Time-stamp: <2024-10-13 14:48:43 krylon>
 //
 // This file contains data structures to be passed to HTML templates.
 
@@ -84,6 +84,7 @@ type tmplDataTagAll struct {
 	tmplDataBase
 	Tags    []*model.Tag
 	ItemCnt map[int64]int64
+	Tag     model.Tag
 }
 
 // Local Variables:  //
