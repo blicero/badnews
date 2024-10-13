@@ -1,5 +1,5 @@
 # -*- mode: org; fill-column: 78; -*-
-# Time-stamp: <2024-10-12 21:01:13 krylon>
+# Time-stamp: <2024-10-13 20:15:23 krylon>
 #
 #+TAGS: internals(i) ui(u) bug(b) feature(f)
 #+TAGS: database(d) design(e), meditation(m)
@@ -12,21 +12,21 @@
   BadNews is an RSS reader
 ** Clock table
    #+BEGIN: clocktable :scope file :maxlevel 202 :emphasize t
-   #+CAPTION: Clock summary at [2024-10-12 Sa 21:01]
+   #+CAPTION: Clock summary at [2024-10-13 So 20:15]
    | Headline                            | Time      |           |       |       |      |
    |-------------------------------------+-----------+-----------+-------+-------+------|
-   | *Total time*                        | *2d 0:08* |           |       |       |      |
+   | *Total time*                        | *2d 5:43* |           |       |       |      |
    |-------------------------------------+-----------+-----------+-------+-------+------|
-   | *BadNews*                           | *2d 0:08* |           |       |       |      |
-   | \_  /Features [1/2]/                |           | /16:43/   |       |       |      |
-   | \_    Rating and Tagging [1/2]      |           |           | 16:43 |       |      |
+   | *BadNews*                           | *2d 5:43* |           |       |       |      |
+   | \_  /Features [1/2]/                |           | /22:07/   |       |       |      |
+   | \_    Rating and Tagging [1/2]      |           |           | 22:07 |       |      |
    | \_      Rating [1/1]                |           |           |       |  6:30 |      |
    | \_        Caching results           |           |           |       |       | 0:27 |
-   | \_      Tags [0/0]                  |           |           |       | 10:12 |      |
-   | \_  /Components [4/4]/              |           | /1d 7:25/ |       |       |      |
+   | \_      Tags [0/0]                  |           |           |       | 15:36 |      |
+   | \_  /Components [4/4]/              |           | /1d 7:36/ |       |       |      |
    | \_    Data model [0/0]              |           |           |  0:27 |       |      |
-   | \_    Database [1/1]                |           |           | 11:21 |       |      |
-   | \_      Testing [0/0]               |           |           |       |  2:51 |      |
+   | \_    Database [1/1]                |           |           | 11:32 |       |      |
+   | \_      Testing [0/0]               |           |           |       |  3:02 |      |
    | \_      Queries respect transaction |           |           |       |  0:03 |      |
    | \_    Feed catcher / parser [0/0]   |           |           |  5:41 |       |      |
    | \_      Testing                     |           |           |       |  2:16 |      |
@@ -84,6 +84,8 @@
      :VISIBILITY: children
      :END:
      :LOGBOOK:
+     CLOCK: [2024-10-13 So 18:47]--[2024-10-13 So 20:15] =>  1:28
+     CLOCK: [2024-10-13 So 14:40]--[2024-10-13 So 18:36] =>  3:56
      CLOCK: [2024-10-12 Sa 15:52]--[2024-10-12 Sa 18:10] =>  2:18
      CLOCK: [2024-10-11 Fr 21:30]--[2024-10-11 Fr 22:45] =>  1:15
      CLOCK: [2024-10-11 Fr 18:25]--[2024-10-11 Fr 18:51] =>  0:26
@@ -122,6 +124,7 @@
     :END:
 **** Testing [0/0]
      :LOGBOOK:
+     CLOCK: [2024-10-13 So 18:36]--[2024-10-13 So 18:47] =>  0:11
      CLOCK: [2024-10-12 Sa 18:10]--[2024-10-12 Sa 21:01] =>  2:51
      :END:
 **** DONE [#A] Queries respect transaction                              :bug:
