@@ -1,6 +1,6 @@
 {{ define "tag_form" }}
 {{/* Created on 11. 10. 2024 */}}
-{{/* Time-stamp: <2024-10-13 18:59:35 krylon> */}}
+{{/* Time-stamp: <2024-10-14 15:50:58 krylon> */}}
 <form id="tag_form">
   <script>
    function reset_form() {
@@ -28,6 +28,13 @@
          "id": id,
        },
        (res) => {
+         if (res.status) {
+           $("#tag_details")[0].innerHTML = res.payload.content
+         } else {
+           const msg = `Error updating/creating tag: ${res.message}`
+           console.log(msg)
+           alert(msg)
+         }
        },
        'json'
      )
@@ -43,6 +50,7 @@
       <td>
         <select id="tag_parent">
           {{ $tag := .Tag }}
+          <option value="0">--</option>
           {{ range .Tags }}
           <option value="{{ .ID }}"
                   {{ if (eq .ID $tag.ID) }}selected{{ end }}>
@@ -54,8 +62,12 @@
       </td>
     </tr>
     <tr>
-      <td><input type="button" onclick="reset_form();" />Cancel</td>
-      <td><input type="button" onclick="submit_tag();" />Submit</td>
+      <td></td>
+      <td>
+        <input type="button" onclick="reset_form();" value="Cancel" />
+        &nbsp;
+        <input type="button" onclick="submit_tag();" value="Submit" />
+      </td>
     </tr>
   </table>
 </form>

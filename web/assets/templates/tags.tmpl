@@ -1,6 +1,6 @@
 {{ define "tags" }}
 {{/* Created on 11. 10. 2024 */}}
-{{/* Time-stamp: <2024-10-13 14:48:56 krylon> */}}
+{{/* Time-stamp: <2024-10-14 15:41:06 krylon> */}}
 <!DOCTYPE html>
 <html>
   {{ template "head" . }}
@@ -17,6 +17,7 @@
                          {},
                          (res) => {
          if (res.status) {
+           $("#tag_view")[0].innerHTML = res.payload.content
          } else {
            const msg = `Error fetching Tags: ${res.message}`
            console.log(msg)
