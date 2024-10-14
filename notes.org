@@ -1,5 +1,5 @@
 # -*- mode: org; fill-column: 78; -*-
-# Time-stamp: <2024-10-13 20:15:23 krylon>
+# Time-stamp: <2024-10-14 16:05:34 krylon>
 #
 #+TAGS: internals(i) ui(u) bug(b) feature(f)
 #+TAGS: database(d) design(e), meditation(m)
@@ -12,17 +12,17 @@
   BadNews is an RSS reader
 ** Clock table
    #+BEGIN: clocktable :scope file :maxlevel 202 :emphasize t
-   #+CAPTION: Clock summary at [2024-10-13 So 20:15]
+   #+CAPTION: Clock summary at [2024-10-14 Mo 16:05]
    | Headline                            | Time      |           |       |       |      |
    |-------------------------------------+-----------+-----------+-------+-------+------|
-   | *Total time*                        | *2d 5:43* |           |       |       |      |
+   | *Total time*                        | *2d 7:18* |           |       |       |      |
    |-------------------------------------+-----------+-----------+-------+-------+------|
-   | *BadNews*                           | *2d 5:43* |           |       |       |      |
-   | \_  /Features [1/2]/                |           | /22:07/   |       |       |      |
-   | \_    Rating and Tagging [1/2]      |           |           | 22:07 |       |      |
+   | *BadNews*                           | *2d 7:18* |           |       |       |      |
+   | \_  /Features [1/2]/                |           | /23:42/   |       |       |      |
+   | \_    Rating and Tagging [1/2]      |           |           | 23:42 |       |      |
    | \_      Rating [1/1]                |           |           |       |  6:30 |      |
    | \_        Caching results           |           |           |       |       | 0:27 |
-   | \_      Tags [0/0]                  |           |           |       | 15:36 |      |
+   | \_      Tags [0/0]                  |           |           |       | 17:11 |      |
    | \_  /Components [4/4]/              |           | /1d 7:36/ |       |       |      |
    | \_    Data model [0/0]              |           |           |  0:27 |       |      |
    | \_    Database [1/1]                |           |           | 11:32 |       |      |
@@ -84,6 +84,7 @@
      :VISIBILITY: children
      :END:
      :LOGBOOK:
+     CLOCK: [2024-10-14 Mo 14:30]--[2024-10-14 Mo 16:05] =>  1:35
      CLOCK: [2024-10-13 So 18:47]--[2024-10-13 So 20:15] =>  1:28
      CLOCK: [2024-10-13 So 14:40]--[2024-10-13 So 18:36] =>  3:56
      CLOCK: [2024-10-12 Sa 15:52]--[2024-10-12 Sa 18:10] =>  2:18
