@@ -1,5 +1,5 @@
 # -*- mode: org; fill-column: 78; -*-
-# Time-stamp: <2024-10-14 16:05:34 krylon>
+# Time-stamp: <2024-10-16 17:49:09 krylon>
 #
 #+TAGS: internals(i) ui(u) bug(b) feature(f)
 #+TAGS: database(d) design(e), meditation(m)
@@ -12,20 +12,20 @@
   BadNews is an RSS reader
 ** Clock table
    #+BEGIN: clocktable :scope file :maxlevel 202 :emphasize t
-   #+CAPTION: Clock summary at [2024-10-14 Mo 16:05]
+   #+CAPTION: Clock summary at [2024-10-16 Mi 17:49]
    | Headline                            | Time      |           |       |       |      |
    |-------------------------------------+-----------+-----------+-------+-------+------|
-   | *Total time*                        | *2d 7:18* |           |       |       |      |
+   | *Total time*                        | *2d 8:03* |           |       |       |      |
    |-------------------------------------+-----------+-----------+-------+-------+------|
-   | *BadNews*                           | *2d 7:18* |           |       |       |      |
-   | \_  /Features [1/2]/                |           | /23:42/   |       |       |      |
-   | \_    Rating and Tagging [1/2]      |           |           | 23:42 |       |      |
+   | *BadNews*                           | *2d 8:03* |           |       |       |      |
+   | \_  /Features [1/4]/                |           | /23:42/   |       |       |      |
+   | \_    Rating and Tagging [1/4]      |           |           | 23:42 |       |      |
    | \_      Rating [1/1]                |           |           |       |  6:30 |      |
    | \_        Caching results           |           |           |       |       | 0:27 |
-   | \_      Tags [0/0]                  |           |           |       | 17:11 |      |
-   | \_  /Components [4/4]/              |           | /1d 7:36/ |       |       |      |
+   | \_      Tags [0/2]                  |           |           |       | 17:11 |      |
+   | \_  /Components [4/4]/              |           | /1d 8:21/ |       |       |      |
    | \_    Data model [0/0]              |           |           |  0:27 |       |      |
-   | \_    Database [1/1]                |           |           | 11:32 |       |      |
+   | \_    Database [1/1]                |           |           | 12:17 |       |      |
    | \_      Testing [0/0]               |           |           |       |  3:02 |      |
    | \_      Queries respect transaction |           |           |       |  0:03 |      |
    | \_    Feed catcher / parser [0/0]   |           |           |  5:41 |       |      |
@@ -39,12 +39,12 @@
    | \_      AJAX FTW [0/0]              |           |           |       |  3:02 |      |
    #+END:
 ** Journal
-** Features [1/2]
+** Features [1/4]
    :PROPERTIES:
    :COOKIE_DATA: todo recursive
    :VISIBILITY: children
    :END:
-*** Rating and Tagging [1/2]
+*** Rating and Tagging [1/4]
     :PROPERTIES:
     :COOKIE_DATA: todo recursive
     :VISIBILITY: children
@@ -78,7 +78,7 @@
       isn't it? -, but I could use something else, too, so I don't create an
       accidental bottleneck. LevelDB for example, which claims to be pretty
       fast.
-**** Tags [0/0]
+**** Tags [0/2]
      :PROPERTIES:
      :COOKIE_DATA: todo recursive
      :VISIBILITY: children
@@ -94,6 +94,8 @@
      CLOCK: [2024-10-08 Di 18:14]--[2024-10-08 Di 19:41] =>  1:27
      CLOCK: [2024-10-08 Di 14:56]--[2024-10-08 Di 15:31] =>  0:35
      :END:
+***** TODO Add newly created tags to tag_view
+***** TODO Order tags by hierarchy
 ** Components [4/4]
    :PROPERTIES:
    :COOKIE_DATA: todo recursive
@@ -113,6 +115,7 @@
     :VISIBILITY: children
     :END:
     :LOGBOOK:
+    CLOCK: [2024-10-15 Di 16:21]--[2024-10-15 Di 17:06] =>  0:45
     CLOCK: [2024-10-01 Di 18:27]--[2024-10-01 Di 18:35] =>  0:08
     CLOCK: [2024-09-24 Di 14:42]--[2024-09-24 Di 14:44] =>  0:02
     CLOCK: [2024-09-23 Mo 20:45]--[2024-09-23 Mo 21:37] =>  0:52
