@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 28. 09. 2024 by Benjamin Walkenhorst
 // (c) 2024 Benjamin Walkenhorst
-// Time-stamp: <2024-10-14 15:41:50 krylon>
+// Time-stamp: <2024-10-16 16:07:36 krylon>
 
 // Package web provides the web interface.
 package web
@@ -183,6 +183,7 @@ func Create(addr string) (*Server, error) {
 	srv.router.HandleFunc("/ajax/item_unrate/{id:(?:\\d+)$}", srv.handleAjaxUnrateItem)
 	srv.router.HandleFunc("/ajax/tag/all", srv.handleAjaxTagView)
 	srv.router.HandleFunc("/ajax/tag/submit", srv.handleAjaxTagSubmit)
+	srv.router.HandleFunc("/ajax/tag/details/{id:(?:\\d+)$}", srv.handleAjaxTagDetails)
 
 	return srv, nil
 } // func Create(addr string) (*Server, error)
@@ -1379,21 +1380,6 @@ func (srv *Server) handleAjaxTagSubmit(w http.ResponseWriter, r *http.Request) {
 	db = srv.pool.Get()
 	defer srv.pool.Put(db)
 
-	// if data.Tags, err = db.TagGetAll(); err != nil {
-	// 	res.Message = fmt.Sprintf("Failed to load all Tags: %s", err.Error())
-	// 	srv.log.Println("[CRITICAL] " + res.Message)
-	// 	srv.sendErrorMessage(w, res.Message)
-	// 	hstatus = 500
-	// 	goto SEND_RESPONSE
-	// } else if tag, err = db.TagGetByID(tagID); err != nil {
-	// 	res.Message = fmt.Sprintf("Failed to load Tag %d: %s",
-	// 		tagID,
-	// 		err.Error())
-	// 	srv.log.Printf("[CANTHAPPEN] %s\n", res.Message)
-	// 	hstatus = 500
-	// 	goto SEND_RESPONSE
-	// }
-
 	defer func() {
 		if res.Status {
 			db.Commit() // nolint: errcheck
@@ -1401,6 +1387,22 @@ func (srv *Server) handleAjaxTagSubmit(w http.ResponseWriter, r *http.Request) {
 			db.Rollback() // nolint: errcheck
 		}
 	}()
+
+	if data.Tags, err = db.TagGetAll(); err != nil {
+		res.Message = fmt.Sprintf("Failed to load all Tags: %s", err.Error())
+		srv.log.Println("[CRITICAL] " + res.Message)
+		srv.sendErrorMessage(w, res.Message)
+		hstatus = 500
+		goto SEND_RESPONSE
+	}
+	//else if tag, err = db.TagGetByID(tagID); err != nil {
+	// 	res.Message = fmt.Sprintf("Failed to load Tag %d: %s",
+	// 		tagID,
+	// 		err.Error())
+	// 	srv.log.Printf("[CANTHAPPEN] %s\n", res.Message)
+	// 	hstatus = 500
+	// 	goto SEND_RESPONSE
+	// }
 
 	// If the tag does not exist, we create it. If it does, we update it.
 	// You know, we could use an UPSERT for that, couldn't we?
@@ -1492,3 +1494,111 @@ SEND_RESPONSE:
 		srv.log.Println("[ERROR] " + msg)
 	}
 } // func (srv *Server) handleAjaxTagSubmit(w http.ResponseWriter, r *http.Request)
+
+// Ich Esel, ich sollte hier einfach das Formular neu rendern.
+func (srv *Server) handleAjaxTagDetails(w http.ResponseWriter, r *http.Request) {
+	srv.log.Printf("[TRACE] Handle request for %s from %s\n",
+		r.URL.EscapedPath(),
+		r.RemoteAddr)
+	const tmplName = "tag_form"
+	var (
+		err   error
+		sess  *sessions.Session
+		rbuf  []byte
+		tbuf  bytes.Buffer
+		tmpl  *template.Template
+		tag   *model.Tag
+		idstr string
+		id    int64
+		db    *database.Database
+		vars  map[string]string
+		data  = tmplDataTagForm{
+			tmplDataBase: tmplDataBase{
+				Debug: common.Debug,
+				URL:   r.URL.EscapedPath(),
+			},
+		}
+		res = Reply{
+			Payload: make(map[string]string, 2),
+		}
+		hstatus = 200
+	)
+
+	vars = mux.Vars(r)
+	idstr = vars["id"]
+
+	if id, err = strconv.ParseInt(idstr, 10, 64); err != nil {
+		res.Message = fmt.Sprintf("Cannot parse Tag ID %q: %s",
+			idstr,
+			err.Error())
+		srv.log.Printf("[ERROR] %s\n", res.Message)
+		hstatus = 400
+		goto SEND_RESPONSE
+	}
+
+	db = srv.pool.Get()
+	defer srv.pool.Put(db)
+
+	if sess, err = srv.store.Get(r, sessionNameFrontend); err != nil {
+		res.Message = fmt.Sprintf("Error getting client session from session store: %s",
+			err.Error())
+		srv.log.Println("[CRITICAL] " + res.Message)
+		srv.sendErrorMessage(w, res.Message)
+		return
+	} else if tag, err = db.TagGetByID(id); err != nil {
+		res.Message = fmt.Sprintf("Failed to load Tag %d: %s",
+			id,
+			err.Error())
+		srv.log.Println("[CRITICAL] " + res.Message)
+		srv.sendErrorMessage(w, res.Message)
+		goto SEND_RESPONSE
+	}
+
+	data.Tag = *tag
+
+	if data.Tags, err = db.TagGetAll(); err != nil {
+		res.Message = fmt.Sprintf("Failed to load all Tags: %s",
+			err.Error())
+		srv.log.Printf("[ERROR] %s\n", res.Message)
+		hstatus = 500
+		goto SEND_RESPONSE
+	} else if tmpl = srv.tmpl.Lookup(tmplName); tmpl == nil {
+		res.Message = fmt.Sprintf("Did not find template %q", tmplName)
+		srv.log.Printf("[ERROR] %s\n", res.Message)
+		hstatus = 500
+		goto SEND_RESPONSE
+	} else if err = tmpl.Execute(&tbuf, &data); err != nil {
+		res.Message = fmt.Sprintf("Failed to render template %q: %s",
+			tmplName,
+			err.Error())
+		srv.log.Printf("[ERROR] %s\n", res.Message)
+		hstatus = 500
+		goto SEND_RESPONSE
+	}
+
+	res.Payload["content"] = tbuf.String()
+	res.Status = true
+
+SEND_RESPONSE:
+	if sess != nil {
+		if err = sess.Save(r, w); err != nil {
+			srv.log.Printf("[ERROR] Failed to set session cookie: %s\n",
+				err.Error())
+		}
+	}
+	res.Timestamp = time.Now()
+	if rbuf, err = json.Marshal(&res); err != nil {
+		srv.log.Printf("[ERROR] Error serializing response: %s\n",
+			err.Error())
+		rbuf = errJSON(err.Error())
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Cache-Control", "no-store, max-age=0")
+	w.WriteHeader(hstatus)
+	if _, err = w.Write(rbuf); err != nil {
+		var msg = fmt.Sprintf("Failed to send result: %s",
+			err.Error())
+		srv.log.Println("[ERROR] " + msg)
+	}
+} // func (srv *Server) handleAjaxTagDetails(w http.ResponseWriter, r *http.Request)

@@ -1,6 +1,6 @@
 {{ define "tags" }}
 {{/* Created on 11. 10. 2024 */}}
-{{/* Time-stamp: <2024-10-14 15:41:06 krylon> */}}
+{{/* Time-stamp: <2024-10-16 15:55:32 krylon> */}}
 <!DOCTYPE html>
 <html>
   {{ template "head" . }}
@@ -26,6 +26,23 @@
        },
                          'json')
      })
+
+     function load_tag_details(id) {
+       const url = `/ajax/tag/details/${id}`
+       const req = $.get(
+         url,
+         {},
+         (res) => {
+           if (res.status) {
+             $("#tag_details")[0].innerHTML = res.payload.content
+           } else {
+             const msg = `Error fetching Tags: ${res.message}`
+             console.log(msg)
+             alert(msg)
+           }
+         },
+         'json')
+     } // function load_tag_details(id)
     </script>
 
     <div id="tag_details">

@@ -1,6 +1,6 @@
 {{ define "tag_form" }}
 {{/* Created on 11. 10. 2024 */}}
-{{/* Time-stamp: <2024-10-14 15:50:58 krylon> */}}
+{{/* Time-stamp: <2024-10-15 16:21:47 krylon> */}}
 <form id="tag_form">
   <script>
    function reset_form() {
@@ -43,7 +43,7 @@
   <table class="horizontal">
     <tr>
       <th>Name</th>
-      <td><input id="tag_name" type="text" />{{ .Tag.Name }}</td>
+      <td><input id="tag_name" type="text" value="{{ .Tag.Name }}" /></td>
     </tr>
     <tr>
       <th>Parent</th>
