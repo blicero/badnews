@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 19. 09. 2024 by Benjamin Walkenhorst
 // (c) 2024 Benjamin Walkenhorst
-// Time-stamp: <2024-10-08 14:58:42 krylon>
+// Time-stamp: <2024-10-17 22:05:48 krylon>
 
 // Package model provides the data types used across the application.
 package model
@@ -62,14 +62,15 @@ func (f *Feed) Clone() *Feed {
 
 // Item is a single news item
 type Item struct {
-	ID          int64
-	FeedID      int64
-	URL         *url.URL
-	Timestamp   time.Time
-	Headline    string
-	Description string
-	Rating      int8
-	Guessed     int8
+	ID          int64     `json:"id"`
+	FeedID      int64     `json:"feed_id"`
+	URL         *url.URL  `json:"url"`
+	Timestamp   time.Time `json:"timestamp"`
+	Headline    string    `json:"headline"`
+	Description string    `json:"description"`
+	Rating      int8      `json:"rating"`
+	Guessed     int8      `json:"guessed"`
+	Tags        []*Tag    `json:"tags"`
 	_idstr      string
 	_plain      string
 }
