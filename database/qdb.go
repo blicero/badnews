@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 19. 09. 2024 by Benjamin Walkenhorst
 // (c) 2024 Benjamin Walkenhorst
-// Time-stamp: <2024-10-13 20:05:57 krylon>
+// Time-stamp: <2024-10-17 16:12:33 krylon>
 
 package database
 
@@ -137,7 +137,7 @@ INSERT INTO tag (name, parent)
          VALUES (   ?,      ?)
 RETURNING id
 `,
-	query.TagGetByID: "SELECT parent, name FROM tag WHERE id = ?",
+	query.TagGetByID: "SELECT name, parent FROM tag WHERE id = ?",
 	// TODO Recursively fetch grandchildren etc.
 	query.TagGetChildren: `
 SELECT
