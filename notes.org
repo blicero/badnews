@@ -1,5 +1,5 @@
 # -*- mode: org; fill-column: 78; -*-
-# Time-stamp: <2024-10-17 16:47:41 krylon>
+# Time-stamp: <2024-10-17 23:30:43 krylon>
 #
 #+TAGS: internals(i) ui(u) bug(b) feature(f)
 #+TAGS: database(d) design(e), meditation(m)
@@ -12,40 +12,41 @@
   BadNews is an RSS reader
 ** Clock table
    #+BEGIN: clocktable :scope file :maxlevel 202 :emphasize t
-   #+CAPTION: Clock summary at [2024-10-17 Do 16:47]
-   | Headline                                     | Time      |           |         |       |      |
-   |----------------------------------------------+-----------+-----------+---------+-------+------|
-   | *Total time*                                 | *2d 9:23* |           |         |       |      |
-   |----------------------------------------------+-----------+-----------+---------+-------+------|
-   | *BadNews*                                    | *2d 9:23* |           |         |       |      |
-   | \_  /Features [2/4]/                         |           | /1d 1:02/ |         |       |      |
-   | \_    Rating and Tagging [2/4]               |           |           | 1d 1:02 |       |      |
-   | \_      Rating [1/1]                         |           |           |         |  6:30 |      |
-   | \_        Caching results                    |           |           |         |       | 0:27 |
-   | \_      Tags [1/2]                           |           |           |         | 18:31 |      |
-   | \_        Add newly created tags to tag_view |           |           |         |       | 1:20 |
-   | \_  /Components [4/4]/                       |           | /1d 8:21/ |         |       |      |
-   | \_    Data model [0/0]                       |           |           |    0:27 |       |      |
-   | \_    Database [1/1]                         |           |           |   12:17 |       |      |
-   | \_      Testing [0/0]                        |           |           |         |  3:02 |      |
-   | \_      Queries respect transaction          |           |           |         |  0:03 |      |
-   | \_    Feed catcher / parser [0/0]            |           |           |    5:41 |       |      |
-   | \_      Testing                              |           |           |         |  2:16 |      |
-   | \_    Web Interface [4/4]                    |           |           |   13:56 |       |      |
-   | \_      Appearances matter [4/4]             |           |           |         |  4:24 |      |
-   | \_        Feed Details                       |           |           |         |       | 0:41 |
-   | \_        Images                             |           |           |         |       | 0:12 |
-   | \_        Hide long descriptions             |           |           |         |       | 0:20 |
-   | \_        Fix Links                          |           |           |         |       | 0:03 |
-   | \_      AJAX FTW [0/0]                       |           |           |         |  3:02 |      |
+   #+CAPTION: Clock summary at [2024-10-17 Do 23:30]
+   | Headline                                     | Time       |           |         |       |      |
+   |----------------------------------------------+------------+-----------+---------+-------+------|
+   | *Total time*                                 | *2d 12:56* |           |         |       |      |
+   |----------------------------------------------+------------+-----------+---------+-------+------|
+   | *BadNews*                                    | *2d 12:56* |           |         |       |      |
+   | \_  /Features [2/5]/                         |            | /1d 4:35/ |         |       |      |
+   | \_    Rating and Tagging [2/5]               |            |           | 1d 4:35 |       |      |
+   | \_      Rating [1/1]                         |            |           |         |  6:30 |      |
+   | \_        Caching results                    |            |           |         |       | 0:27 |
+   | \_      Tags [1/3]                           |            |           |         | 22:04 |      |
+   | \_        Add newly created tags to tag_view |            |           |         |       | 1:20 |
+   | \_        Link Tags to Items [0/0]           |            |           |         |       | 3:33 |
+   | \_  /Components [4/4]/                       |            | /1d 8:21/ |         |       |      |
+   | \_    Data model [0/0]                       |            |           |    0:27 |       |      |
+   | \_    Database [1/1]                         |            |           |   12:17 |       |      |
+   | \_      Testing [0/0]                        |            |           |         |  3:02 |      |
+   | \_      Queries respect transaction          |            |           |         |  0:03 |      |
+   | \_    Feed catcher / parser [0/0]            |            |           |    5:41 |       |      |
+   | \_      Testing                              |            |           |         |  2:16 |      |
+   | \_    Web Interface [4/4]                    |            |           |   13:56 |       |      |
+   | \_      Appearances matter [4/4]             |            |           |         |  4:24 |      |
+   | \_        Feed Details                       |            |           |         |       | 0:41 |
+   | \_        Images                             |            |           |         |       | 0:12 |
+   | \_        Hide long descriptions             |            |           |         |       | 0:20 |
+   | \_        Fix Links                          |            |           |         |       | 0:03 |
+   | \_      AJAX FTW [0/0]                       |            |           |         |  3:02 |      |
    #+END:
 ** Journal
-** Features [2/4]
+** Features [2/5]
    :PROPERTIES:
    :COOKIE_DATA: todo recursive
    :VISIBILITY: children
    :END:
-*** Rating and Tagging [2/4]
+*** Rating and Tagging [2/5]
     :PROPERTIES:
     :COOKIE_DATA: todo recursive
     :VISIBILITY: children
@@ -79,7 +80,7 @@
       isn't it? -, but I could use something else, too, so I don't create an
       accidental bottleneck. LevelDB for example, which claims to be pretty
       fast.
-**** Tags [1/2]
+**** Tags [1/3]
      :PROPERTIES:
      :COOKIE_DATA: todo recursive
      :VISIBILITY: children
@@ -101,6 +102,15 @@
       CLOCK: [2024-10-17 Do 15:27]--[2024-10-17 Do 16:47] =>  1:20
       :END:
 ***** TODO Order tags by hierarchy
+***** TODO Link Tags to Items [0/0]
+      :PROPERTIES:
+      :COOKIE_DATA: todo recursive
+      :VISIBILITY: children
+      :END:
+      :LOGBOOK:
+      CLOCK: [2024-10-17 Do 21:57]--[2024-10-17 Do 23:30] =>  1:33
+      CLOCK: [2024-10-17 Do 17:52]--[2024-10-17 Do 19:52] =>  2:00
+      :END:
 ** Components [4/4]
    :PROPERTIES:
    :COOKIE_DATA: todo recursive
