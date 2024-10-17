@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 28. 09. 2024 by Benjamin Walkenhorst
 // (c) 2024 Benjamin Walkenhorst
-// Time-stamp: <2024-10-16 16:07:36 krylon>
+// Time-stamp: <2024-10-17 16:43:44 krylon>
 
 // Package web provides the web interface.
 package web
@@ -1318,10 +1318,11 @@ func (srv *Server) handleAjaxTagSubmit(w http.ResponseWriter, r *http.Request) {
 		rbuf                   []byte
 		tbuf                   bytes.Buffer
 		db                     *database.Database
-		res                    = Reply{Payload: make(map[string]string, 2)}
+		res                    = Reply{Payload: make(map[string]string, 3)}
 		msg, idstr, pstr, name string
 		tagID, parentID        int64
 		tag                    *model.Tag
+		itemCnt                map[int64]int64
 		tmpl                   *template.Template
 		hstatus                = 200
 		data                   = tmplDataTagForm{
@@ -1347,6 +1348,9 @@ func (srv *Server) handleAjaxTagSubmit(w http.ResponseWriter, r *http.Request) {
 
 	if pstr == "" {
 		pstr = "0"
+	}
+	if idstr == "" {
+		idstr = "0"
 	}
 
 	if sess, err = srv.store.Get(r, sessionNameFrontend); err != nil {
@@ -1395,14 +1399,6 @@ func (srv *Server) handleAjaxTagSubmit(w http.ResponseWriter, r *http.Request) {
 		hstatus = 500
 		goto SEND_RESPONSE
 	}
-	//else if tag, err = db.TagGetByID(tagID); err != nil {
-	// 	res.Message = fmt.Sprintf("Failed to load Tag %d: %s",
-	// 		tagID,
-	// 		err.Error())
-	// 	srv.log.Printf("[CANTHAPPEN] %s\n", res.Message)
-	// 	hstatus = 500
-	// 	goto SEND_RESPONSE
-	// }
 
 	// If the tag does not exist, we create it. If it does, we update it.
 	// You know, we could use an UPSERT for that, couldn't we?
@@ -1453,6 +1449,12 @@ func (srv *Server) handleAjaxTagSubmit(w http.ResponseWriter, r *http.Request) {
 		srv.log.Printf("[ERROR] %s\n", res.Message)
 		hstatus = 500
 		goto SEND_RESPONSE
+	} else if itemCnt, err = db.TagGetItemCnt(); err != nil {
+		res.Message = fmt.Sprintf("Failed to load Item Counts by Tag: %s",
+			err.Error())
+		srv.log.Printf("[ERROR] %s\n", res.Message)
+		hstatus = 500
+		goto SEND_RESPONSE
 	}
 
 	// Now render the updated form
@@ -1463,11 +1465,24 @@ func (srv *Server) handleAjaxTagSubmit(w http.ResponseWriter, r *http.Request) {
 		srv.log.Printf("[ERROR] %s\n", res.Message)
 		hstatus = 500
 		goto SEND_RESPONSE
+	} else if rbuf, err = json.Marshal(&data.Tag); err != nil {
+		res.Message = fmt.Sprintf("Failed to serialize Tag %s (%d): %s",
+			data.Tag.Name,
+			data.Tag.ID,
+			err.Error())
+		srv.log.Printf("[ERROR] %s\n", res.Message)
+		hstatus = 500
+		goto SEND_RESPONSE
 	}
 
-	res.Payload = map[string]string{
-		"content": tbuf.String(),
-	}
+	// res.Payload = map[string]string{
+	// 	"content": tbuf.String(),
+	// 	"tag":     string(rbuf),
+	// 	"cnt":     strconv.FormatInt(itemCnt[data.Tag.ID], 10),
+	// }
+	res.Payload["content"] = tbuf.String()
+	res.Payload["tag"] = string(rbuf)
+	res.Payload["cnt"] = strconv.FormatInt(itemCnt[data.Tag.ID], 10)
 
 	res.Status = true
 

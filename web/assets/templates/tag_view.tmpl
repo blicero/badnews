@@ -1,14 +1,15 @@
 {{ define "tag_view" }}
 {{/* Created on 12. 10. 2024 */}}
-{{/* Time-stamp: <2024-10-15 16:28:54 krylon> */}}
+{{/* Time-stamp: <2024-10-17 16:01:02 krylon> */}}
 {{ $item_cnt := .ItemCnt }}
 {{ range $idx, $tag := .Tags }}
-<tr>
+<tr id="tag_details_{{ $tag.ID }}">
   <td>{{ $tag.ID }}</td>
   <td>
     <h4 onclick="load_tag_details({{ $tag.ID }});">{{ $tag.Name }}</h4>
   </td>
   <td>{{ index $item_cnt $tag.ID }}</td>
+  <td>&nbsp;</td>
 </tr>
 {{ end }}
 {{ end }}

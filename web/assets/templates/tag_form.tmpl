@@ -1,6 +1,6 @@
 {{ define "tag_form" }}
 {{/* Created on 11. 10. 2024 */}}
-{{/* Time-stamp: <2024-10-15 16:21:47 krylon> */}}
+{{/* Time-stamp: <2024-10-17 16:44:27 krylon> */}}
 <form id="tag_form">
   <script>
    function reset_form() {
@@ -30,6 +30,10 @@
        (res) => {
          if (res.status) {
            $("#tag_details")[0].innerHTML = res.payload.content
+           const tag = JSON.parse(res.payload.tag)
+           const cnt = parseInt(res.payload.cnt)
+           render_tag_row(tag, cnt)
+           reset_form()
          } else {
            const msg = `Error updating/creating tag: ${res.message}`
            console.log(msg)
@@ -39,6 +43,24 @@
        'json'
      )
    } // function submit_tag()
+
+   function render_tag_row(tag, cnt) {
+     const row = `<td>${tag.id}</td>
+       <td>
+           <h4 onclick="load_tag_details(${tag.id});">${tag.name}</h4>
+       </td>
+       <td>${cnt}</td>
+       <td>&nbsp;</td>`
+     const rowid = `#tag_details_${tag.id}`
+     const tr = $(rowid)[0]
+
+     if (defined(tr)) {
+       tr.innerHTML = `<tr id="tag_details_${tag.id}">` + row + "</tr>"
+     } else {
+       const view = $('#tag_view')[0]
+       view.innerHTML += row
+     }
+   }
   </script>
   <table class="horizontal">
     <tr>
