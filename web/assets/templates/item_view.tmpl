@@ -1,9 +1,10 @@
 {{ define "item_view" }}
 {{/* Created on 01. 10. 2024 */}}
-{{/* Time-stamp: <2024-10-11 18:28:43 krylon> */}}
+{{/* Time-stamp: <2024-10-17 22:35:08 krylon> */}}
 {{ $feeds := .Feeds }}
+{{ $tags := .Tags }}
 {{ range $id, $item := .Items }}
-<tr>
+<tr id="tr_item_{{ $id }}">
   <td>{{ fmt_time_minute $item.Timestamp }}</td>
   <td><a href="/feed/{{ $item.FeedID }}">{{ (index $feeds $item.FeedID).Title }}</a></td>
   <td><a href="{{ $item.URL }}">{{ $item.Headline }}</a></td>
@@ -33,7 +34,19 @@
     <img src="/static/face-glasses.png" onclick="unrate_item({{ $item.ID }});" />
     {{ end }}
   </td>
-  <td></td>
+  <td>
+    <div id="item_tags_{{ $item.ID }}">
+      {{ range $item.Tags }}{{ .Name }} {{ end }}
+    </div>
+    <div id="item_tag_form_{{ $item.ID }}">
+      <select id="item_tag_sel_{{ $item.ID }}" class="btn btn-secondary">
+        {{ range $idx, $tag := $tags }}
+        <option value="{{ $tag.ID }}">{{ $tag.Name }}</option>
+        {{ end }}
+      </select>
+      <button onclick="add_tag({{ $item.ID }});">Add Tag</button>
+    </div>
+  </td>
   <td>
     {{ if gt (len .Description) 500 }}
     <button class="btn btn-primary"

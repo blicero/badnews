@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 28. 09. 2024 by Benjamin Walkenhorst
 // (c) 2024 Benjamin Walkenhorst
-// Time-stamp: <2024-10-17 16:43:44 krylon>
+// Time-stamp: <2024-10-17 22:00:07 krylon>
 
 // Package web provides the web interface.
 package web
@@ -714,6 +714,7 @@ func (srv *Server) handleAjaxItems(w http.ResponseWriter, r *http.Request) {
 		res         Reply
 		msg, rating string
 		feeds       []model.Feed
+		tags        []*model.Tag
 		vars        map[string]string
 		hstatus     = 200
 		data        = tmplDataItemView{
@@ -767,6 +768,12 @@ func (srv *Server) handleAjaxItems(w http.ResponseWriter, r *http.Request) {
 		srv.log.Printf("[CANTHAPPEN] %s\n", res.Message)
 		hstatus = 500
 		goto SEND_RESPONSE
+	} else if tags, err = db.TagGetAll(); err != nil {
+		res.Message = fmt.Sprintf("Failed to load all Tags: %s",
+			err.Error())
+		srv.log.Printf("[ERROR] %s\n", res.Message)
+		hstatus = 500
+		goto SEND_RESPONSE
 	} else if tmpl = srv.tmpl.Lookup(tmplName); tmpl == nil {
 		res.Message = fmt.Sprintf("Could not find template %q", tmplName)
 		srv.log.Printf("[CANTHAPPEN] %s\n", res.Message)
@@ -802,9 +809,14 @@ func (srv *Server) handleAjaxItems(w http.ResponseWriter, r *http.Request) {
 	}
 
 	data.Feeds = make(map[int64]model.Feed, len(feeds))
+	data.Tags = make(map[int64]*model.Tag, len(tags))
 
 	for _, f := range feeds {
 		data.Feeds[f.ID] = f
+	}
+
+	for _, t := range tags {
+		data.Tags[t.ID] = t
 	}
 
 	if err = tmpl.Execute(&buf, &data); err != nil {

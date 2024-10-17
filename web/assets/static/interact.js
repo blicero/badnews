@@ -1,4 +1,4 @@
-// Time-stamp: <2024-10-09 16:32:40 krylon>
+// Time-stamp: <2024-10-17 22:05:00 krylon>
 // -*- mode: javascript; coding: utf-8; -*-
 // Copyright 2015-2020 Benjamin Walkenhorst <krylon@gmx.net>
 //
@@ -373,3 +373,12 @@ function load_items(cnt) {
         alert("Error loading items")
     })
 } // function load_items(cnt)
+
+function add_tag(item_id) {
+    const sel_id = `#item_tag_sel_${item_id}`
+    const sel = $(sel_id)[0]
+    const tag_id = sel.value
+    const msg = `Add Tag ${tag_id} to Item ${item_id}`
+    console.log(msg)
+    alert(msg)
+} // function add_tag(item_id)

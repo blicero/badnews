@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 06. 05. 2020 by Benjamin Walkenhorst
 // (c) 2020 Benjamin Walkenhorst
-// Time-stamp: <2024-10-13 14:48:43 krylon>
+// Time-stamp: <2024-10-17 21:58:04 krylon>
 //
 // This file contains data structures to be passed to HTML templates.
 
@@ -65,6 +65,7 @@ type tmplDataItemView struct {
 	tmplDataBase
 	Feeds map[int64]model.Feed
 	Items []*model.Item
+	Tags  map[int64]*model.Tag
 }
 
 type tmplDataFeedDetails struct {
