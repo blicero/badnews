@@ -1,6 +1,6 @@
 {{ define "item_view" }}
 {{/* Created on 01. 10. 2024 */}}
-{{/* Time-stamp: <2024-10-17 22:35:08 krylon> */}}
+{{/* Time-stamp: <2024-10-18 22:18:05 krylon> */}}
 {{ $feeds := .Feeds }}
 {{ $tags := .Tags }}
 {{ range $id, $item := .Items }}
@@ -36,7 +36,9 @@
   </td>
   <td>
     <div id="item_tags_{{ $item.ID }}">
-      {{ range $item.Tags }}{{ .Name }} {{ end }}
+      {{ range $item.Tags }}
+      {{ .Name }}
+      {{ end }}
     </div>
     <div id="item_tag_form_{{ $item.ID }}">
       <select id="item_tag_sel_{{ $item.ID }}" class="btn btn-secondary">

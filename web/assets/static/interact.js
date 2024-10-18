@@ -1,4 +1,4 @@
-// Time-stamp: <2024-10-17 22:05:00 krylon>
+// Time-stamp: <2024-10-18 22:18:40 krylon>
 // -*- mode: javascript; coding: utf-8; -*-
 // Copyright 2015-2020 Benjamin Walkenhorst <krylon@gmx.net>
 //
@@ -382,3 +382,23 @@ function add_tag(item_id) {
     console.log(msg)
     alert(msg)
 } // function add_tag(item_id)
+
+// No sure if I really wand to go down that route...
+function render_tag_single(item, tag) {
+    return `<a href="/tags/${tag.id}">${tag.name}</a>
+&nbsp;
+<button onclick="remove_tag(${tag.id}, ${item.id});">
+<img src="/static/delete.png" />
+</button>`
+} // function render_single_tag(item, tag)
+
+function render_tags_for_item(item, tags) {
+    const rendered_tags = []
+
+    for (var t of tags) {
+        const r = render_tag_single(item, t)
+        rendered_tags.push(r)
+    }
+
+    return rendered_tags.join(" &nbsp; ")
+} // function render_tags_for_item(item, tags)

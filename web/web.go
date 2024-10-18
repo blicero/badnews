@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 28. 09. 2024 by Benjamin Walkenhorst
 // (c) 2024 Benjamin Walkenhorst
-// Time-stamp: <2024-10-17 22:00:07 krylon>
+// Time-stamp: <2024-10-18 23:18:37 krylon>
 
 // Package web provides the web interface.
 package web
@@ -184,6 +184,7 @@ func Create(addr string) (*Server, error) {
 	srv.router.HandleFunc("/ajax/tag/all", srv.handleAjaxTagView)
 	srv.router.HandleFunc("/ajax/tag/submit", srv.handleAjaxTagSubmit)
 	srv.router.HandleFunc("/ajax/tag/details/{id:(?:\\d+)$}", srv.handleAjaxTagDetails)
+	srv.router.HandleFunc("/ajax/tag/link/{tag:(?:\\d+)}/{item:(\\d+)}", srv.handleAjaxTagLinkAdd)
 
 	return srv, nil
 } // func Create(addr string) (*Server, error)
@@ -1629,3 +1630,122 @@ SEND_RESPONSE:
 		srv.log.Println("[ERROR] " + msg)
 	}
 } // func (srv *Server) handleAjaxTagDetails(w http.ResponseWriter, r *http.Request)
+
+func (srv *Server) handleAjaxTagLinkAdd(w http.ResponseWriter, r *http.Request) {
+	srv.log.Printf("[TRACE] Handle request for %s from %s\n",
+		r.URL.EscapedPath(),
+		r.RemoteAddr)
+	var (
+		err             error
+		sess            *sessions.Session
+		rbuf            []byte
+		tbuf            bytes.Buffer
+		tmpl            *template.Template
+		tag             *model.Tag
+		item            *model.Item
+		istr, tstr, msg string
+		tagID, itemID   int64
+		db              *database.Database
+		vars            map[string]string
+		data            = tmplDataTagForm{
+			tmplDataBase: tmplDataBase{
+				Debug: common.Debug,
+				URL:   r.URL.EscapedPath(),
+			},
+		}
+		res = Reply{
+			Payload: make(map[string]string, 2),
+		}
+		hstatus = 200
+	)
+
+	vars = mux.Vars(r)
+	istr = vars["item"]
+	tstr = vars["tag"]
+
+	if itemID, err = strconv.ParseInt(istr, 10, 64); err != nil {
+		res.Message = fmt.Sprintf("Cannot parse Item ID %q: %s",
+			istr,
+			err.Error())
+		srv.log.Printf("[CANTHAPPEN] %s\n", res.Message)
+		hstatus = 400
+		goto SEND_RESPONSE
+	} else if tagID, err = strconv.ParseInt(tstr, 10, 64); err != nil {
+		res.Message = fmt.Sprintf("Cannot parse Tag ID %q: %s",
+			tstr,
+			err.Error())
+		srv.log.Printf("[CANTHAPPEN] %s\n", res.Message)
+		hstatus = 400
+		goto SEND_RESPONSE
+	}
+
+	db = srv.pool.Get()
+	defer srv.pool.Put(db)
+
+	if sess, err = srv.store.Get(r, sessionNameFrontend); err != nil {
+		res.Message = fmt.Sprintf("Error getting client session from session store: %s",
+			err.Error())
+		srv.log.Println("[CRITICAL] " + res.Message)
+		srv.sendErrorMessage(w, res.Message)
+		return
+	} else if tag, err = db.TagGetByID(tagID); err != nil {
+		res.Message = fmt.Sprintf("Failed to load Tag %d: %s",
+			tagID,
+			err.Error())
+		srv.log.Println("[CRITICAL] " + res.Message)
+		srv.sendErrorMessage(w, res.Message)
+		goto SEND_RESPONSE
+	} else if tag == nil {
+		res.Message = fmt.Sprintf("Did not find Tag %d in database", tagID)
+		srv.log.Printf("[ERROR] %s\n", res.Message)
+		hstatus = 400
+		goto SEND_RESPONSE
+	} else if item, err = db.ItemGetByID(itemID); err != nil {
+		res.Message = fmt.Sprintf("Failed to load Item %d: %s",
+			itemID, err.Error())
+		srv.log.Printf("[ERROR] %s\n", res.Message)
+		hstatus = 500
+		goto SEND_RESPONSE
+	} else if item == nil {
+		res.Message = fmt.Sprintf("Did not find Item %d in database", itemID)
+		srv.log.Printf("[ERROR] %s\n", res.Message)
+		hstatus = 400
+		goto SEND_RESPONSE
+	} else if err = db.TagLinkAdd(item, tag); err != nil {
+		res.Message = fmt.Sprintf("Failed to attach Tag %s (%d) to Item %d: %s",
+			tag.Name,
+			tag.ID,
+			item.ID,
+			err.Error())
+		srv.log.Printf("[ERROR] %s\n", res.Message)
+		hstatus = 500
+		goto SEND_RESPONSE
+	}
+
+	// - Step 7: ???
+	// - Step 8: Profit!
+	res.Status = true
+
+SEND_RESPONSE:
+	if sess != nil {
+		if err = sess.Save(r, w); err != nil {
+			srv.log.Printf("[ERROR] Failed to set session cookie: %s\n",
+				err.Error())
+		}
+	}
+	res.Timestamp = time.Now()
+	if rbuf, err = json.Marshal(&res); err != nil {
+		srv.log.Printf("[ERROR] Error serializing response: %s\n",
+			err.Error())
+		rbuf = errJSON(err.Error())
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Cache-Control", "no-store, max-age=0")
+	w.WriteHeader(hstatus)
+	if _, err = w.Write(rbuf); err != nil {
+		msg = fmt.Sprintf("Failed to send result: %s",
+			err.Error())
+		srv.log.Println("[ERROR] " + msg)
+	}
+} // func (srv *Server) handleAjaxTagLinkAdd(w http.ResponseWriter, r *http.Request)
