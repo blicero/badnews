@@ -1,4 +1,4 @@
-// Time-stamp: <2024-10-18 22:18:40 krylon>
+// Time-stamp: <2024-10-19 20:31:36 krylon>
 // -*- mode: javascript; coding: utf-8; -*-
 // Copyright 2015-2020 Benjamin Walkenhorst <krylon@gmx.net>
 //
@@ -378,18 +378,34 @@ function add_tag(item_id) {
     const sel_id = `#item_tag_sel_${item_id}`
     const sel = $(sel_id)[0]
     const tag_id = sel.value
+    const url = `/ajax/tag/link/${tag_id}/${item_id}`
     const msg = `Add Tag ${tag_id} to Item ${item_id}`
     console.log(msg)
-    alert(msg)
+    // alert(msg)
+
+    const req = $.get(
+        url,
+        {},
+        (res) => {
+            if (res.status) {
+                const item = JSON.parse(res.payload.item)
+                const tag = JSON.parse(res.payload.tag)
+                const div_id = `#item_tags_${item_id}`
+                const div = $(div_id)[0]
+                // div.innerHTML += res.payload.tag.name + " "
+                const snippet = render_tag_single(item, tag)
+                div.innerHTML += snippet
+            }
+        },
+        'json'
+    )
 } // function add_tag(item_id)
 
 // No sure if I really wand to go down that route...
 function render_tag_single(item, tag) {
     return `<a href="/tags/${tag.id}">${tag.name}</a>
 &nbsp;
-<button onclick="remove_tag(${tag.id}, ${item.id});">
-<img src="/static/delete.png" />
-</button>`
+<img src="/static/delete.png" onclick="remove_tag(${tag.id}, ${item.id});" /> `
 } // function render_single_tag(item, tag)
 
 function render_tags_for_item(item, tags) {

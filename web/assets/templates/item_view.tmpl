@@ -1,6 +1,6 @@
 {{ define "item_view" }}
 {{/* Created on 01. 10. 2024 */}}
-{{/* Time-stamp: <2024-10-18 22:18:05 krylon> */}}
+{{/* Time-stamp: <2024-10-19 20:33:08 krylon> */}}
 {{ $feeds := .Feeds }}
 {{ $tags := .Tags }}
 {{ range $id, $item := .Items }}
@@ -37,7 +37,9 @@
   <td>
     <div id="item_tags_{{ $item.ID }}">
       {{ range $item.Tags }}
-      {{ .Name }}
+      <a href="/tags/{{ .ID }}">{{ .Name }}</a>
+      <img src="/static/delete.png"
+           onclick="remove_tag({{ .ID }}, {{ $item.ID }});" />
       {{ end }}
     </div>
     <div id="item_tag_form_{{ $item.ID }}">
@@ -46,7 +48,7 @@
         <option value="{{ $tag.ID }}">{{ $tag.Name }}</option>
         {{ end }}
       </select>
-      <button onclick="add_tag({{ $item.ID }});">Add Tag</button>
+      <button class="btn btn-success" onclick="add_tag({{ $item.ID }});">Add Tag</button>
     </div>
   </td>
   <td>

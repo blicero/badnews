@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 28. 09. 2024 by Benjamin Walkenhorst
 // (c) 2024 Benjamin Walkenhorst
-// Time-stamp: <2024-10-18 23:18:37 krylon>
+// Time-stamp: <2024-10-19 20:45:42 krylon>
 
 // Package web provides the web interface.
 package web
@@ -184,7 +184,7 @@ func Create(addr string) (*Server, error) {
 	srv.router.HandleFunc("/ajax/tag/all", srv.handleAjaxTagView)
 	srv.router.HandleFunc("/ajax/tag/submit", srv.handleAjaxTagSubmit)
 	srv.router.HandleFunc("/ajax/tag/details/{id:(?:\\d+)$}", srv.handleAjaxTagDetails)
-	srv.router.HandleFunc("/ajax/tag/link/{tag:(?:\\d+)}/{item:(\\d+)}", srv.handleAjaxTagLinkAdd)
+	srv.router.HandleFunc("/ajax/tag/link/{tag:(?:\\d+)}/{item:(?:\\d+)}", srv.handleAjaxTagLinkAdd)
 
 	return srv, nil
 } // func Create(addr string) (*Server, error)
@@ -783,7 +783,14 @@ func (srv *Server) handleAjaxItems(w http.ResponseWriter, r *http.Request) {
 	}
 
 	for _, i := range data.Items {
-		if i.EffectiveRating() == 0 {
+		if i.Tags, err = db.TagLinkGetByItem(i); err != nil {
+			res.Message = fmt.Sprintf("Failed to load linked tags for Item %d: %s",
+				i.ID,
+				err.Error())
+			srv.log.Printf("[ERROR] %s\n", res.Message)
+			hstatus = 500
+			goto SEND_RESPONSE
+		} else if i.EffectiveRating() == 0 {
 			srv.log.Printf("[TRACE] Using classifier to guess rating for item %q (%d)\n",
 				i.Headline,
 				i.ID)
@@ -1638,22 +1645,14 @@ func (srv *Server) handleAjaxTagLinkAdd(w http.ResponseWriter, r *http.Request) 
 	var (
 		err             error
 		sess            *sessions.Session
-		rbuf            []byte
-		tbuf            bytes.Buffer
-		tmpl            *template.Template
+		rbuf, pbuf      []byte
 		tag             *model.Tag
 		item            *model.Item
 		istr, tstr, msg string
 		tagID, itemID   int64
 		db              *database.Database
 		vars            map[string]string
-		data            = tmplDataTagForm{
-			tmplDataBase: tmplDataBase{
-				Debug: common.Debug,
-				URL:   r.URL.EscapedPath(),
-			},
-		}
-		res = Reply{
+		res             = Reply{
 			Payload: make(map[string]string, 2),
 		}
 		hstatus = 200
@@ -1722,8 +1721,29 @@ func (srv *Server) handleAjaxTagLinkAdd(w http.ResponseWriter, r *http.Request) 
 		goto SEND_RESPONSE
 	}
 
-	// - Step 7: ???
-	// - Step 8: Profit!
+	if pbuf, err = json.Marshal(tag); err != nil {
+		res.Message = fmt.Sprintf("Failed to serialize Tag %s (%d): %s",
+			tag.Name,
+			tag.ID,
+			err.Error())
+		srv.log.Printf("[ERROR] %s\n", res.Message)
+		hstatus = 500
+		goto SEND_RESPONSE
+	}
+
+	res.Payload["tag"] = string(pbuf)
+
+	if pbuf, err = json.Marshal(item); err != nil {
+		res.Message = fmt.Sprintf("Failed to serialize Item %d: %s",
+			item.ID,
+			err.Error())
+		srv.log.Printf("[ERROR] %s\n", res.Message)
+		hstatus = 500
+		goto SEND_RESPONSE
+	}
+
+	res.Payload["item"] = string(pbuf)
+
 	res.Status = true
 
 SEND_RESPONSE:
