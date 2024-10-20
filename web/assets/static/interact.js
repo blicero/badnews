@@ -1,4 +1,4 @@
-// Time-stamp: <2024-10-19 20:31:36 krylon>
+// Time-stamp: <2024-10-20 18:19:29 krylon>
 // -*- mode: javascript; coding: utf-8; -*-
 // Copyright 2015-2020 Benjamin Walkenhorst <krylon@gmx.net>
 //
@@ -403,9 +403,11 @@ function add_tag(item_id) {
 
 // No sure if I really wand to go down that route...
 function render_tag_single(item, tag) {
-    return `<a href="/tags/${tag.id}">${tag.name}</a>
+    return `<span id="tag_link_${item.id}_${tag.id}">
+<a href="/tags/${tag.id}">${tag.name}</a>
 &nbsp;
-<img src="/static/delete.png" onclick="remove_tag(${tag.id}, ${item.id});" /> `
+<img src="/static/delete.png" onclick="remove_tag(${tag.id}, ${item.id});" />
+</span> `
 } // function render_single_tag(item, tag)
 
 function render_tags_for_item(item, tags) {
@@ -418,3 +420,19 @@ function render_tags_for_item(item, tags) {
 
     return rendered_tags.join(" &nbsp; ")
 } // function render_tags_for_item(item, tags)
+
+function remove_tag(tag_id, item_id) {
+    const url = `/ajax/tag/unlink/${tag_id}/${item_id}`
+    $.get(
+        url,
+        {},
+        (res) => {
+            if (res.status) {
+                const span_id = `#tag_link_${item_id}_${tag_id}`
+                $(span_id).remove()
+            } else {
+                alert(res.message)
+            }
+        },
+        'json')
+} // function remove_tag(tag_id, item_id)
