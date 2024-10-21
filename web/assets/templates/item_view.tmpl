@@ -1,6 +1,6 @@
 {{ define "item_view" }}
 {{/* Created on 01. 10. 2024 */}}
-{{/* Time-stamp: <2024-10-20 17:52:49 krylon> */}}
+{{/* Time-stamp: <2024-10-21 17:40:14 krylon> */}}
 {{ $feeds := .Feeds }}
 {{ $tags := .Tags }}
 {{ range $id, $item := .Items }}
@@ -45,9 +45,15 @@
       {{ end }}
     </div>
     <div id="item_tag_form_{{ $item.ID }}">
+      {{ $id := concat "tag_menu_item_" (i64str $item.ID) }}
       <select id="item_tag_sel_{{ $item.ID }}" class="btn btn-secondary">
         {{ range $idx, $tag := $tags }}
-        <option value="{{ $tag.ID }}">{{ $tag.Name }}</option>
+        <option value="{{ $tag.ID }}"
+                id="{{ $id }}_opt_{{ $tag.ID }}"
+                {{ if ($item.HasTag $tag.ID) }}disabled="" {{ end }}
+                >
+          {{ nbsp (twice $tag.Level) }}{{ $tag.Name }}
+        </option>
         {{ end }}
       </select>
       <button class="btn btn-success" onclick="add_tag({{ $item.ID }});">Add Tag</button>

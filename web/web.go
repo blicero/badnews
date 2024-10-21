@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 28. 09. 2024 by Benjamin Walkenhorst
 // (c) 2024 Benjamin Walkenhorst
-// Time-stamp: <2024-10-20 18:14:27 krylon>
+// Time-stamp: <2024-10-21 17:35:03 krylon>
 
 // Package web provides the web interface.
 package web
@@ -770,7 +770,7 @@ func (srv *Server) handleAjaxItems(w http.ResponseWriter, r *http.Request) {
 		srv.log.Printf("[CANTHAPPEN] %s\n", res.Message)
 		hstatus = 500
 		goto SEND_RESPONSE
-	} else if tags, err = db.TagGetAll(); err != nil {
+	} else if tags, err = db.TagGetSorted(); err != nil {
 		res.Message = fmt.Sprintf("Failed to load all Tags: %s",
 			err.Error())
 		srv.log.Printf("[ERROR] %s\n", res.Message)

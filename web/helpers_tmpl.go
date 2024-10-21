@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 12. 12. 2018 by Benjamin Walkenhorst
 // (c) 2018 Benjamin Walkenhorst
-// Time-stamp: <2024-09-28 15:53:04 krylon>
+// Time-stamp: <2024-10-21 17:40:11 krylon>
 
 package web
 
@@ -57,6 +57,7 @@ var funcmap = template.FuncMap{
 	"intRange":         intRange,
 	"inc":              inc,
 	"dec":              dec,
+	"twice":            twice,
 }
 
 type generator struct {
@@ -258,14 +259,17 @@ func escapeLinebreak(str string) string {
 	return newline.ReplaceAllString(str, "\\n")
 } // func escapeLinebreak(str string) string
 
-func nbsp(cnt int) string {
+func nbsp(cnt int64) string {
 	const entity = "&nbsp;"
 
-	var bld strings.Builder
+	var (
+		bld strings.Builder
+		i   int64
+	)
 
-	bld.Grow(len(entity)*cnt + 2)
+	bld.Grow(len(entity)*int(cnt) + 2)
 
-	for i := 0; i < cnt; i++ {
+	for i = 0; i < cnt; i++ {
 		bld.WriteString(entity) // nolint: errcheck,gosec
 	}
 
@@ -320,3 +324,7 @@ func inc(n int64) int64 {
 func dec(n int64) int64 {
 	return n - 1
 } // func dec(n int64) int64
+
+func twice(n int64) int64 {
+	return n + n
+}
