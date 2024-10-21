@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 19. 09. 2024 by Benjamin Walkenhorst
 // (c) 2024 Benjamin Walkenhorst
-// Time-stamp: <2024-10-13 20:09:22 krylon>
+// Time-stamp: <2024-10-21 16:48:15 krylon>
 
 // Package database provides persistence.
 package database
@@ -1868,6 +1868,60 @@ EXEC_QUERY:
 
 	return tags, nil
 } // func (db *Database) TagGetAll() ([]*model.Tag, error)
+
+// TagGetSorted returns all Tags, sorted hierarchically.
+func (db *Database) TagGetSorted() ([]*model.Tag, error) {
+	const qid query.ID = query.TagGetSorted
+	var (
+		err  error
+		msg  string
+		stmt *sql.Stmt
+	)
+
+	if stmt, err = db.getQuery(qid); err != nil {
+		db.log.Printf("[ERROR] Cannot prepare query %s: %s\n",
+			qid,
+			err.Error())
+		return nil, err
+	} else if db.tx != nil {
+		stmt = db.tx.Stmt(stmt)
+	}
+
+	var rows *sql.Rows
+
+EXEC_QUERY:
+	if rows, err = stmt.Query(); err != nil {
+		if worthARetry(err) {
+			waitForRetry()
+			goto EXEC_QUERY
+		}
+
+		return nil, err
+	}
+
+	defer rows.Close() // nolint: errcheck,gosec
+	var tags = make([]*model.Tag, 0, 16)
+
+	for rows.Next() {
+		var (
+			parent *int64
+			t      = new(model.Tag)
+		)
+
+		if err = rows.Scan(&t.ID, &t.Name, &parent, &t.Level, &t.FullName); err != nil {
+			msg = fmt.Sprintf("Error scanning row for Feed: %s",
+				err.Error())
+			db.log.Printf("[ERROR] %s\n", msg)
+			return nil, errors.New(msg)
+		} else if parent != nil {
+			t.Parent = *parent
+		}
+
+		tags = append(tags, t)
+	}
+
+	return tags, nil
+} // func (db *Database) TagGetSorted() ([]*model.Tag, error)
 
 // TagGetItemCnt returns a map of all Tag IDs and the number of Items that have
 // the Tag linked.

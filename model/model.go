@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 19. 09. 2024 by Benjamin Walkenhorst
 // (c) 2024 Benjamin Walkenhorst
-// Time-stamp: <2024-10-17 22:05:48 krylon>
+// Time-stamp: <2024-10-21 16:48:08 krylon>
 
 // Package model provides the data types used across the application.
 package model
@@ -117,6 +117,17 @@ func (i *Item) Plaintext() string {
 	return i._plain
 } // func (i *Item) Plaintext() string
 
+// HasTag returns true if the Tag with the given id is found in the Item's list of Tags.
+func (i *Item) HasTag(id int64) bool {
+	for _, t := range i.Tags {
+		if t.ID == id {
+			return true
+		}
+	}
+
+	return false
+} // func (i *Item) HasTag(id int64) bool
+
 // Returns the ID as a string
 func (i *Item) IDString() string {
 	if i._idstr != "" {
@@ -130,7 +141,9 @@ func (i *Item) IDString() string {
 // Tag is a label that can be attached to an Item. A Tag can also have
 // a Parent Tag, which allows to organize them in a hierarchy.
 type Tag struct {
-	ID     int64  `json:"id"`
-	Parent int64  `json:"parent,omitempty"`
-	Name   string `json:"name"`
+	ID       int64  `json:"id"`
+	Parent   int64  `json:"parent,omitempty"`
+	Name     string `json:"name"`
+	Level    int64  `json:"level"`
+	FullName string `json:"full_name"`
 }

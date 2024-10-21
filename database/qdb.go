@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 19. 09. 2024 by Benjamin Walkenhorst
 // (c) 2024 Benjamin Walkenhorst
-// Time-stamp: <2024-10-17 16:12:33 krylon>
+// Time-stamp: <2024-10-21 16:32:39 krylon>
 
 package database
 
@@ -155,6 +155,37 @@ SELECT
 FROM tag
 ORDER BY COALESCE(parent, 0), id
 `,
+	query.TagGetSorted: `
+WITH RECURSIVE children(id, name, lvl, root, parent, full_name) AS (
+    SELECT
+        id,
+        name,
+        0 AS lvl,
+        id AS root,
+        COALESCE(parent, 0) AS parent,
+        name AS full_name
+    FROM tag WHERE parent IS NULL
+    UNION ALL
+    SELECT
+        tag.id,
+        tag.name,
+        lvl + 1 AS lvl,
+        children.root,
+        tag.parent,
+        full_name || '/' || tag.name AS full_name
+    FROM tag, children
+    WHERE tag.parent = children.id
+)
+
+SELECT
+        id,
+        name,
+        parent,
+        lvl,
+        full_name
+FROM children
+ORDER BY full_name
+`,
 	query.TagGetItemCnt: `
 WITH cnt_list (tag_id, cnt) AS (
     SELECT
@@ -204,11 +235,10 @@ WHERE tag_id = ?
 }
 
 /*
-WITH RECURSIVE children(id, name, description, lvl, root, parent, full_name) AS (
+WITH RECURSIVE children(id, name, lvl, root, parent, full_name) AS (
     SELECT
         id,
         name,
-        description,
         0 AS lvl,
         id AS root,
         COALESCE(parent, 0) AS parent,
@@ -218,7 +248,6 @@ WITH RECURSIVE children(id, name, description, lvl, root, parent, full_name) AS 
     SELECT
         tag.id,
         tag.name,
-        tag.description,
         lvl + 1 AS lvl,
         children.root,
         tag.parent,
@@ -230,7 +259,6 @@ WITH RECURSIVE children(id, name, description, lvl, root, parent, full_name) AS 
 SELECT
         id,
         name,
-        description,
         parent,
         lvl,
         full_name
