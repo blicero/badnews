@@ -1,5 +1,5 @@
 # -*- mode: org; fill-column: 78; -*-
-# Time-stamp: <2024-10-21 17:41:52 krylon>
+# Time-stamp: <2024-10-22 14:55:37 krylon>
 #
 #+TAGS: internals(i) ui(u) bug(b) feature(f)
 #+TAGS: database(d) design(e), meditation(m)
@@ -85,7 +85,7 @@
       isn't it? -, but I could use something else, too, so I don't create an
       accidental bottleneck. LevelDB for example, which claims to be pretty
       fast.
-**** Tags [5/5]
+**** Tags [5/6]
      :PROPERTIES:
      :COOKIE_DATA: todo recursive
      :VISIBILITY: children
@@ -101,6 +101,10 @@
      CLOCK: [2024-10-08 Di 18:14]--[2024-10-08 Di 19:41] =>  1:27
      CLOCK: [2024-10-08 Di 14:56]--[2024-10-08 Di 15:31] =>  0:35
      :END:
+***** TODO Recommend tags for Items
+      I had this feature on my previous ticker application, but I suspect it
+      is very, very slow. On this retry, I'd like have acceptable performance,
+      even if the app is running on a lowly Raspberry Pi Model 2.
 ***** DONE Add newly created tags to tag_view
       CLOSED: [2024-10-17 Do 16:47]
       :LOGBOOK:
