@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 18. 09. 2024 by Benjamin Walkenhorst
 // (c) 2024 Benjamin Walkenhorst
-// Time-stamp: <2024-10-20 18:23:51 krylon>
+// Time-stamp: <2024-10-22 17:13:09 krylon>
 
 package common
 
@@ -108,6 +108,11 @@ func Path(p path.Path) string {
 		return filepath.Join(
 			BaseDir,
 			"jcache.db")
+	case path.Advisor:
+		return filepath.Join(
+			BaseDir,
+			"advisor",
+		)
 	default:
 		panic(fmt.Sprintf("Invalid Path value: %s", p))
 	}
@@ -191,6 +196,11 @@ func InitApp() error {
 		return err
 	} else if err = os.Mkdir(Path(path.Judge), 0700); err != nil && !os.IsExist(err) {
 		fmt.Printf("Error creating Judge store %s: %s",
+			Path(path.Judge),
+			err.Error())
+		return err
+	} else if err = os.Mkdir(Path(path.Advisor), 0700); err != nil && !os.IsExist(err) {
+		fmt.Printf("Error creating Advisor cache %s: %s",
 			Path(path.Judge),
 			err.Error())
 		return err

@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 18. 09. 2024 by Benjamin Walkenhorst
 // (c) 2024 Benjamin Walkenhorst
-// Time-stamp: <2024-10-04 20:49:04 krylon>
+// Time-stamp: <2024-10-22 15:49:21 krylon>
 
 package logdomain
 
@@ -16,6 +16,7 @@ const (
 	Judge
 	Reader
 	Web
+	Advisor
 )
 
 func AllDomains() []ID {
@@ -25,5 +26,6 @@ func AllDomains() []ID {
 		Judge,
 		Reader,
 		Web,
+		Advisor,
 	}
 } // func AllDomains() []ID
