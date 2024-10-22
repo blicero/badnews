@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 19. 09. 2024 by Benjamin Walkenhorst
 // (c) 2024 Benjamin Walkenhorst
-// Time-stamp: <2024-10-21 16:32:39 krylon>
+// Time-stamp: <2024-10-22 14:54:04 krylon>
 
 package database
 
@@ -233,35 +233,3 @@ INNER JOIN item i ON l.item_id = i.id
 WHERE tag_id = ?
 `,
 }
-
-/*
-WITH RECURSIVE children(id, name, lvl, root, parent, full_name) AS (
-    SELECT
-        id,
-        name,
-        0 AS lvl,
-        id AS root,
-        COALESCE(parent, 0) AS parent,
-        name AS full_name
-    FROM tag WHERE parent IS NULL
-    UNION ALL
-    SELECT
-        tag.id,
-        tag.name,
-        lvl + 1 AS lvl,
-        children.root,
-        tag.parent,
-        full_name || '/' || tag.name AS full_name
-    FROM tag, children
-    WHERE tag.parent = children.id
-)
-
-SELECT
-        id,
-        name,
-        parent,
-        lvl,
-        full_name
-FROM children
-ORDER BY full_name;
-*/
