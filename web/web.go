@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 28. 09. 2024 by Benjamin Walkenhorst
 // (c) 2024 Benjamin Walkenhorst
-// Time-stamp: <2024-10-21 17:35:03 krylon>
+// Time-stamp: <2024-10-23 14:41:12 krylon>
 
 // Package web provides the web interface.
 package web
@@ -27,6 +27,7 @@ import (
 	"text/template"
 	"time"
 
+	"github.com/blicero/badnews/advisor"
 	"github.com/blicero/badnews/common"
 	"github.com/blicero/badnews/common/path"
 	"github.com/blicero/badnews/database"
@@ -62,6 +63,7 @@ type Server struct {
 	mimeTypes map[string]string
 	store     sessions.Store
 	judge     *judge.Judge
+	adv       *advisor.Advisor
 }
 
 // Create creates and returns a new Server.
@@ -120,6 +122,14 @@ func Create(addr string) (*Server, error) {
 		return nil, err
 	} else if err = srv.judge.Train(); err != nil {
 		srv.log.Printf("[CRITICAL] Failed to train classifier: %s\n",
+			err.Error())
+		return nil, err
+	} else if srv.adv, err = advisor.NewAdvisor(); err != nil {
+		srv.log.Printf("[CRITICAL] Failed to create Advisor: %s\n",
+			err.Error())
+		return nil, err
+	} else if err = srv.adv.Train(); err != nil {
+		srv.log.Printf("[CRITICAL] Failed to train Advisor: %s\n",
 			err.Error())
 		return nil, err
 	}

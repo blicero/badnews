@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 10. 03. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2024-10-22 17:19:30 krylon>
+// Time-stamp: <2024-10-23 14:40:24 krylon>
 
 // Package advisor provides suggestions on what Tags one might want to attach
 // to news Items.
@@ -136,7 +136,12 @@ func (adv *Advisor) Train() error {
 			s         shield.Shield
 		)
 
-		if len(item.Tags) == 0 {
+		if item.Tags, err = adv.db.TagLinkGetByItem(item); err != nil {
+			adv.log.Printf("[ERROR] Failed to load Tags for Item %d: %s\n",
+				item.ID,
+				err.Error())
+			return err
+		} else if len(item.Tags) == 0 {
 			continue
 		}
 
