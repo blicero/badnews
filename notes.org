@@ -1,5 +1,5 @@
 # -*- mode: org; fill-column: 78; -*-
-# Time-stamp: <2024-10-23 18:57:03 krylon>
+# Time-stamp: <2024-10-24 22:46:34 krylon>
 #
 #+TAGS: internals(i) ui(u) bug(b) feature(f)
 #+TAGS: database(d) design(e), meditation(m)
@@ -13,18 +13,18 @@
   BadNews is an RSS reader
 ** Clock table
    #+BEGIN: clocktable :scope file :maxlevel 202 :emphasize t
-   #+CAPTION: Clock summary at [2024-10-23 Mi 18:57]
+   #+CAPTION: Clock summary at [2024-10-24 Do 22:46]
    | Headline                                             | Time      |            |          |          |       |      |
    |------------------------------------------------------+-----------+------------+----------+----------+-------+------|
-   | *Total time*                                         | *3d 2:29* |            |          |          |       |      |
+   | *Total time*                                         | *3d 5:31* |            |          |          |       |      |
    |------------------------------------------------------+-----------+------------+----------+----------+-------+------|
-   | *BadNews*                                            | *3d 2:29* |            |          |          |       |      |
-   | \_  /Features [7/8]/                                 |           | /1d 16:49/ |          |          |       |      |
-   | \_    Rating and Tagging [7/8]                       |           |            | 1d 16:49 |          |       |      |
+   | *BadNews*                                            | *3d 5:31* |            |          |          |       |      |
+   | \_  /Features [7/8]/                                 |           | /1d 19:51/ |          |          |       |      |
+   | \_    Rating and Tagging [7/8]                       |           |            | 1d 19:51 |          |       |      |
    | \_      Rating [1/1]                                 |           |            |          |     6:30 |       |      |
    | \_        Caching results                            |           |            |          |          |  0:27 |      |
-   | \_      Tags [5/6]                                   |           |            |          | 1d 10:18 |       |      |
-   | \_        Recommend tags for Items                   |           |            |          |          |  1:26 |      |
+   | \_      Tags [5/6]                                   |           |            |          | 1d 13:20 |       |      |
+   | \_        Recommend tags for Items                   |           |            |          |          |  4:28 |      |
    | \_        Add newly created tags to tag_view         |           |            |          |          |  1:20 |      |
    | \_        Order tags by hierarchy                    |           |            |          |          |  1:10 |      |
    | \_        Link Tags to Items [2/2]                   |           |            |          |          | 13:11 |      |
@@ -105,6 +105,7 @@
      :END:
 ***** TODO Recommend tags for Items
       :LOGBOOK:
+      CLOCK: [2024-10-24 Do 19:44]--[2024-10-24 Do 22:46] =>  3:02
       CLOCK: [2024-10-23 Mi 13:24]--[2024-10-23 Mi 14:50] =>  1:26
       :END:
       I had this feature on my previous ticker application, but I suspect it
