@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 24. 09. 2024 by Benjamin Walkenhorst
 // (c) 2024 Benjamin Walkenhorst
-// Time-stamp: <2024-09-27 17:06:26 krylon>
+// Time-stamp: <2024-10-24 21:51:41 krylon>
 
 // Package reader implements the fetching and parsing of RSS/Atom feeds.
 package reader
@@ -184,8 +184,8 @@ func (r *Reader) process(f model.Feed) error {
 				err.Error())
 			continue
 		} else if exists {
-			r.log.Printf("[DEBUG] Item %q already exists in database.\n",
-				item.URL)
+			// r.log.Printf("[DEBUG] Item %q already exists in database.\n",
+			// 	item.URL)
 			continue
 		} else if err = db.ItemAdd(&item); err != nil {
 			r.log.Printf("[ERROR] Failed to add item %q (%s) to database: %s\n",
