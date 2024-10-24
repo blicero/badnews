@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 06. 05. 2020 by Benjamin Walkenhorst
 // (c) 2020 Benjamin Walkenhorst
-// Time-stamp: <2024-10-17 21:58:04 krylon>
+// Time-stamp: <2024-10-24 19:58:24 krylon>
 //
 // This file contains data structures to be passed to HTML templates.
 
@@ -13,6 +13,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/blicero/badnews/advisor"
 	"github.com/blicero/badnews/common"
 	"github.com/blicero/badnews/model"
 
@@ -56,26 +57,29 @@ type tmplDataIndex struct { // nolint: unused,deadcode
 
 type tmplDataItems struct {
 	tmplDataBase
-	ReqCnt   int64
-	MaxItems int64
-	Feeds    map[int64]model.Feed
+	ReqCnt      int64
+	MaxItems    int64
+	Feeds       map[int64]model.Feed
+	Suggestions map[int64][]advisor.SuggestedTag
 }
 
 type tmplDataItemView struct {
 	tmplDataBase
-	Feeds map[int64]model.Feed
-	Items []*model.Item
-	Tags  map[int64]*model.Tag
+	Feeds       map[int64]model.Feed
+	Items       []*model.Item
+	Tags        map[int64]*model.Tag
+	Suggestions map[int64][]advisor.SuggestedTag
 }
 
 type tmplDataFeedDetails struct {
 	tmplDataBase
-	Feed  *model.Feed
-	Feeds map[int64]model.Feed
-	Items []*model.Item
+	Feed        *model.Feed
+	Feeds       map[int64]model.Feed
+	Items       []*model.Item
+	Suggestions map[int64][]advisor.SuggestedTag
 }
 
-type tmplDataTagForm struct { // nolint: unused
+type tmplDataTagForm struct {
 	tmplDataBase
 	Tags []*model.Tag
 	Tag  model.Tag

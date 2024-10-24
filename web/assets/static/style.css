@@ -1,4 +1,4 @@
-/* Time-stamp: <2024-09-13 17:50:35 krylon> */
+/* Time-stamp: <2024-10-24 22:12:44 krylon> */
 
 body { 
     font-family: Arial,Helvetica,sans-serif;
@@ -36,7 +36,7 @@ h2 {
 }
 
 *.suggest {
-    font-family: Monospace;
+    font-family: Serif;
     font-size: smaller;
 }
 

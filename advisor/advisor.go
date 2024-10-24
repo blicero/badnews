@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 10. 03. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2024-10-23 14:40:24 krylon>
+// Time-stamp: <2024-10-24 19:55:45 krylon>
 
 // Package advisor provides suggestions on what Tags one might want to attach
 // to news Items.
@@ -222,10 +222,9 @@ func (s suggList) Swap(i, j int)      { s[i], s[j] = s[j], s[i] }
 func (s suggList) Less(i, j int) bool { return s[j].Score < s[i].Score }
 
 // Suggest returns a map Tags and how likely they apply to the given Item.
-func (adv *Advisor) Suggest(item *model.Item, n int) map[string]SuggestedTag {
+func (adv *Advisor) Suggest(item *model.Item, n int) []SuggestedTag {
 	var (
 		err        error
-		sugg       map[string]SuggestedTag
 		res        map[string]float64
 		lang, body string
 		s          shield.Shield
@@ -261,16 +260,9 @@ func (adv *Advisor) Suggest(item *model.Item, n int) map[string]SuggestedTag {
 
 	var cnt = krylib.Min(len(list), n)
 	sort.Sort(list)
-	sugg = make(map[string]SuggestedTag, cnt)
 
-	if cnt > 0 {
-		for _, s := range list[:cnt] {
-			sugg[s.Tag.Name] = s
-		}
-	}
-
-	return sugg
-} // func (adv *Advisor) Suggest(item *model.Item) map[string]float64
+	return list[:cnt]
+} // func (adv *Advisor) Suggest(item *model.Item) []SuggestedTag
 
 func (adv *Advisor) getLanguage(item *model.Item) (lng, fullText string) {
 	const (

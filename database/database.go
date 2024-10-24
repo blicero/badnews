@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 19. 09. 2024 by Benjamin Walkenhorst
 // (c) 2024 Benjamin Walkenhorst
-// Time-stamp: <2024-10-21 16:48:15 krylon>
+// Time-stamp: <2024-10-24 20:04:30 krylon>
 
 // Package database provides persistence.
 package database
@@ -1245,9 +1245,10 @@ EXEC_QUERY:
 func (db *Database) ItemGetRecentPaged(cnt, offset int64) ([]*model.Item, error) {
 	const qid query.ID = query.ItemGetRecentPaged
 	var (
-		err  error
-		msg  string
-		stmt *sql.Stmt
+		err   error
+		msg   string
+		stmt  *sql.Stmt
+		rsize int64
 	)
 
 	if stmt, err = db.getQuery(qid); err != nil {
@@ -1271,8 +1272,14 @@ EXEC_QUERY:
 		return nil, err
 	}
 
+	if cnt < 0 {
+		rsize = 16
+	} else {
+		rsize = cnt
+	}
+
 	defer rows.Close() // nolint: errcheck,gosec
-	var items = make([]*model.Item, 0, cnt)
+	var items = make([]*model.Item, 0, rsize)
 
 	for rows.Next() {
 		var (

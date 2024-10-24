@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 28. 09. 2024 by Benjamin Walkenhorst
 // (c) 2024 Benjamin Walkenhorst
-// Time-stamp: <2024-10-23 14:41:12 krylon>
+// Time-stamp: <2024-10-24 19:57:34 krylon>
 
 // Package web provides the web interface.
 package web
@@ -46,6 +46,7 @@ const (
 	sessionNameAgent    = "TeamOrca"
 	sessionNameFrontend = "Frontend"
 	sessionMaxAge       = 3600 * 24 * 7 // 1 week
+	suggPerItem         = 10
 )
 
 //go:embed assets
@@ -133,6 +134,11 @@ func Create(addr string) (*Server, error) {
 			err.Error())
 		return nil, err
 	}
+
+	// TODO As shield uses a database to persists its training data, I don't
+	//      really need to train it on startup, but for the moment, I do that
+	//      anyway. Once I'm happy with how everything works, I can skip that
+	//      step.
 
 	const tmplFolder = "assets/templates"
 	var templates []fs.DirEntry
@@ -590,8 +596,6 @@ func (srv *Server) handleTagAll(w http.ResponseWriter, r *http.Request) {
 //// Ajax handlers /////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-// const success = "Success"
-
 func (srv *Server) handleBeacon(w http.ResponseWriter, r *http.Request) {
 	// srv.log.Printf("[TRACE] Handle %s from %s\n",
 	// 	r.URL,
@@ -793,6 +797,8 @@ func (srv *Server) handleAjaxItems(w http.ResponseWriter, r *http.Request) {
 		goto SEND_RESPONSE
 	}
 
+	data.Suggestions = make(map[int64][]advisor.SuggestedTag, len(data.Items))
+
 	for _, i := range data.Items {
 		if i.Tags, err = db.TagLinkGetByItem(i); err != nil {
 			res.Message = fmt.Sprintf("Failed to load linked tags for Item %d: %s",
@@ -825,6 +831,8 @@ func (srv *Server) handleAjaxItems(w http.ResponseWriter, r *http.Request) {
 				i.Guessed = 1
 			}
 		}
+
+		data.Suggestions[i.ID] = srv.adv.Suggest(i, suggPerItem)
 	}
 
 	data.Feeds = make(map[int64]model.Feed, len(feeds))
@@ -960,6 +968,8 @@ func (srv *Server) handleAjaxItemsByFeed(w http.ResponseWriter, r *http.Request)
 	for _, f := range feeds {
 		data.Feeds[f.ID] = f
 	}
+
+	data.Suggestions = make(map[int64][]advisor.SuggestedTag, len(data.Items))
 
 	for _, i := range data.Items {
 		if i.EffectiveRating() == 0 {

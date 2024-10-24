@@ -1,8 +1,9 @@
 {{ define "item_view" }}
 {{/* Created on 01. 10. 2024 */}}
-{{/* Time-stamp: <2024-10-21 17:40:14 krylon> */}}
+{{/* Time-stamp: <2024-10-24 22:21:10 krylon> */}}
 {{ $feeds := .Feeds }}
 {{ $tags := .Tags }}
+{{ $suggestion_table := .Suggestions }}
 {{ range $id, $item := .Items }}
 <tr id="tr_item_{{ $id }}">
   <td>{{ fmt_time_minute $item.Timestamp }}</td>
@@ -35,6 +36,13 @@
     {{ end }}
   </td>
   <td>
+    <div id="item_tag_suggestions_{{ $item.ID }}">
+      {{ $sugg := (index $suggestion_table $item.ID) }}
+      {{ range $sugg }}
+      {{ .Name }} ({{ .Score }} %)
+      {{/* onclick="attach_tag_to_item({{ $item.ID }}, {{ .ID }});" /> &nbsp; */}}
+      {{ end }}
+    </div>
     <div id="item_tags_{{ $item.ID }}">
       {{ range $item.Tags }}
       <span id="tag_link_{{ $item.ID }}_{{ .ID }}">
