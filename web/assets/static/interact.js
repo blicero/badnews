@@ -1,4 +1,4 @@
-// Time-stamp: <2024-10-28 20:59:23 krylon>
+// Time-stamp: <2024-10-28 22:46:36 krylon>
 // -*- mode: javascript; coding: utf-8; -*-
 // Copyright 2015-2020 Benjamin Walkenhorst <krylon@gmx.net>
 //
@@ -378,10 +378,10 @@ function add_tag(item_id) {
     const sel_id = `#item_tag_sel_${item_id}`
     const sel = $(sel_id)[0]
     const tag_id = sel.value
+    const opt_id = `#tag_menu_item_${item_id}_opt_${tag_id}`
     const url = `/ajax/tag/link/${tag_id}/${item_id}`
     const msg = `Add Tag ${tag_id} to Item ${item_id}`
     console.log(msg)
-    // alert(msg)
 
     const req = $.get(
         url,
@@ -390,11 +390,16 @@ function add_tag(item_id) {
             if (res.status) {
                 const item = JSON.parse(res.payload.item)
                 const tag = JSON.parse(res.payload.tag)
+
                 const div_id = `#item_tags_${item_id}`
                 const div = $(div_id)[0]
-                // div.innerHTML += res.payload.tag.name + " "
+
                 const snippet = render_tag_single(item, tag)
+
                 div.innerHTML += snippet
+
+                const opt = $(opt_id)[0]
+                opt.disabled = true
             }
         },
         'json'
