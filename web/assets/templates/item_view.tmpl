@@ -1,6 +1,6 @@
 {{ define "item_view" }}
 {{/* Created on 01. 10. 2024 */}}
-{{/* Time-stamp: <2024-10-28 21:36:46 krylon> */}}
+{{/* Time-stamp: <2024-10-28 22:21:25 krylon> */}}
 {{ $feeds := .Feeds }}
 {{ $tags := .Tags }}
 {{ $suggestion_table := .Suggestions }}
@@ -36,7 +36,7 @@
     {{ end }}
   </td>
   <td>
-    <div id="item_tag_suggestions_{{ $item.ID }}">
+    <div id="item_tag_suggestions_{{ $item.ID }}" class="suggest">
       {{ $sugg := (index $suggestion_table $item.ID) }}
       {{ range $sugg }}
       {{ $id := (uuid) }}
