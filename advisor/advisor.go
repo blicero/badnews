@@ -106,10 +106,9 @@ func (adv *Advisor) loadTags() error {
 func (adv *Advisor) Train() error {
 	var (
 		err   error
+		tags  []*model.Tag
 		items []*model.Item
 	)
-
-	// XXX This approach is grossly inefficient.
 
 	for k, v := range adv.shield {
 		adv.log.Printf("[DEBUG] Reset Shield instance for %s\n",
@@ -122,36 +121,32 @@ func (adv *Advisor) Train() error {
 		}
 	}
 
-	if items, err = adv.db.ItemGetRecentPaged(-1, 0); err != nil {
-		adv.log.Printf("[ERROR] Cannot load all Tags: %s\n",
+	if tags, err = adv.db.TagGetAll(); err != nil {
+		adv.log.Printf("·[ERROR] Failed to load all tags: %s\n",
 			err.Error())
 		return err
 	}
 
-	// var docs = make([]bayesian.Document, 0, 256)
-
-	for _, item := range items {
-		var (
-			lng, body string
-			s         shield.Shield
-		)
-
-		if item.Tags, err = adv.db.TagLinkGetByItem(item); err != nil {
-			adv.log.Printf("[ERROR] Failed to load Tags for Item %d: %s\n",
-				item.ID,
+	for _, t := range tags {
+		if items, err = adv.db.TagLinkGetByTag(t); err != nil {
+			adv.log.Printf("[ERROR] Failed to load Items for Tag %s: %s",
+				t.Name,
 				err.Error())
 			return err
-		} else if len(item.Tags) == 0 {
-			continue
 		}
 
-		lng, body = adv.getLanguage(item)
+		for _, item := range items {
+			var (
+				lng, body string
+				s         shield.Shield
+			)
 
-		if s = adv.shield[lng]; s == nil {
-			s = adv.shield["en"]
-		}
+			lng, body = adv.getLanguage(item)
 
-		for _, t := range item.Tags {
+			if s = adv.shield[lng]; s == nil {
+				s = adv.shield["en"]
+			}
+
 			if err = s.Learn(t.Name, body); err != nil {
 				adv.log.Printf("[ERROR] Failed to learn Item %d (%q): %s\n",
 					item.ID,
