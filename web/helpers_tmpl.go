@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 12. 12. 2018 by Benjamin Walkenhorst
 // (c) 2018 Benjamin Walkenhorst
-// Time-stamp: <2024-10-21 17:40:11 krylon>
+// Time-stamp: <2024-10-25 17:34:20 krylon>
 
 package web
 
@@ -58,6 +58,7 @@ var funcmap = template.FuncMap{
 	"inc":              inc,
 	"dec":              dec,
 	"twice":            twice,
+	"repeat":           repeat,
 }
 
 type generator struct {
@@ -328,3 +329,7 @@ func dec(n int64) int64 {
 func twice(n int64) int64 {
 	return n + n
 }
+
+func repeat(n int64, s string) string {
+	return strings.Repeat(s, int(n))
+} // func repeat(n int64, s string) string

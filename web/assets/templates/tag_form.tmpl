@@ -1,6 +1,6 @@
 {{ define "tag_form" }}
 {{/* Created on 11. 10. 2024 */}}
-{{/* Time-stamp: <2024-10-17 16:44:27 krylon> */}}
+{{/* Time-stamp: <2024-10-26 18:24:13 krylon> */}}
 <form id="tag_form">
   <script>
    function reset_form() {
@@ -32,8 +32,20 @@
            $("#tag_details")[0].innerHTML = res.payload.content
            const tag = JSON.parse(res.payload.tag)
            const cnt = parseInt(res.payload.cnt)
-           render_tag_row(tag, cnt)
-           reset_form()
+           //render_tag_row(tag, cnt)
+           // reset_form()
+           load_tag_table()
+           $.get("/ajax/tag/form",
+                 {},
+                 (r) => {
+             if (r) {
+               $('#tag_details')[0].innerHTML = r.payload.form
+             } else {
+               console.log(r.message)
+               alert(r.message)
+             }
+           },
+                 'json')
          } else {
            const msg = `Error updating/creating tag: ${res.message}`
            console.log(msg)
@@ -75,8 +87,8 @@
           <option value="0">--</option>
           {{ range .Tags }}
           <option value="{{ .ID }}"
-                  {{ if (eq .ID $tag.ID) }}selected{{ end }}>
-            {{ .Name }}
+                  {{- if (eq .ID $tag.ID) }}selected{{ end }}>
+            {{ nbsp (twice .Level) }}{{ .Name }}
           </option>
           {{ end }}
         </select>

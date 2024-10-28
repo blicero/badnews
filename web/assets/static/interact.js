@@ -1,4 +1,4 @@
-// Time-stamp: <2024-10-20 18:19:29 krylon>
+// Time-stamp: <2024-10-28 20:59:23 krylon>
 // -*- mode: javascript; coding: utf-8; -*-
 // Copyright 2015-2020 Benjamin Walkenhorst <krylon@gmx.net>
 //
@@ -436,3 +436,29 @@ function remove_tag(tag_id, item_id) {
         },
         'json')
 } // function remove_tag(tag_id, item_id)
+
+function attach_tag_to_item(tag_id, item_id, span_id) {
+    const url = `/ajax/tag/link/${tag_id}/${item_id}`
+    const msg = `Add Tag ${tag_id} to Item ${item_id}`
+
+    const req = $.get(
+        url,
+        {},
+        (res) => {
+            if (res.status) {
+                const item = JSON.parse(res.payload.item)
+                const tag = JSON.parse(res.payload.tag)
+                const div_id = `#item_tags_${item_id}`
+                const div = $(div_id)[0]
+                const snippet = render_tag_single(item, tag)
+                div.innerHTML += snippet
+                const sugg = $(`#${span_id}`)[0]
+                sugg.remove()
+            }
+        },
+        'json'
+    )
+} // function attach_tag_to_item(tag_id, item_id)
+
+
+

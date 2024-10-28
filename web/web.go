@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 28. 09. 2024 by Benjamin Walkenhorst
 // (c) 2024 Benjamin Walkenhorst
-// Time-stamp: <2024-10-24 19:57:34 krylon>
+// Time-stamp: <2024-10-26 18:51:43 krylon>
 
 // Package web provides the web interface.
 package web
@@ -202,6 +202,7 @@ func Create(addr string) (*Server, error) {
 	srv.router.HandleFunc("/ajax/tag/details/{id:(?:\\d+)$}", srv.handleAjaxTagDetails)
 	srv.router.HandleFunc("/ajax/tag/link/{tag:(?:\\d+)}/{item:(?:\\d+)}", srv.handleAjaxTagLinkAdd)
 	srv.router.HandleFunc("/ajax/tag/unlink/{tag:(?:\\d+)}/{item:(?:\\d+)}", srv.handleAjaxTagLinkRemove)
+	srv.router.HandleFunc("/ajax/tag/form", srv.handleAjaxTagForm)
 
 	return srv, nil
 } // func Create(addr string) (*Server, error)
@@ -559,7 +560,7 @@ func (srv *Server) handleTagAll(w http.ResponseWriter, r *http.Request) {
 	db = srv.pool.Get()
 	defer srv.pool.Put(db)
 
-	if data.Tags, err = db.TagGetAll(); err != nil {
+	if data.Tags, err = db.TagGetSorted(); err != nil {
 		msg = fmt.Sprintf("Failed to load Tags: %s",
 			err.Error())
 		srv.log.Println("[CRITICAL] " + msg)
@@ -836,14 +837,10 @@ func (srv *Server) handleAjaxItems(w http.ResponseWriter, r *http.Request) {
 	}
 
 	data.Feeds = make(map[int64]model.Feed, len(feeds))
-	data.Tags = make(map[int64]*model.Tag, len(tags))
+	data.Tags = tags
 
 	for _, f := range feeds {
 		data.Feeds[f.ID] = f
-	}
-
-	for _, t := range tags {
-		data.Tags[t.ID] = t
 	}
 
 	if err = tmpl.Execute(&buf, &data); err != nil {
@@ -1295,7 +1292,7 @@ func (srv *Server) handleAjaxTagView(w http.ResponseWriter, r *http.Request) {
 		srv.log.Println("[CRITICAL] " + res.Message)
 		srv.sendErrorMessage(w, res.Message)
 		return
-	} else if data.Tags, err = db.TagGetAll(); err != nil {
+	} else if data.Tags, err = db.TagGetSorted(); err != nil {
 		res.Message = fmt.Sprintf("Failed to load all Tags: %s", err.Error())
 		srv.log.Println("[CRITICAL] " + res.Message)
 		srv.sendErrorMessage(w, res.Message)
@@ -1479,7 +1476,7 @@ func (srv *Server) handleAjaxTagSubmit(w http.ResponseWriter, r *http.Request) {
 	} else if tag == nil {
 		res.Message = fmt.Sprintf("Tag %d was not found in database",
 			tagID)
-		srv.log.Printf("[ERROR] %s\n", res.Message)
+		srv.log.Printf("[CRITICAL] %s\n", res.Message)
 		hstatus = 500
 		goto SEND_RESPONSE
 	} else if err = db.TagUpdate(tag, name, parentID); err != nil {
@@ -1902,3 +1899,83 @@ SEND_RESPONSE:
 		srv.log.Println("[ERROR] " + msg)
 	}
 } // func (srv *Server) handleAjaxTagLinkRemove(w http.ResponseWriter, r *http.Request)
+
+func (srv *Server) handleAjaxTagForm(w http.ResponseWriter, r *http.Request) {
+	const tmplName = "tag_form"
+	srv.log.Printf("[TRACE] Handle request for %s from %s\n",
+		r.URL.EscapedPath(),
+		r.RemoteAddr)
+	var (
+		err     error
+		sess    *sessions.Session
+		rbuf    []byte
+		tbuf    bytes.Buffer
+		db      *database.Database
+		res     = Reply{Payload: make(map[string]string, 3)}
+		msg     string
+		tmpl    *template.Template
+		hstatus = 200
+		data    = tmplDataTagForm{
+			tmplDataBase: tmplDataBase{
+				Title: "All Tags",
+				Debug: common.Debug,
+				URL:   r.URL.EscapedPath(),
+			},
+		}
+	)
+
+	db = srv.pool.Get()
+	defer srv.pool.Put(db)
+
+	if sess, err = srv.store.Get(r, sessionNameFrontend); err != nil {
+		res.Message = fmt.Sprintf("Error getting client session from session store: %s",
+			err.Error())
+		srv.log.Println("[CRITICAL] " + res.Message)
+		srv.sendErrorMessage(w, res.Message)
+		return
+	} else if data.Tags, err = db.TagGetSorted(); err != nil {
+		res.Message = fmt.Sprintf("Failed to load tags from database: %s", err.Error())
+		srv.log.Printf("[ERROR] %s\n", res.Message)
+		hstatus = 500
+		goto SEND_RESPONSE
+	} else if tmpl = srv.tmpl.Lookup(tmplName); tmpl == nil {
+		res.Message = fmt.Sprintf("Couldn't find template named %q", tmplName)
+		srv.log.Printf("[ERROR] %s\n", res.Message)
+		hstatus = 500
+		goto SEND_RESPONSE
+	} else if err = tmpl.Execute(&tbuf, &data); err != nil {
+		res.Message = fmt.Sprintf("Failed to render template %s: %s",
+			tmplName,
+			err.Error())
+		srv.log.Printf("[ERROR] %s\n", res.Message)
+		hstatus = 500
+		goto SEND_RESPONSE
+	}
+
+	res.Payload = map[string]string{
+		"form": tbuf.String(),
+	}
+
+SEND_RESPONSE:
+	if sess != nil {
+		if err = sess.Save(r, w); err != nil {
+			srv.log.Printf("[ERROR] Failed to set session cookie: %s\n",
+				err.Error())
+		}
+	}
+	res.Timestamp = time.Now()
+	if rbuf, err = json.Marshal(&res); err != nil {
+		srv.log.Printf("[ERROR] Error serializing response: %s\n",
+			err.Error())
+		rbuf = errJSON(err.Error())
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Cache-Control", "no-store, max-age=0")
+	w.WriteHeader(hstatus)
+	if _, err = w.Write(rbuf); err != nil {
+		msg = fmt.Sprintf("Failed to send result: %s",
+			err.Error())
+		srv.log.Println("[ERROR] " + msg)
+	}
+} // func (srv *Server) handleAjaxTagForm(w http.ResponseWriter, r *http.Request)

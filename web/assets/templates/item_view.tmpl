@@ -1,6 +1,6 @@
 {{ define "item_view" }}
 {{/* Created on 01. 10. 2024 */}}
-{{/* Time-stamp: <2024-10-24 22:21:10 krylon> */}}
+{{/* Time-stamp: <2024-10-28 21:36:46 krylon> */}}
 {{ $feeds := .Feeds }}
 {{ $tags := .Tags }}
 {{ $suggestion_table := .Suggestions }}
@@ -39,9 +39,16 @@
     <div id="item_tag_suggestions_{{ $item.ID }}">
       {{ $sugg := (index $suggestion_table $item.ID) }}
       {{ range $sugg }}
-      {{ .Name }} ({{ .Score }} %)
-      {{/* onclick="attach_tag_to_item({{ $item.ID }}, {{ .ID }});" /> &nbsp; */}}
+      {{ $id := (uuid) }}
+      <span id="{{ $id }}">
+        {{ .Name }} ({{ fmt_float .Score }} %)
+        <img src="/static/cs-xlet-running.png"
+             width="16"
+             height="16"
+             onclick="attach_tag_to_item({{ .ID }}, {{ $item.ID }}, '{{- $id -}}');" />
+      </span>
       {{ end }}
+      </span>
     </div>
     <div id="item_tags_{{ $item.ID }}">
       {{ range $item.Tags }}
@@ -58,7 +65,7 @@
         {{ range $idx, $tag := $tags }}
         <option value="{{ $tag.ID }}"
                 id="{{ $id }}_opt_{{ $tag.ID }}"
-                {{ if ($item.HasTag $tag.ID) }}disabled="" {{ end }}
+                {{- if ($item.HasTag $tag.ID) }}disabled="" {{ end -}}
                 >
           {{ nbsp (twice $tag.Level) }}{{ $tag.Name }}
         </option>
@@ -68,7 +75,6 @@
     </div>
   </td>
   <td>
-    {{ if gt (len .Description) 500 }}
     <button class="btn btn-primary"
             data-bs-toggle="collapse"
             href="#collapse_item_{{ .ID }}"
@@ -79,9 +85,6 @@
     <div class="collapse" id="collapse_item_{{ .ID }}">
       {{ .Description }}
     </div>
-    {{ else }}
-    {{ .Description }}
-    {{ end }}
   </td>
 </tr>
 {{ end }}
