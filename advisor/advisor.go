@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 10. 03. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2024-10-24 19:55:45 krylon>
+// Time-stamp: <2024-10-28 20:42:55 krylon>
 
 // Package advisor provides suggestions on what Tags one might want to attach
 // to news Items.
@@ -242,9 +242,13 @@ func (adv *Advisor) Suggest(item *model.Item, n int) []SuggestedTag {
 	var list = make(suggList, 0, len(res))
 
 	for c, r := range res {
-		if t, ok := adv.tags[c]; ok {
-			var s = SuggestedTag{Tag: *t, Score: r * 100}
-			list = append(list, s)
+		if c == "unknown" {
+			continue
+		} else if t, ok := adv.tags[c]; ok {
+			if !item.HasTag(t.ID) {
+				var s = SuggestedTag{Tag: *t, Score: r * 100}
+				list = append(list, s)
+			}
 		} else {
 			adv.log.Printf("[CRITICAL] Invalid tag suggested for Item %q (%d):\n%#v\n",
 				item.Headline,
