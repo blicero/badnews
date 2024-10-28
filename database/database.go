@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 19. 09. 2024 by Benjamin Walkenhorst
 // (c) 2024 Benjamin Walkenhorst
-// Time-stamp: <2024-10-24 20:04:30 krylon>
+// Time-stamp: <2024-10-26 18:33:15 krylon>
 
 // Package database provides persistence.
 package database
@@ -2134,6 +2134,7 @@ func (db *Database) TagUpdate(t *model.Tag, name string, parent int64) error {
 		stmt   *sql.Stmt
 		tx     *sql.Tx
 		status bool
+		p      *int64
 	)
 
 	if stmt, err = db.getQuery(qid); err != nil {
@@ -2176,8 +2177,12 @@ func (db *Database) TagUpdate(t *model.Tag, name string, parent int64) error {
 
 	stmt = tx.Stmt(stmt)
 
+	if parent != 0 {
+		p = &parent
+	}
+
 EXEC_QUERY:
-	if _, err = stmt.Exec(name, parent, t.ID); err != nil {
+	if _, err = stmt.Exec(name, p, t.ID); err != nil {
 		if worthARetry(err) {
 			waitForRetry()
 			goto EXEC_QUERY
@@ -2482,7 +2487,7 @@ func (db *Database) TagLinkGetByTag(tag *model.Tag) ([]*model.Item, error) {
 	var rows *sql.Rows
 
 EXEC_QUERY:
-	if rows, err = stmt.Query(); err != nil {
+	if rows, err = stmt.Query(tag.ID); err != nil {
 		if worthARetry(err) {
 			waitForRetry()
 			goto EXEC_QUERY
