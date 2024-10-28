@@ -1,5 +1,5 @@
 # -*- mode: org; fill-column: 78; -*-
-# Time-stamp: <2024-10-24 22:46:34 krylon>
+# Time-stamp: <2024-10-28 21:33:27 krylon>
 #
 #+TAGS: internals(i) ui(u) bug(b) feature(f)
 #+TAGS: database(d) design(e), meditation(m)
@@ -13,38 +13,39 @@
   BadNews is an RSS reader
 ** Clock table
    #+BEGIN: clocktable :scope file :maxlevel 202 :emphasize t
-   #+CAPTION: Clock summary at [2024-10-24 Do 22:46]
-   | Headline                                             | Time      |            |          |          |       |      |
-   |------------------------------------------------------+-----------+------------+----------+----------+-------+------|
-   | *Total time*                                         | *3d 5:31* |            |          |          |       |      |
-   |------------------------------------------------------+-----------+------------+----------+----------+-------+------|
-   | *BadNews*                                            | *3d 5:31* |            |          |          |       |      |
-   | \_  /Features [7/8]/                                 |           | /1d 19:51/ |          |          |       |      |
-   | \_    Rating and Tagging [7/8]                       |           |            | 1d 19:51 |          |       |      |
-   | \_      Rating [1/1]                                 |           |            |          |     6:30 |       |      |
-   | \_        Caching results                            |           |            |          |          |  0:27 |      |
-   | \_      Tags [5/6]                                   |           |            |          | 1d 13:20 |       |      |
-   | \_        Recommend tags for Items                   |           |            |          |          |  4:28 |      |
-   | \_        Add newly created tags to tag_view         |           |            |          |          |  1:20 |      |
-   | \_        Order tags by hierarchy                    |           |            |          |          |  1:10 |      |
-   | \_        Link Tags to Items [2/2]                   |           |            |          |          | 13:11 |      |
-   | \_          Unlink Tags from Items                   |           |            |          |          |       | 1:13 |
-   | \_          Fetch linked tags per item in handler... |           |            |          |          |       | 0:23 |
-   | \_  /Components [4/4]/                               |           | /1d 9:40/  |          |          |       |      |
-   | \_    Data model [0/0]                               |           |            |     0:27 |          |       |      |
-   | \_    Database [1/1]                                 |           |            |    12:17 |          |       |      |
-   | \_      Testing [0/0]                                |           |            |          |     3:02 |       |      |
-   | \_      Queries respect transaction                  |           |            |          |     0:03 |       |      |
-   | \_    Feed catcher / parser [0/0]                    |           |            |     5:41 |          |       |      |
-   | \_      Testing                                      |           |            |          |     2:16 |       |      |
-   | \_    Web Interface [4/4]                            |           |            |    13:56 |          |       |      |
-   | \_      Appearances matter [4/4]                     |           |            |          |     4:24 |       |      |
-   | \_        Feed Details                               |           |            |          |          |  0:41 |      |
-   | \_        Images                                     |           |            |          |          |  0:12 |      |
-   | \_        Hide long descriptions                     |           |            |          |          |  0:20 |      |
-   | \_        Fix Links                                  |           |            |          |          |  0:03 |      |
-   | \_      AJAX FTW [0/0]                               |           |            |          |     3:02 |       |      |
-   | \_    Tag Advisor [0/0]                              |           |            |     1:19 |          |       |      |
+   #+CAPTION: Clock summary at [2024-10-26 Sa 22:24]
+   | Headline                                             | Time       |           |         |          |       |      |
+   |------------------------------------------------------+------------+-----------+---------+----------+-------+------|
+   | *Total time*                                         | *3d 10:54* |           |         |          |       |      |
+   |------------------------------------------------------+------------+-----------+---------+----------+-------+------|
+   | *BadNews*                                            | *3d 10:54* |           |         |          |       |      |
+   | \_  /Features [7/8]/                                 |            | /2d 1:14/ |         |          |       |      |
+   | \_    Rating and Tagging [7/8]                       |            |           | 2d 1:14 |          |       |      |
+   | \_      Rating [1/1]                                 |            |           |         |     6:30 |       |      |
+   | \_        Caching results                            |            |           |         |          |  0:27 |      |
+   | \_      Tags [5/7]                                   |            |           |         | 1d 18:43 |       |      |
+   | \_        Re-render everything tag when editing...   |            |           |         |          |  0:56 |      |
+   | \_        Recommend tags for Items                   |            |           |         |          |  5:02 |      |
+   | \_        Add newly created tags to tag_view         |            |           |         |          |  1:20 |      |
+   | \_        Order tags by hierarchy                    |            |           |         |          |  1:10 |      |
+   | \_        Link Tags to Items [2/2]                   |            |           |         |          | 13:11 |      |
+   | \_          Unlink Tags from Items                   |            |           |         |          |       | 1:13 |
+   | \_          Fetch linked tags per item in handler... |            |           |         |          |       | 0:23 |
+   | \_  /Components [4/4]/                               |            | /1d 9:40/ |         |          |       |      |
+   | \_    Data model [0/0]                               |            |           |    0:27 |          |       |      |
+   | \_    Database [1/1]                                 |            |           |   12:17 |          |       |      |
+   | \_      Testing [0/0]                                |            |           |         |     3:02 |       |      |
+   | \_      Queries respect transaction                  |            |           |         |     0:03 |       |      |
+   | \_    Feed catcher / parser [0/0]                    |            |           |    5:41 |          |       |      |
+   | \_      Testing                                      |            |           |         |     2:16 |       |      |
+   | \_    Web Interface [4/4]                            |            |           |   13:56 |          |       |      |
+   | \_      Appearances matter [4/4]                     |            |           |         |     4:24 |       |      |
+   | \_        Feed Details                               |            |           |         |          |  0:41 |      |
+   | \_        Images                                     |            |           |         |          |  0:12 |      |
+   | \_        Hide long descriptions                     |            |           |         |          |  0:20 |      |
+   | \_        Fix Links                                  |            |           |         |          |  0:03 |      |
+   | \_      AJAX FTW [0/0]                               |            |           |         |     3:02 |       |      |
+   | \_    Tag Advisor [0/0]                              |            |           |    1:19 |          |       |      |
    #+END:
 ** Journal
 ** Features [7/8]
@@ -87,12 +88,14 @@
       isn't it? -, but I could use something else, too, so I don't create an
       accidental bottleneck. LevelDB for example, which claims to be pretty
       fast.
-**** Tags [5/6]
+**** Tags [8/8]
      :PROPERTIES:
      :COOKIE_DATA: todo recursive
      :VISIBILITY: children
      :END:
      :LOGBOOK:
+     CLOCK: [2024-10-28 Mo 19:59]--[2024-10-28 Mo 20:36] =>  0:37
+     CLOCK: [2024-10-26 Sa 18:30]--[2024-10-26 Sa 22:23] =>  3:53
      CLOCK: [2024-10-14 Mo 14:30]--[2024-10-14 Mo 16:05] =>  1:35
      CLOCK: [2024-10-13 So 18:47]--[2024-10-13 So 20:15] =>  1:28
      CLOCK: [2024-10-13 So 14:40]--[2024-10-13 So 18:36] =>  3:56
@@ -103,14 +106,26 @@
      CLOCK: [2024-10-08 Di 18:14]--[2024-10-08 Di 19:41] =>  1:27
      CLOCK: [2024-10-08 Di 14:56]--[2024-10-08 Di 15:31] =>  0:35
      :END:
-***** TODO Recommend tags for Items
+***** DONE Re-render everything tag when editing tags
+      CLOSED: [2024-10-28 Mo 19:59]
       :LOGBOOK:
+      CLOCK: [2024-10-25 Fr 17:52]--[2024-10-25 Fr 18:48] =>  0:56
+      :END:
+***** DONE Recommend tags for Items
+      CLOSED: [2024-10-28 Mo 19:59]
+      :LOGBOOK:
+      CLOCK: [2024-10-25 Fr 17:17]--[2024-10-25 Fr 17:51] =>  0:34
       CLOCK: [2024-10-24 Do 19:44]--[2024-10-24 Do 22:46] =>  3:02
       CLOCK: [2024-10-23 Mi 13:24]--[2024-10-23 Mi 14:50] =>  1:26
       :END:
       I had this feature on my previous ticker application, but I suspect it
       is very, very slow. On this retry, I'd like have acceptable performance,
       even if the app is running on a lowly Raspberry Pi Model 2.
+****** DONE Don't recommend Tags the Item already has
+       CLOSED: [2024-10-28 Mo 21:33]
+       :LOGBOOK:
+       CLOCK: [2024-10-28 Mo 20:36]--[2024-10-28 Mo 21:33] =>  0:57
+       :END:
 ***** DONE Add newly created tags to tag_view
       CLOSED: [2024-10-17 Do 16:47]
       :LOGBOOK:
