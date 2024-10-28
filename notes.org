@@ -1,5 +1,5 @@
 # -*- mode: org; fill-column: 78; -*-
-# Time-stamp: <2024-10-28 21:33:27 krylon>
+# Time-stamp: <2024-10-28 23:48:15 krylon>
 #
 #+TAGS: internals(i) ui(u) bug(b) feature(f)
 #+TAGS: database(d) design(e), meditation(m)
@@ -13,22 +13,24 @@
   BadNews is an RSS reader
 ** Clock table
    #+BEGIN: clocktable :scope file :maxlevel 202 :emphasize t
-   #+CAPTION: Clock summary at [2024-10-26 Sa 22:24]
+   #+CAPTION: Clock summary at [2024-10-28 Mo 23:48]
    | Headline                                             | Time       |           |         |          |       |      |
    |------------------------------------------------------+------------+-----------+---------+----------+-------+------|
-   | *Total time*                                         | *3d 10:54* |           |         |          |       |      |
+   | *Total time*                                         | *3d 13:41* |           |         |          |       |      |
    |------------------------------------------------------+------------+-----------+---------+----------+-------+------|
-   | *BadNews*                                            | *3d 10:54* |           |         |          |       |      |
-   | \_  /Features [7/8]/                                 |            | /2d 1:14/ |         |          |       |      |
-   | \_    Rating and Tagging [7/8]                       |            |           | 2d 1:14 |          |       |      |
+   | *BadNews*                                            | *3d 13:41* |           |         |          |       |      |
+   | \_  /Features [7/8]/                                 |            | /2d 4:01/ |         |          |       |      |
+   | \_    Rating and Tagging [7/8]                       |            |           | 2d 4:01 |          |       |      |
    | \_      Rating [1/1]                                 |            |           |         |     6:30 |       |      |
    | \_        Caching results                            |            |           |         |          |  0:27 |      |
-   | \_      Tags [5/7]                                   |            |           |         | 1d 18:43 |       |      |
+   | \_      Tags [8/8]                                   |            |           |         | 1d 21:30 |       |      |
    | \_        Re-render everything tag when editing...   |            |           |         |          |  0:56 |      |
-   | \_        Recommend tags for Items                   |            |           |         |          |  5:02 |      |
+   | \_        Recommend tags for Items                   |            |           |         |          |  5:59 |      |
+   | \_          Don't recommend Tags the Item already... |            |           |         |          |       | 0:57 |
    | \_        Add newly created tags to tag_view         |            |           |         |          |  1:20 |      |
    | \_        Order tags by hierarchy                    |            |           |         |          |  1:10 |      |
-   | \_        Link Tags to Items [2/2]                   |            |           |         |          | 13:11 |      |
+   | \_        Link Tags to Items [3/3]                   |            |           |         |          | 14:24 |      |
+   | \_          Disable linked Tags in menu              |            |           |         |          |       | 1:13 |
    | \_          Unlink Tags from Items                   |            |           |         |          |       | 1:13 |
    | \_          Fetch linked tags per item in handler... |            |           |         |          |       | 0:23 |
    | \_  /Components [4/4]/                               |            | /1d 9:40/ |         |          |       |      |
@@ -136,7 +138,7 @@
       :LOGBOOK:
       CLOCK: [2024-10-21 Mo 16:31]--[2024-10-21 Mo 17:41] =>  1:10
       :END:
-***** DONE Link Tags to Items [2/2]
+***** DONE Link Tags to Items [3/3]
       CLOSED: [2024-10-21 Mo 17:41]
       :PROPERTIES:
       :COOKIE_DATA: todo recursive
@@ -148,6 +150,11 @@
       CLOCK: [2024-10-17 Do 21:57]--[2024-10-17 Do 23:30] =>  1:33
       CLOCK: [2024-10-17 Do 17:52]--[2024-10-17 Do 19:52] =>  2:00
       :END:
+****** DONE Disable linked Tags in menu
+       CLOSED: [2024-10-28 Mo 23:48]
+       :LOGBOOK:
+       CLOCK: [2024-10-28 Mo 22:35]--[2024-10-28 Mo 23:48] =>  1:13
+       :END:
 ****** DONE Unlink Tags from Items
        CLOSED: [2024-10-20 So 18:22]
        :LOGBOOK:
