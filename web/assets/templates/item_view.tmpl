@@ -1,6 +1,6 @@
 {{ define "item_view" }}
 {{/* Created on 01. 10. 2024 */}}
-{{/* Time-stamp: <2024-10-28 22:21:25 krylon> */}}
+{{/* Time-stamp: <2024-10-29 12:29:01 krylon> */}}
 {{ $feeds := .Feeds }}
 {{ $tags := .Tags }}
 {{ $suggestion_table := .Suggestions }}
@@ -36,6 +36,15 @@
     {{ end }}
   </td>
   <td>
+    <div id="item_tags_{{ $item.ID }}">
+      {{ range $item.Tags }}
+      <span id="tag_link_{{ $item.ID }}_{{ .ID }}">
+        <a href="/tags/{{ .ID }}">{{ .Name }}</a>
+        <img src="/static/delete.png"
+             onclick="remove_tag({{ .ID }}, {{ $item.ID }});" />
+      </span>
+      {{ end }}
+    </div>
     <div id="item_tag_suggestions_{{ $item.ID }}" class="suggest">
       {{ $sugg := (index $suggestion_table $item.ID) }}
       {{ range $sugg }}
@@ -49,15 +58,6 @@
       </span>
       {{ end }}
       </span>
-    </div>
-    <div id="item_tags_{{ $item.ID }}">
-      {{ range $item.Tags }}
-      <span id="tag_link_{{ $item.ID }}_{{ .ID }}">
-        <a href="/tags/{{ .ID }}">{{ .Name }}</a>
-        <img src="/static/delete.png"
-             onclick="remove_tag({{ .ID }}, {{ $item.ID }});" />
-      </span>
-      {{ end }}
     </div>
     <div id="item_tag_form_{{ $item.ID }}">
       {{ $id := concat "tag_menu_item_" (i64str $item.ID) }}
