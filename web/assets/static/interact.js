@@ -1,4 +1,4 @@
-// Time-stamp: <2024-10-28 22:46:36 krylon>
+// Time-stamp: <2024-10-29 17:00:44 krylon>
 // -*- mode: javascript; coding: utf-8; -*-
 // Copyright 2015-2020 Benjamin Walkenhorst <krylon@gmx.net>
 //
@@ -212,7 +212,7 @@ function unrate_item(id) {
                       (res) => {
                           if (!res.status) {
                               console.log(res.message)
-                              alert(res.message)
+                              msg_add(res.message, 2)
                               return
                           }
 
@@ -243,7 +243,7 @@ function load_items(cnt) {
                               window.setTimeout(scale_images, 50)
                           } else {
                               console.log(res.message)
-                              alert(res.message)
+                              msg_add(res.message, 2)
                           }
                       },
                       'json'
@@ -280,6 +280,9 @@ function add_tag(item_id) {
 
                 const opt = $(opt_id)[0]
                 opt.disabled = true
+            } else {
+                console.log(res.message)
+                msg_add(res.message)
             }
         },
         'json'
@@ -316,7 +319,8 @@ function remove_tag(tag_id, item_id) {
                 const span_id = `#tag_link_${item_id}_${tag_id}`
                 $(span_id).remove()
             } else {
-                alert(res.message)
+                console.log(res.message)
+                msg_add(res.message, 2)
             }
         },
         'json')
@@ -339,11 +343,22 @@ function attach_tag_to_item(tag_id, item_id, span_id) {
                 div.innerHTML += snippet
                 const sugg = $(`#${span_id}`)[0]
                 sugg.remove()
+            } else {
+                console.log(res.message)
+                msg_add(res.message, 2)
             }
         },
         'json'
     )
 } // function attach_tag_to_item(tag_id, item_id)
 
+function msg_clear() {
+    $('#msg_tbl')[0].innerHTML = ''
+} // function msg_clear()
 
+function msg_add(msg, level=1) {
+    const row = `<tr><td>${new Date()}</td><td>${level}</td><td>${msg}</td></tr>`
+    const msg_tbl = $('#msg_tbl')[0]
 
+    msg_tbl.innerHTML += row
+} // function msg_add(msg)

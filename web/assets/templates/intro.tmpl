@@ -1,5 +1,5 @@
 {{ define "intro" }}
-{{/* Time-stamp: <2024-09-05 21:10:51 krylon> */}}
+{{/* Time-stamp: <2024-10-29 16:44:53 krylon> */}}
 <h1 id="page_title">{{ .Title }}</h1>
 <hr />
 
@@ -12,13 +12,22 @@
  });
 </script>
 
-<div class="debug container-fluid">
-  {{ app_string }} running on {{ hostname }} (built on {{ app_build }})<br />
-  Template rendered on <time>{{ now }}</time><br />
-  <div id="beacon" class="debug" onclick="beaconToggle();">
-    Beacon
-  </div>
-</div>
+<table>
+  <tr>
+    <td>
+      <div class="debug container-fluid">
+        {{ app_string }} running on {{ hostname }} (built on {{ app_build }})<br />
+        Template rendered on <time>{{ now }}</time><br />
+        <div id="beacon" class="debug" onclick="beaconToggle();">
+          Beacon
+        </div>
+      </div>
+    </td>
+    <td>
+      {{ template "msg" . }}
+    </td>
+  </tr>
+</table>
 {{ end }}
 
 {{ template "menu" . }}
