@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 18. 09. 2024 by Benjamin Walkenhorst
 // (c) 2024 Benjamin Walkenhorst
-// Time-stamp: <2024-10-30 16:29:01 krylon>
+// Time-stamp: <2024-10-30 17:55:05 krylon>
 
 package common
 
@@ -15,6 +15,7 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"slices"
 	"strings"
 	"time"
 
@@ -35,7 +36,7 @@ import (
 // their status.
 const (
 	Debug                    = true
-	Version                  = "0.7.0"
+	Version                  = "0.8.0"
 	AppName                  = "BadNews"
 	TimestampFormat          = "2006-01-02 15:04:05"
 	TimestampFormatMinute    = "2006-01-02 15:04"
