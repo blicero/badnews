@@ -75,6 +75,19 @@ func init() {
 	}
 } // func init()
 
+func SetLogLevel(lvl logutils.LogLevel) {
+	if slices.Index(LogLevels, lvl) == -1 {
+		fmt.Fprintf(
+			os.Stderr,
+			"Invalid loglevel: %s\n", lvl)
+		return
+	}
+
+	for _, id := range logdomain.AllDomains() {
+		PackageLevels[id] = lvl
+	}
+} // func SetLogLevel(lvl string)
+
 // Path looks up the given path.Path and returns the full path of the file or directory.
 func Path(p path.Path) string {
 	switch p {
@@ -176,7 +189,13 @@ func GetLogger(dom logdomain.ID) (*log.Logger, error) {
 
 	writer := io.MultiWriter(os.Stdout, logfile)
 
-	logger := log.New(writer, logName, log.Ldate|log.Ltime|log.Lshortfile)
+	fwriter := &logutils.LevelFilter{
+		Levels:   LogLevels,
+		MinLevel: PackageLevels[dom],
+		Writer:   writer,
+	}
+
+	logger := log.New(fwriter, logName, log.Ldate|log.Ltime|log.Lshortfile)
 	return logger, nil
 } // func GetLogger(name string) (*log.logger, error)
 
