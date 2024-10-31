@@ -1,6 +1,6 @@
 {{ define "item_view" }}
 {{/* Created on 01. 10. 2024 */}}
-{{/* Time-stamp: <2024-10-29 12:29:01 krylon> */}}
+{{/* Time-stamp: <2024-10-30 23:36:18 krylon> */}}
 {{ $feeds := .Feeds }}
 {{ $tags := .Tags }}
 {{ $suggestion_table := .Suggestions }}
@@ -52,8 +52,8 @@
       <span id="{{ $id }}">
         {{ .Name }} ({{ fmt_float .Score }} %)
         <img src="/static/cs-xlet-running.png"
-             width="16"
-             height="16"
+             width="24"
+             height="24"
              onclick="attach_tag_to_item({{ .ID }}, {{ $item.ID }}, '{{- $id -}}');" />
       </span>
       {{ end }}
