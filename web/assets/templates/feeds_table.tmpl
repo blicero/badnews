@@ -1,6 +1,6 @@
 {{ define "feeds_table" }}
 {{/* Created on 30. 09. 2024 */}}
-{{/* Time-stamp: <2024-09-30 13:44:44 krylon> */}}
+{{/* Time-stamp: <2024-10-31 01:08:37 krylon> */}}
 <table class="table-primary" table-striped>
   <thead>
     <tr>
@@ -13,10 +13,22 @@
   <tbody>
     {{ range .Feeds }}
     <tr>
-      <td>{{ .Title }}</td>
+      <td>
+        <a href="/feed/{{ .ID }}">{{ .Title }}</a>
+      </td>
       <td>{{ .UpdateInterval }}</td>
       <td>{{ fmt_time .LastRefresh }}</td>
-      <td>{{ if .Active }}Active{{ else }}Suspended{{ end }}</td>
+      <td>
+        <div class="form-check form-switch">
+          <input class="form-check-input"
+                 type="checkbox"
+                 role="switch"
+                 {{ if .Active }}checked{{ end }}
+                 onchange="toggle_feed_active({{ .ID }});"
+                 id="check_feed_active_{{ .ID }}">
+          <label class="form-check-label" for=check_feed_active_{{ .ID }}">Active</label>
+        </div>
+      </td>
     </tr>
     {{ end }}
   </tbody>

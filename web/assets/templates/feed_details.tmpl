@@ -1,6 +1,6 @@
 {{ define "feed_details" }}
 {{/* Created on 09. 10. 2024 */}}
-{{/* Time-stamp: <2024-10-11 18:28:43 krylon> */}}
+{{/* Time-stamp: <2024-10-31 00:20:44 krylon> */}}
 <!DOCTYPE html>
 <html>
   {{ template "head" . }}
@@ -31,7 +31,7 @@
 
     <hr />
 
-    <h2>Recent Items</h2>
+    <h3>Recent Items</h3>
 
     <script>
      $(document).ready(() => {
@@ -43,13 +43,19 @@
            const tbody = $('#items')[0]
            tbody.innerHTML = res.payload["items"]
          } else {
-           const msg = `Error fetching items: ${res.Message}`
+           const msg = `Error fetching items: ${res.message}`
            console.log(msg)
-           alert(msg)
+           msg_add(msg)
          }
        },
                          'json'
                          )
+
+       req.fail((reply, status, xhr) => {
+         const msg = `Error loading Items for Feed {{ .Feed.Title }} ({{ .Feed.ID }}): ${status} ${reply} ${xhr}`
+         console.log(msg)
+         msg_add(msg)
+       })
      })
     </script>
 

@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 28. 09. 2024 by Benjamin Walkenhorst
 // (c) 2024 Benjamin Walkenhorst
-// Time-stamp: <2024-10-26 18:51:43 krylon>
+// Time-stamp: <2024-10-31 01:35:29 krylon>
 
 // Package web provides the web interface.
 package web
@@ -188,6 +188,7 @@ func Create(addr string) (*Server, error) {
 	srv.router.HandleFunc("/{page:(?:index|main|start)?$}", srv.handleMain)
 	srv.router.HandleFunc("/items/{cnt:(?:\\d+)}", srv.handleItemPage)
 	srv.router.HandleFunc("/feed/{id:(?:\\d+$)}", srv.handleFeedDetails)
+	srv.router.HandleFunc("/feed/all", srv.handleFeedPage)
 	srv.router.HandleFunc("/tags/all", srv.handleTagAll)
 
 	// AJAX Handlers
@@ -195,6 +196,7 @@ func Create(addr string) (*Server, error) {
 	srv.router.HandleFunc("/ajax/subscribe", srv.handleSubscribe)
 	srv.router.HandleFunc("/ajax/items/{offset:(?:\\d+)}/{cnt:(?:\\d+)}", srv.handleAjaxItems)
 	srv.router.HandleFunc("/ajax/feed_items/{id:(?:\\d+)$}", srv.handleAjaxItemsByFeed)
+	srv.router.HandleFunc("/ajax/feed/{id:(?:\\d+)}/toggle", srv.handleAjaxFeedToggle)
 	srv.router.HandleFunc("/ajax/item_rate", srv.handleAjaxRateItem)
 	srv.router.HandleFunc("/ajax/item_unrate/{id:(?:\\d+)$}", srv.handleAjaxUnrateItem)
 	srv.router.HandleFunc("/ajax/tag/all", srv.handleAjaxTagView)
@@ -524,6 +526,62 @@ func (srv *Server) handleFeedDetails(w http.ResponseWriter, r *http.Request) {
 	}
 } // func (srv *Server) handleFeedDetails(w http.ResponseWriter, r *http.Request)
 
+func (srv *Server) handleFeedPage(w http.ResponseWriter, r *http.Request) {
+	srv.log.Printf("[TRACE] Handle request for %s from %s\n",
+		r.URL.EscapedPath(),
+		r.RemoteAddr)
+	const tmplName = "feed_page"
+	var (
+		err  error
+		msg  string
+		tmpl *template.Template
+		db   *database.Database
+		sess *sessions.Session
+		data = tmplDataIndex{
+			tmplDataBase: tmplDataBase{
+				Title: "Feeds",
+				Debug: true,
+				URL:   r.URL.EscapedPath(),
+			},
+		}
+	)
+
+	db = srv.pool.Get()
+	defer srv.pool.Put(db)
+
+	if sess, err = srv.store.Get(r, sessionNameFrontend); err != nil {
+		msg = fmt.Sprintf("Error getting client session from session store: %s",
+			err.Error())
+		srv.log.Println("[CRITICAL] " + msg)
+		srv.sendErrorMessage(w, msg)
+		return
+	} else if tmpl = srv.tmpl.Lookup(tmplName); tmpl == nil {
+		msg = fmt.Sprintf("Could not find template %q", tmplName)
+		srv.log.Println("[CRITICAL] " + msg)
+		srv.sendErrorMessage(w, msg)
+		return
+	} else if data.Feeds, err = db.FeedGetAll(); err != nil {
+		msg = fmt.Sprintf("Failed to load Feeds: %s", err.Error())
+		srv.log.Println("[CRITICAL] " + msg)
+		srv.sendErrorMessage(w, msg)
+		return
+	}
+
+	if err = sess.Save(r, w); err != nil {
+		srv.log.Printf("[ERROR] Failed to set session cookie: %s\n",
+			err.Error())
+	}
+	w.Header().Set("Cache-Control", "no-store, max-age=0")
+	w.Header().Set("Content-Type", "text/html")
+	w.WriteHeader(200)
+	if err = tmpl.Execute(w, &data); err != nil {
+		msg = fmt.Sprintf("Error rendering template %q: %s",
+			tmplName,
+			err.Error())
+		srv.sendErrorMessage(w, msg)
+	}
+} // func (srv *Server) handleFeedPage(w http.ResponseWriter, r *http.Request)
+
 func (srv *Server) handleTagAll(w http.ResponseWriter, r *http.Request) {
 	const tmplName = "tags"
 	srv.log.Printf("[TRACE] Handle request for %s from %s\n",
@@ -713,6 +771,103 @@ SEND_RESPONSE:
 		srv.log.Println("[ERROR] " + msg)
 	}
 } // func (srv *Server) handleSubscribe(w http.ResponseWriter, r *http.Request)
+
+func (srv *Server) handleAjaxFeedToggle(w http.ResponseWriter, r *http.Request) {
+	srv.log.Printf("[TRACE] Handle request for %s from %s\n",
+		r.URL.EscapedPath(),
+		r.RemoteAddr)
+
+	var (
+		err     error
+		sess    *sessions.Session
+		feed    *model.Feed
+		idstr   string
+		feedID  int64
+		rbuf    []byte
+		db      *database.Database
+		vars    map[string]string
+		res     Reply
+		msg     string
+		hstatus = 200
+	)
+
+	vars = mux.Vars(r)
+	idstr = vars["id"]
+
+	if sess, err = srv.store.Get(r, sessionNameFrontend); err != nil {
+		res.Message = fmt.Sprintf(
+			"Error getting/creating session %s: %s",
+			sessionNameFrontend,
+			err.Error())
+		srv.log.Printf("[ERROR] %s\n", res.Message)
+		sess = nil
+		hstatus = 403
+		goto SEND_RESPONSE
+	} else if feedID, err = strconv.ParseInt(idstr, 10, 64); err != nil {
+		res.Message = fmt.Sprintf("Cannot parse Feed ID %q: %s",
+			idstr,
+			err.Error())
+		srv.log.Printf("[CANTHAPPEN] %s\n", res.Message)
+		hstatus = 400
+		goto SEND_RESPONSE
+	}
+
+	db = srv.pool.Get()
+	defer srv.pool.Put(db)
+
+	if feed, err = db.FeedGetByID(feedID); err != nil {
+		res.Message = fmt.Sprintf("Failed to load Feed %d: %s",
+			feedID,
+			err.Error())
+		srv.log.Printf("[ERROR] %s\n", res.Message)
+		hstatus = 500
+		goto SEND_RESPONSE
+	} else if feed == nil {
+		res.Message = fmt.Sprintf("Feed %d was not found in database", feedID)
+		srv.log.Printf("[ERROR] %s\n", res.Message)
+		hstatus = 500
+		goto SEND_RESPONSE
+	} else if err = db.FeedSetActive(feed, !feed.Active); err != nil {
+		res.Message = fmt.Sprintf("Failed to toggle Active flag for Feed %s (%d): %s",
+			feed.Title,
+			feed.ID,
+			err.Error())
+		srv.log.Printf("[ERROR] %s\n", res.Message)
+		hstatus = 500
+		goto SEND_RESPONSE
+	}
+
+	res.Message = fmt.Sprintf("Successfully toggled Active flag for Feed %s (%d)",
+		feed.Title,
+		feed.ID)
+	res.Status = true
+	res.Payload = map[string]string{
+		"id": strconv.Itoa(int(feed.ID)),
+	}
+
+SEND_RESPONSE:
+	if sess != nil {
+		if err = sess.Save(r, w); err != nil {
+			srv.log.Printf("[ERROR] Failed to set session cookie: %s\n",
+				err.Error())
+		}
+	}
+	res.Timestamp = time.Now()
+	if rbuf, err = json.Marshal(&res); err != nil {
+		srv.log.Printf("[ERROR] Error serializing response: %s\n",
+			err.Error())
+		rbuf = errJSON(err.Error())
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Cache-Control", "no-store, max-age=0")
+	w.WriteHeader(hstatus)
+	if _, err = w.Write(rbuf); err != nil {
+		msg = fmt.Sprintf("Failed to send result: %s",
+			err.Error())
+		srv.log.Println("[ERROR] " + msg)
+	}
+} // func (srv *Server) handleAjaxFeedToggle(w http.ResponseWriter, r *http.Request)
 
 func (srv *Server) handleAjaxItems(w http.ResponseWriter, r *http.Request) {
 	srv.log.Printf("[TRACE] Handle request for %s from %s\n",
@@ -953,11 +1108,27 @@ func (srv *Server) handleAjaxItemsByFeed(w http.ResponseWriter, r *http.Request)
 		srv.log.Printf("[ERROR] %s\n", res.Message)
 		hstatus = 500
 		goto SEND_RESPONSE
+	} else if data.Tags, err = db.TagGetSorted(); err != nil {
+		res.Message = fmt.Sprintf("Failed to load Tags: %s", err.Error())
+		srv.log.Printf("[ERROR] %s\n", res.Message)
+		hstatus = 500
+		goto SEND_RESPONSE
 	} else if tmpl = srv.tmpl.Lookup(tmplName); tmpl == nil {
 		res.Message = fmt.Sprintf("Could not find template %q", tmplName)
 		srv.log.Printf("[CANTHAPPEN] %s\n", res.Message)
 		hstatus = 500
 		goto SEND_RESPONSE
+	}
+
+	for _, item := range data.Items {
+		if item.Tags, err = db.TagLinkGetByItem(item); err != nil {
+			res.Message = fmt.Sprintf("Failed to load Tags for Item %d: %s",
+				item.ID,
+				err.Error())
+			srv.log.Printf("[ERROR] %s\n", res.Message)
+			hstatus = 500
+			goto SEND_RESPONSE
+		}
 	}
 
 	data.Feeds = make(map[int64]model.Feed, len(feeds))
@@ -993,6 +1164,8 @@ func (srv *Server) handleAjaxItemsByFeed(w http.ResponseWriter, r *http.Request)
 				i.Guessed = 1
 			}
 		}
+
+		data.Suggestions[i.ID] = srv.adv.Suggest(i, suggPerItem)
 	}
 
 	if err = tmpl.Execute(&buf, &data); err != nil {

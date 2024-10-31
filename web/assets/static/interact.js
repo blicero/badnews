@@ -1,4 +1,4 @@
-// Time-stamp: <2024-10-29 17:00:44 krylon>
+// Time-stamp: <2024-10-31 01:45:21 krylon>
 // -*- mode: javascript; coding: utf-8; -*-
 // Copyright 2015-2020 Benjamin Walkenhorst <krylon@gmx.net>
 //
@@ -198,7 +198,7 @@ function rate_item(item_id, rating) {
 
                                cell.innerHTML = `<img src="${src}" onclick="unrate_item(${item_id});" />`
                            } else {
-                               alert(res.message)
+                               msg_add(res.message)
                            }
                        },
                        'json')
@@ -235,7 +235,9 @@ function load_items(cnt) {
                               item_cnt += cnt
 
                               if (res.payload.count == cnt && item_cnt < max_cnt) {
-                                  console.log(`${item_cnt} Items already loaded, loading ${cnt} more items.`)
+                                  const msg = `${item_cnt} Items already loaded, loading ${cnt} more items.`
+                                  console.log(msg)
+                                  msg_add(msg, 2)
                                   window.setTimeout(load_items, 200, cnt)
                               }
 
@@ -352,13 +354,47 @@ function attach_tag_to_item(tag_id, item_id, span_id) {
     )
 } // function attach_tag_to_item(tag_id, item_id)
 
+const max_msg_cnt = 5
+
 function msg_clear() {
     $('#msg_tbl')[0].innerHTML = ''
 } // function msg_clear()
 
 function msg_add(msg, level=1) {
-    const row = `<tr><td>${new Date()}</td><td>${level}</td><td>${msg}</td></tr>`
+    const row = `<tr><td>${new Date()}</td><td>${level}</td><td>${msg}</td><td></td></tr>`
     const msg_tbl = $('#msg_tbl')[0]
+
+    const rows = $('#msg_tbl tr')
+    let i = 0
+    let cnt = rows.length
+    while (cnt >= max_msg_cnt) {
+        rows[i].remove()
+        i++
+        cnt--
+    }
 
     msg_tbl.innerHTML += row
 } // function msg_add(msg)
+
+function toggle_feed_active(feed_id) {
+    const switch_id = `#check_feed_active_${feed_id}`
+    const ckbox = $(switch_id)[0]
+    const flag = ckbox.checked
+    // msg_add(`Feed ${feed_id} is now ${flag ? "Active" : "Suspended"}`, 3)
+    const url = `/ajax/feed/${feed_id}/toggle`
+    const req = $.get(
+        url,
+        {},
+        (res) => {
+            if (res.status) {
+                msg_add(`Active flag was toggled successfully`, 1)
+            } else {
+                msg_add(res.message, 3)
+            }
+        },
+        'json')
+
+    req.fail((reply, status, xhr) => {
+        msg_add(status, 3)
+    })
+} // function toggle_feed_active(feed_id)
