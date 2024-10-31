@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 18. 09. 2024 by Benjamin Walkenhorst
 // (c) 2024 Benjamin Walkenhorst
-// Time-stamp: <2024-10-30 17:52:52 krylon>
+// Time-stamp: <2024-10-31 19:22:05 krylon>
 
 package main
 
@@ -26,18 +26,20 @@ func main() {
 		common.BuildStamp.Format(common.TimestampFormat))
 
 	var (
-		err     error
-		rdr     *reader.Reader
-		srv     *web.Server
-		sigq    chan os.Signal
-		minlog  = "TRACE"
-		baseDir = common.Path(path.Base)
-		addr    = fmt.Sprintf("[::1]:%d", common.Port)
+		err        error
+		rdr        *reader.Reader
+		srv        *web.Server
+		sigq       chan os.Signal
+		flushCache bool
+		minlog     = "TRACE"
+		baseDir    = common.Path(path.Base)
+		addr       = fmt.Sprintf("[::1]:%d", common.Port)
 	)
 
 	flag.StringVar(&baseDir, "basedir", baseDir, "Path for application-specific files")
 	flag.StringVar(&addr, "addr", addr, "Address for the web server to listen on")
 	flag.StringVar(&minlog, "loglevel", minlog, "Minimum level for log messages to be logged")
+	flag.BoolVar(&flushCache, "flush", false, "Flush cached ratings and tag suggestions")
 	flag.Parse()
 
 	if baseDir != common.Path(path.Base) {
@@ -55,6 +57,24 @@ func main() {
 			"Error initializing application environment: %s\n",
 			err.Error())
 		os.Exit(2)
+	}
+
+	if flushCache {
+		if err = os.Remove(common.Path(path.JudgeCache)); err != nil {
+			fmt.Fprintf(
+				os.Stderr,
+				"Failed to delete JudgeCache %s: %s\n",
+				common.Path(path.JudgeCache),
+				err.Error())
+			os.Exit(2)
+		} else if err = os.Remove(common.Path(path.AdviceCache)); err != nil {
+			fmt.Fprintf(
+				os.Stderr,
+				"Failed to delete AdviceCache %s: %s\n",
+				common.Path(path.AdviceCache),
+				err.Error())
+			os.Exit(2)
+		}
 	}
 
 	if rdr, err = reader.New(4); err != nil {
