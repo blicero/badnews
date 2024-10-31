@@ -1,5 +1,5 @@
 # -*- mode: org; fill-column: 78; -*-
-# Time-stamp: <2024-10-31 01:48:37 krylon>
+# Time-stamp: <2024-10-31 17:43:47 krylon>
 #
 #+TAGS: internals(i) ui(u) bug(b) feature(f)
 #+TAGS: database(d) design(e), meditation(m)
@@ -13,7 +13,7 @@
   BadNews is an RSS reader
 ** Clock table
    #+BEGIN: clocktable :scope file :maxlevel 202 :emphasize t
-   #+CAPTION: Clock summary at [2024-10-31 Do 01:48]
+   #+CAPTION: Clock summary at [2024-10-31 Do 17:43]
    | Headline                                             | Time      |            |         |          |       |      |
    |------------------------------------------------------+-----------+------------+---------+----------+-------+------|
    | *Total time*                                         | *4d 0:07* |            |         |          |       |      |
@@ -33,14 +33,14 @@
    | \_          Disable linked Tags in menu              |           |            |         |          |       | 1:13 |
    | \_          Unlink Tags from Items                   |           |            |         |          |       | 1:13 |
    | \_          Fetch linked tags per item in handler... |           |            |         |          |       | 0:23 |
-   | \_  /Components [6/7]/                               |           | /1d 20:06/ |         |          |       |      |
+   | \_  /Components [7/7]/                               |           | /1d 20:06/ |         |          |       |      |
    | \_    Data model [0/0]                               |           |            |    0:27 |          |       |      |
    | \_    Database [1/1]                                 |           |            |   12:17 |          |       |      |
    | \_      Testing [0/0]                                |           |            |         |     3:02 |       |      |
    | \_      Queries respect transaction                  |           |            |         |     0:03 |       |      |
    | \_    Feed catcher / parser [0/0]                    |           |            |    5:41 |          |       |      |
    | \_      Testing                                      |           |            |         |     2:16 |       |      |
-   | \_    Web Interface [5/6]                            |           |            | 1d 0:22 |          |       |      |
+   | \_    Web Interface [6/6]                            |           |            | 1d 0:22 |          |       |      |
    | \_      Feeds overview                               |           |            |         |     1:42 |       |      |
    | \_      Message Area                                 |           |            |         |     7:10 |       |      |
    | \_      Appearances matter [4/4]                     |           |            |         |     4:24 |       |      |
@@ -167,7 +167,7 @@
       :LOGBOOK:
       CLOCK: [2024-10-19 Sa 20:37]--[2024-10-19 Sa 21:00] =>  0:23
       :END:
-** Components [6/7]
+** Components [7/7]
    :PROPERTIES:
    :COOKIE_DATA: todo recursive
    :VISIBILITY: children
@@ -227,7 +227,7 @@
      :LOGBOOK:
      CLOCK: [2024-09-26 Do 17:56]--[2024-09-26 Do 20:12] =>  2:16
      :END:
-*** Web Interface [5/6]
+*** Web Interface [6/6]
     :PROPERTIES:
     :COOKIE_DATA: todo recursive
     :VISIBILITY: children
@@ -241,7 +241,8 @@
     CLOCK: [2024-09-29 So 16:10]--[2024-09-29 So 16:30] =>  0:20
     :END:
     For an RSS reader, a web interface is the obvious approach, isn't it?
-**** TODO Feeds overview
+**** DONE Feeds overview
+     CLOSED: [2024-10-31 Do 17:43]
      :LOGBOOK:
      CLOCK: [2024-10-31 Do 01:00]--[2024-10-31 Do 01:48] =>  0:48
      CLOCK: [2024-10-31 Do 00:05]--[2024-10-31 Do 00:59] =>  0:54
