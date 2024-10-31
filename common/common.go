@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 18. 09. 2024 by Benjamin Walkenhorst
 // (c) 2024 Benjamin Walkenhorst
-// Time-stamp: <2024-10-31 01:50:15 krylon>
+// Time-stamp: <2024-10-31 17:53:08 krylon>
 
 package common
 
@@ -126,6 +126,11 @@ func Path(p path.Path) string {
 		return filepath.Join(
 			BaseDir,
 			"advisor",
+		)
+	case path.AdviceCache:
+		return filepath.Join(
+			BaseDir,
+			"advice_cache",
 		)
 	default:
 		panic(fmt.Sprintf("Invalid Path value: %s", p))

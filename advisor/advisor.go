@@ -2,18 +2,22 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 10. 03. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2024-10-28 20:42:55 krylon>
+// Time-stamp: <2024-10-31 18:18:26 krylon>
 
 // Package advisor provides suggestions on what Tags one might want to attach
 // to news Items.
 package advisor
 
 import (
+	"encoding/json"
 	"log"
 	"path/filepath"
 	"runtime"
 	"sort"
 	"strings"
+	"time"
+
+	bt "go.etcd.io/bbolt" // Use the BoltDB backend
 
 	"github.com/blicero/badnews/common"
 	"github.com/blicero/badnews/common/path"
@@ -21,10 +25,14 @@ import (
 	"github.com/blicero/badnews/logdomain"
 	"github.com/blicero/badnews/model"
 	"github.com/blicero/shield"
+	"github.com/faabiosr/cachego"
+	"github.com/faabiosr/cachego/bolt"
 
 	"github.com/blicero/krylib"
 	"github.com/endeveit/guesslanguage"
 )
+
+const cacheTimeout = time.Minute * 60
 
 // var nonword = regexp.MustCompile(`\W+`)
 
@@ -40,6 +48,8 @@ type Advisor struct {
 	log    *log.Logger
 	shield map[string]shield.Shield
 	tags   map[string]*model.Tag
+	bdb    *bt.DB
+	cache  cachego.Cache
 }
 
 // NewAdvisor returns a new Advisor, but it does not train it, yet.
@@ -75,7 +85,14 @@ func NewAdvisor() (*Advisor, error) {
 		return nil, err
 	} else if err = adv.loadTags(); err != nil {
 		return nil, err
+	} else if adv.bdb, err = bt.Open(common.Path(path.AdviceCache), 0600, nil); err != nil {
+		adv.log.Printf("[CRITICAL] Cannot open advice cache at %s: %s\n",
+			common.Path(path.AdviceCache),
+			err.Error())
+		return nil, err
 	}
+
+	adv.cache = bolt.New(adv.bdb)
 
 	return adv, nil
 } // func NewAdvisor() (*Advisor, error)
@@ -219,11 +236,34 @@ func (s suggList) Less(i, j int) bool { return s[j].Score < s[i].Score }
 // Suggest returns a map Tags and how likely they apply to the given Item.
 func (adv *Advisor) Suggest(item *model.Item, n int) []SuggestedTag {
 	var (
-		err        error
-		res        map[string]float64
-		lang, body string
-		s          shield.Shield
+		err                           error
+		res                           map[string]float64
+		lang, body, idstr, serialized string
+		buf                           []byte
+		s                             shield.Shield
 	)
+
+	idstr = item.IDString()
+	if serialized, err = adv.cache.Fetch(idstr); err != nil {
+		if err == cachego.ErrCacheExpired {
+			// Better luck next time
+		} else {
+			adv.log.Printf("[ERROR] Error looking up Item %d in advice cache: %s\n",
+				item.ID,
+				err.Error())
+		}
+	} else if serialized != "" {
+		var rlist []SuggestedTag
+
+		if err = json.Unmarshal([]byte(serialized), &rlist); err != nil {
+			adv.log.Printf("[ERROR] Failed to parse cached JSON: %s\n%s\n",
+				err.Error(),
+				serialized)
+		} else {
+			var cnt = krylib.Min(len(rlist), n)
+			return rlist[:cnt]
+		}
+	}
 
 	lang, body = adv.getLanguage(item)
 
@@ -259,6 +299,15 @@ func (adv *Advisor) Suggest(item *model.Item, n int) []SuggestedTag {
 
 	var cnt = krylib.Min(len(list), n)
 	sort.Sort(list)
+
+	if buf, err = json.Marshal(list); err != nil {
+		adv.log.Printf("[ERROR] Failed to serialize result list: %s",
+			err.Error())
+	} else if err = adv.cache.Save(idstr, string(buf), cacheTimeout); err != nil {
+		adv.log.Printf("[ERROR] Failed to cache tag advice for Item %d: %s",
+			item.ID,
+			err.Error())
+	}
 
 	return list[:cnt]
 } // func (adv *Advisor) Suggest(item *model.Item) []SuggestedTag
