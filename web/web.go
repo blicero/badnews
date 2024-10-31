@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 28. 09. 2024 by Benjamin Walkenhorst
 // (c) 2024 Benjamin Walkenhorst
-// Time-stamp: <2024-10-31 01:35:29 krylon>
+// Time-stamp: <2024-10-31 19:06:50 krylon>
 
 // Package web provides the web interface.
 package web
@@ -1910,6 +1910,14 @@ func (srv *Server) handleAjaxTagLinkAdd(w http.ResponseWriter, r *http.Request) 
 		srv.log.Printf("[ERROR] %s\n", res.Message)
 		hstatus = 500
 		goto SEND_RESPONSE
+	} else if err = srv.adv.Learn(tag, item); err != nil {
+		// As far as the client is concerned, this isn't really an error,
+		// the Item has been successfully tagged, after all.
+		msg = fmt.Sprintf("Failed to learn association of Tag %s with Item %d: %s",
+			tag.Name,
+			item.ID,
+			err.Error())
+		srv.log.Printf("[ERROR] %s\n", msg)
 	}
 
 	if pbuf, err = json.Marshal(tag); err != nil {
@@ -2042,6 +2050,12 @@ func (srv *Server) handleAjaxTagLinkRemove(w http.ResponseWriter, r *http.Reques
 		srv.log.Printf("[ERROR] %s\n", res.Message)
 		hstatus = 500
 		goto SEND_RESPONSE
+	} else if err = srv.adv.Unlearn(tag, item); err != nil {
+		srv.log.Printf("[ERROR] Failed to unlearn association of Tag %s (%d) and Item %d: %s\n",
+			tag.Name,
+			tag.ID,
+			item.ID,
+			err.Error())
 	}
 
 	res.Status = true

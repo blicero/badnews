@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 10. 03. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2024-10-31 18:18:26 krylon>
+// Time-stamp: <2024-10-31 19:05:05 krylon>
 
 // Package advisor provides suggestions on what Tags one might want to attach
 // to news Items.
@@ -197,6 +197,10 @@ func (adv *Advisor) Learn(t *model.Tag, i *model.Item) error {
 			i.Headline,
 			err.Error())
 		return err
+	} else if err = adv.cache.Delete(i.IDString()); err != nil {
+		adv.log.Printf("[ERROR] Failed to delete cached advice for Item %d: %s\n",
+			i.ID,
+			err.Error())
 	}
 
 	return nil
@@ -222,6 +226,10 @@ func (adv *Advisor) Unlearn(t *model.Tag, i *model.Item) error {
 			i.Headline,
 			err.Error())
 		return err
+	} else if err = adv.cache.Delete(i.IDString()); err != nil {
+		adv.log.Printf("[ERROR] Failed to delete cached advice for Item %d: %s\n",
+			i.ID,
+			err.Error())
 	}
 
 	return nil
