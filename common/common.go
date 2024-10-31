@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 18. 09. 2024 by Benjamin Walkenhorst
 // (c) 2024 Benjamin Walkenhorst
-// Time-stamp: <2024-10-31 17:53:08 krylon>
+// Time-stamp: <2024-10-31 18:36:45 krylon>
 
 package common
 
@@ -36,7 +36,7 @@ import (
 // their status.
 const (
 	Debug                    = true
-	Version                  = "0.9.0"
+	Version                  = "0.10.0"
 	AppName                  = "BadNews"
 	TimestampFormat          = "2006-01-02 15:04:05"
 	TimestampFormatMinute    = "2006-01-02 15:04"
