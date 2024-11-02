@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 24. 09. 2024 by Benjamin Walkenhorst
 // (c) 2024 Benjamin Walkenhorst
-// Time-stamp: <2024-10-24 21:51:41 krylon>
+// Time-stamp: <2024-11-02 18:35:49 krylon>
 
 // Package reader implements the fetching and parsing of RSS/Atom feeds.
 package reader
@@ -13,7 +13,9 @@ import (
 	"sync/atomic"
 	"time"
 
+	"github.com/blicero/badnews/blacklist"
 	"github.com/blicero/badnews/common"
+	"github.com/blicero/badnews/common/path"
 	"github.com/blicero/badnews/database"
 	"github.com/blicero/badnews/logdomain"
 	"github.com/blicero/badnews/model"
@@ -32,6 +34,7 @@ type Reader struct {
 	q         chan model.Feed
 	active    atomic.Bool
 	workerCnt int
+	bl        *blacklist.Blacklist
 }
 
 // New creates a new Reader. Duh.
@@ -48,6 +51,10 @@ func New(workers int) (*Reader, error) {
 		return nil, err
 	} else if rdr.pool, err = database.NewPool(workers); err != nil {
 		rdr.log.Printf("[ERROR] Cannot open database Pool: %s\n",
+			err.Error())
+		return nil, err
+	} else if rdr.bl, err = blacklist.NewFromFile(common.Path(path.Blacklist)); err != nil {
+		rdr.log.Printf("[ERROR] Failed to create Blacklist: %s\n",
 			err.Error())
 		return nil, err
 	}
@@ -177,6 +184,11 @@ func (r *Reader) process(f model.Feed) error {
 		}
 
 		var exists bool
+
+		if r.bl.Match(&item) {
+			r.bl.Sort()
+			continue
+		}
 
 		if exists, err = db.ItemExists(&item); err != nil {
 			r.log.Printf("[ERROR] Failed to check for Item %q: %s\n",

@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 28. 09. 2024 by Benjamin Walkenhorst
 // (c) 2024 Benjamin Walkenhorst
-// Time-stamp: <2024-10-31 21:09:14 krylon>
+// Time-stamp: <2024-11-02 19:11:27 krylon>
 
 // Package web provides the web interface.
 package web
@@ -28,6 +28,7 @@ import (
 	"time"
 
 	"github.com/blicero/badnews/advisor"
+	"github.com/blicero/badnews/blacklist"
 	"github.com/blicero/badnews/common"
 	"github.com/blicero/badnews/common/path"
 	"github.com/blicero/badnews/database"
@@ -65,6 +66,7 @@ type Server struct {
 	store     sessions.Store
 	judge     *judge.Judge
 	adv       *advisor.Advisor
+	bl        *blacklist.Blacklist
 }
 
 // Create creates and returns a new Server.
@@ -133,6 +135,10 @@ func Create(addr string) (*Server, error) {
 		srv.log.Printf("[CRITICAL] Failed to train Advisor: %s\n",
 			err.Error())
 		return nil, err
+	} else if srv.bl, err = blacklist.NewFromFile(common.Path(path.Blacklist)); err != nil {
+		srv.log.Printf("[CRITICAL] Failed to create Blacklist: %s\n",
+			err.Error())
+		return nil, err
 	}
 
 	// TODO As shield uses a database to persists its training data, I don't
@@ -190,6 +196,7 @@ func Create(addr string) (*Server, error) {
 	srv.router.HandleFunc("/feed/{id:(?:\\d+$)}", srv.handleFeedDetails)
 	srv.router.HandleFunc("/feed/all", srv.handleFeedPage)
 	srv.router.HandleFunc("/tags/all", srv.handleTagAll)
+	srv.router.HandleFunc("/blacklist", srv.handleBlacklist)
 
 	// AJAX Handlers
 	srv.router.HandleFunc("/ajax/beacon", srv.handleBeacon)
@@ -651,6 +658,71 @@ func (srv *Server) handleTagAll(w http.ResponseWriter, r *http.Request) {
 // 	const tmplName = "
 // } // func (srv *handleTagDetails(w http.ResponseWriter, r *http.Request)
 
+func (srv *Server) handleBlacklist(w http.ResponseWriter, r *http.Request) {
+	srv.log.Printf("[TRACE] Handle request for %s from %s\n",
+		r.URL.EscapedPath(),
+		r.RemoteAddr)
+	const tmplName = "blacklist"
+	var (
+		err  error
+		msg  string
+		tmpl *template.Template
+		sess *sessions.Session
+		db   *database.Database
+		data = tmplDataTagAll{
+			tmplDataBase: tmplDataBase{
+				Title: "Items",
+				Debug: true,
+				URL:   r.URL.EscapedPath(),
+			},
+		}
+	)
+
+	if sess, err = srv.store.Get(r, sessionNameFrontend); err != nil {
+		msg = fmt.Sprintf("Error getting client session from session store: %s",
+			err.Error())
+		srv.log.Println("[CRITICAL] " + msg)
+		srv.sendErrorMessage(w, msg)
+		return
+	} else if tmpl = srv.tmpl.Lookup(tmplName); tmpl == nil {
+		msg = fmt.Sprintf("Could not find template %q", tmplName)
+		srv.log.Println("[CRITICAL] " + msg)
+		srv.sendErrorMessage(w, msg)
+		return
+	}
+
+	db = srv.pool.Get()
+	defer srv.pool.Put(db)
+
+	if data.Tags, err = db.TagGetSorted(); err != nil {
+		msg = fmt.Sprintf("Failed to load Tags: %s",
+			err.Error())
+		srv.log.Println("[CRITICAL] " + msg)
+		srv.sendErrorMessage(w, msg)
+		return
+	} else if data.ItemCnt, err = db.TagGetItemCnt(); err != nil {
+		msg = fmt.Sprintf("Failed to load Item count: %s",
+			err.Error())
+		srv.log.Println("[CRITICAL] " + msg)
+		srv.sendErrorMessage(w, msg)
+		return
+	}
+
+	if err = sess.Save(r, w); err != nil {
+		srv.log.Printf("[ERROR] Failed to set session cookie: %s\n",
+			err.Error())
+	}
+	w.Header().Set("Cache-Control", "no-store, max-age=0")
+	w.Header().Set("Content-Type", "text/html")
+	w.WriteHeader(200)
+	if err = tmpl.Execute(w, &data); err != nil {
+		msg = fmt.Sprintf("Error rendering template %q: %s",
+			tmplName,
+			err.Error())
+		srv.sendErrorMessage(w, msg)
+	}
+} // func (srv *Server) handleBlacklist(w http.ResponseWriter, r *http.Request)
+
 ////////////////////////////////////////////////////////////////////////////////
 //// Ajax handlers /////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -889,6 +961,7 @@ func (srv *Server) handleAjaxItems(w http.ResponseWriter, r *http.Request) {
 		msg, rating string
 		feeds       []model.Feed
 		tags        []*model.Tag
+		items       []*model.Item
 		vars        map[string]string
 		hstatus     = 200
 		data        = tmplDataItemView{
@@ -949,7 +1022,7 @@ func (srv *Server) handleAjaxItems(w http.ResponseWriter, r *http.Request) {
 	db = srv.pool.Get()
 	defer srv.pool.Put(db)
 
-	if data.Items, err = db.ItemGetRecentPaged(cnt, offset); err != nil {
+	if items, err = db.ItemGetRecentPaged(cnt, offset); err != nil {
 		res.Message = fmt.Sprintf("Failed to load recent items: %s",
 			err.Error())
 		srv.log.Printf("[CANTHAPPEN] %s\n", res.Message)
@@ -972,6 +1045,16 @@ func (srv *Server) handleAjaxItems(w http.ResponseWriter, r *http.Request) {
 		srv.log.Printf("[CANTHAPPEN] %s\n", res.Message)
 		hstatus = 500
 		goto SEND_RESPONSE
+	}
+
+	data.Items = make([]*model.Item, 0, len(items))
+
+	for _, i := range items {
+		if srv.bl.Match(i) {
+			srv.bl.Sort()
+			continue
+		}
+		data.Items = append(data.Items, i)
 	}
 
 	data.Suggestions = make(map[int64][]advisor.SuggestedTag, len(data.Items))
@@ -1074,6 +1157,7 @@ func (srv *Server) handleAjaxItemsByFeed(w http.ResponseWriter, r *http.Request)
 		db          *database.Database
 		buf         bytes.Buffer
 		tmpl        *template.Template
+		items       []*model.Item
 		feedID      int64
 		res         Reply
 		msg, rating string
@@ -1121,7 +1205,7 @@ func (srv *Server) handleAjaxItemsByFeed(w http.ResponseWriter, r *http.Request)
 		srv.log.Printf("[CANTHAPPEN] %s\n", res.Message)
 		hstatus = 500
 		goto SEND_RESPONSE
-	} else if data.Items, err = db.ItemGetByFeed(data.Feed, cnt, offset); err != nil {
+	} else if items, err = db.ItemGetByFeed(data.Feed, cnt, offset); err != nil {
 		res.Message = fmt.Sprintf("Failed to get recent Items for Feed %s (%d): %s",
 			data.Feed.Title,
 			data.Feed.ID,
@@ -1141,8 +1225,13 @@ func (srv *Server) handleAjaxItemsByFeed(w http.ResponseWriter, r *http.Request)
 		goto SEND_RESPONSE
 	}
 
-	for _, item := range data.Items {
-		if item.Tags, err = db.TagLinkGetByItem(item); err != nil {
+	data.Items = make([]*model.Item, 0, len(items))
+
+	for _, item := range items {
+		if srv.bl.Match(item) {
+			srv.bl.Sort()
+			continue
+		} else if item.Tags, err = db.TagLinkGetByItem(item); err != nil {
 			res.Message = fmt.Sprintf("Failed to load Tags for Item %d: %s",
 				item.ID,
 				err.Error())
@@ -1150,6 +1239,8 @@ func (srv *Server) handleAjaxItemsByFeed(w http.ResponseWriter, r *http.Request)
 			hstatus = 500
 			goto SEND_RESPONSE
 		}
+
+		data.Items = append(data.Items, item)
 	}
 
 	data.Feeds = make(map[int64]model.Feed, len(feeds))
