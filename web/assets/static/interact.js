@@ -1,4 +1,4 @@
-// Time-stamp: <2024-10-31 20:34:49 krylon>
+// Time-stamp: <2024-11-02 21:49:42 krylon>
 // -*- mode: javascript; coding: utf-8; -*-
 // Copyright 2015-2020 Benjamin Walkenhorst <krylon@gmx.net>
 //
@@ -243,7 +243,7 @@ function load_items(cnt) {
                               tbody.innerHTML += res.payload.content
                               item_cnt += cnt
 
-                              if (res.payload.count == cnt && item_cnt < max_cnt) {
+                              if (res.payload.count > 0 && item_cnt < max_cnt) {
                                   const msg = `${item_cnt} Items already loaded, loading ${cnt} more items.`
                                   console.log(msg)
                                   msg_add(msg, 2)
@@ -407,3 +407,43 @@ function toggle_feed_active(feed_id) {
         msg_add(status, 3)
     })
 } // function toggle_feed_active(feed_id)
+
+function blacklist_add_pattern() {
+    const url = "/ajax/blacklist/add"
+    const txtid = "#blacklist-pattern"
+    const node = $(txtid)[0]
+    const pat = node.value
+    try {
+        const re = RegExp(pat)
+        $.post(
+            url,
+            { "pattern": pat },
+            (res) => {
+                if (res.status) {
+                    const tr = `<tr id="bl_pat_${res.payload.pattern.id}">
+  <td>
+    ${pat}
+  </td>
+  <td>0</td>
+  <td>
+    <button type="button" class="btn">Edit</button>
+    <button type="button" class="btn btn-danger">Remove</button>
+  </td>
+</tr>`
+                    const tbl = $("#blacklist-table")[0]
+                    tbl.innerHTML += tr
+                } else {
+                    msg_add(res.message, 3)
+                }
+            },
+            'json')
+    } catch (e) {
+        if (e instanceof SyntaxError) {
+            // ...
+            const msg = `Invalid pattern: ${e}`
+            msg_add(msg, 3)
+        } else {
+            throw e
+        }
+    }
+} // function blacklist_add_pattern()

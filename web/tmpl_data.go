@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 06. 05. 2020 by Benjamin Walkenhorst
 // (c) 2020 Benjamin Walkenhorst
-// Time-stamp: <2024-10-31 00:29:56 krylon>
+// Time-stamp: <2024-11-02 20:10:46 krylon>
 //
 // This file contains data structures to be passed to HTML templates.
 
@@ -14,6 +14,7 @@ import (
 	"time"
 
 	"github.com/blicero/badnews/advisor"
+	"github.com/blicero/badnews/blacklist"
 	"github.com/blicero/badnews/common"
 	"github.com/blicero/badnews/model"
 
@@ -91,6 +92,11 @@ type tmplDataTagAll struct {
 	Tags    []*model.Tag
 	ItemCnt map[int64]int64
 	Tag     model.Tag
+}
+
+type tmplDataBlacklist struct {
+	tmplDataBase
+	Blacklist *blacklist.Blacklist
 }
 
 // Local Variables:  //

@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 28. 09. 2024 by Benjamin Walkenhorst
 // (c) 2024 Benjamin Walkenhorst
-// Time-stamp: <2024-11-02 19:11:27 krylon>
+// Time-stamp: <2024-11-02 21:31:03 krylon>
 
 // Package web provides the web interface.
 package web
@@ -123,18 +123,18 @@ func Create(addr string) (*Server, error) {
 			err.Error())
 		srv.pool.Close() // nolint: errcheck
 		return nil, err
-	} else if err = srv.judge.Train(); err != nil {
-		srv.log.Printf("[CRITICAL] Failed to train classifier: %s\n",
-			err.Error())
-		return nil, err
+		// } else if err = srv.judge.Train(); err != nil {
+		// 	srv.log.Printf("[CRITICAL] Failed to train classifier: %s\n",
+		// 		err.Error())
+		// 	return nil, err
 	} else if srv.adv, err = advisor.NewAdvisor(); err != nil {
 		srv.log.Printf("[CRITICAL] Failed to create Advisor: %s\n",
 			err.Error())
 		return nil, err
-	} else if err = srv.adv.Train(); err != nil {
-		srv.log.Printf("[CRITICAL] Failed to train Advisor: %s\n",
-			err.Error())
-		return nil, err
+		// } else if err = srv.adv.Train(); err != nil {
+		// 	srv.log.Printf("[CRITICAL] Failed to train Advisor: %s\n",
+		// 		err.Error())
+		// 	return nil, err
 	} else if srv.bl, err = blacklist.NewFromFile(common.Path(path.Blacklist)); err != nil {
 		srv.log.Printf("[CRITICAL] Failed to create Blacklist: %s\n",
 			err.Error())
@@ -212,6 +212,7 @@ func Create(addr string) (*Server, error) {
 	srv.router.HandleFunc("/ajax/tag/link/{tag:(?:\\d+)}/{item:(?:\\d+)}", srv.handleAjaxTagLinkAdd)
 	srv.router.HandleFunc("/ajax/tag/unlink/{tag:(?:\\d+)}/{item:(?:\\d+)}", srv.handleAjaxTagLinkRemove)
 	srv.router.HandleFunc("/ajax/tag/form", srv.handleAjaxTagForm)
+	srv.router.HandleFunc("/ajax/blacklist/add", srv.handleAjaxBlacklistAdd)
 
 	return srv, nil
 } // func Create(addr string) (*Server, error)
@@ -668,13 +669,13 @@ func (srv *Server) handleBlacklist(w http.ResponseWriter, r *http.Request) {
 		msg  string
 		tmpl *template.Template
 		sess *sessions.Session
-		db   *database.Database
-		data = tmplDataTagAll{
+		data = tmplDataBlacklist{
 			tmplDataBase: tmplDataBase{
 				Title: "Items",
 				Debug: true,
 				URL:   r.URL.EscapedPath(),
 			},
+			Blacklist: srv.bl,
 		}
 	)
 
@@ -686,23 +687,6 @@ func (srv *Server) handleBlacklist(w http.ResponseWriter, r *http.Request) {
 		return
 	} else if tmpl = srv.tmpl.Lookup(tmplName); tmpl == nil {
 		msg = fmt.Sprintf("Could not find template %q", tmplName)
-		srv.log.Println("[CRITICAL] " + msg)
-		srv.sendErrorMessage(w, msg)
-		return
-	}
-
-	db = srv.pool.Get()
-	defer srv.pool.Put(db)
-
-	if data.Tags, err = db.TagGetSorted(); err != nil {
-		msg = fmt.Sprintf("Failed to load Tags: %s",
-			err.Error())
-		srv.log.Println("[CRITICAL] " + msg)
-		srv.sendErrorMessage(w, msg)
-		return
-	} else if data.ItemCnt, err = db.TagGetItemCnt(); err != nil {
-		msg = fmt.Sprintf("Failed to load Item count: %s",
-			err.Error())
 		srv.log.Println("[CRITICAL] " + msg)
 		srv.sendErrorMessage(w, msg)
 		return
@@ -2278,3 +2262,77 @@ SEND_RESPONSE:
 		srv.log.Println("[ERROR] " + msg)
 	}
 } // func (srv *Server) handleAjaxTagForm(w http.ResponseWriter, r *http.Request)
+
+func (srv *Server) handleAjaxBlacklistAdd(w http.ResponseWriter, r *http.Request) {
+	srv.log.Printf("[TRACE] Handle request for %s from %s\n",
+		r.URL.EscapedPath(),
+		r.RemoteAddr)
+	var (
+		err      error
+		sess     *sessions.Session
+		rbuf     []byte
+		res      = Reply{Payload: make(map[string]string, 3)}
+		msg, pat string
+		hstatus  = 200
+	)
+
+	if err = r.ParseForm(); err != nil {
+		res.Message = fmt.Sprintf("Error parsing form data: %s",
+			err.Error())
+		srv.log.Printf("[ERROR] %s\n", res.Message)
+		hstatus = 400
+		goto SEND_RESPONSE
+	}
+
+	pat = r.FormValue("pattern")
+
+	if pat == "" {
+		res.Message = "An empty string is not a valid pattern"
+		srv.log.Printf("[ERROR] %s\n", res.Message)
+		hstatus = 500
+		goto SEND_RESPONSE
+	} else if err = srv.bl.AddString(pat); err != nil {
+		res.Message = fmt.Sprintf("Invalid pattern %q: %s",
+			pat,
+			err.Error())
+		srv.log.Printf("[ERROR] %s\n", res.Message)
+		hstatus = 500
+		goto SEND_RESPONSE
+	} else if err = srv.bl.Dump(common.Path(path.Blacklist)); err != nil {
+		res.Message = fmt.Sprintf("Failed to save Blacklist: %s",
+			err.Error())
+		srv.log.Printf("[ERROR] %s\n", res.Message)
+		hstatus = 500
+		goto SEND_RESPONSE
+	}
+
+	res.Payload = map[string]string{
+		"pattern": pat,
+	}
+
+	res.Message = "Pattern successfully added to Blacklist"
+	res.Status = true
+
+SEND_RESPONSE:
+	if sess != nil {
+		if err = sess.Save(r, w); err != nil {
+			srv.log.Printf("[ERROR] Failed to set session cookie: %s\n",
+				err.Error())
+		}
+	}
+	res.Timestamp = time.Now()
+	if rbuf, err = json.Marshal(&res); err != nil {
+		srv.log.Printf("[ERROR] Error serializing response: %s\n",
+			err.Error())
+		rbuf = errJSON(err.Error())
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Cache-Control", "no-store, max-age=0")
+	w.WriteHeader(hstatus)
+	if _, err = w.Write(rbuf); err != nil {
+		msg = fmt.Sprintf("Failed to send result: %s",
+			err.Error())
+		srv.log.Println("[ERROR] " + msg)
+	}
+} // func (srv *Server) handleAjaxBlacklistAdd(w http.ResponseWriter, r *http.Request)

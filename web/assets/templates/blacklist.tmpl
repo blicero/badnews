@@ -1,6 +1,6 @@
 {{ define "blacklist" }}
 {{/* Created on 02. 11. 2024 */}}
-{{/* Time-stamp: <2024-11-02 19:10:31 krylon> */}}
+{{/* Time-stamp: <2024-11-02 21:26:49 krylon> */}}
 <!DOCTYPE html>
 <html>
   {{ template "head" . }}
@@ -13,13 +13,33 @@
         <tr>
           <th>Pattern</th>
           <th>Match Count</th>
+          <th></th>
         </tr>
       </thead>
       <tbody id="blacklist-table">
-        {{ range .Blacklist.List }}
         <tr>
+          <td>
+            <input type="text" id="blacklist-pattern" />
+          </td>
+          <td>
+          </td>
+          <td>
+            <button
+              type="button"
+              class="btn btn-success"
+              onclick="blacklist_add_pattern();">
+              Add
+            </button>
+          </td>
+        </tr>
+        {{ range .Blacklist.List }}
+        <tr id="bl_pat_{{ .ID }}">
           <td>{{ .Pattern }}</td>
           <td>{{ .Cnt }}</td>
+          <td>
+            <button type="button" class="btn">Edit</button>
+            <button type="button" class="btn btn-danger">Remove</button>
+          </td>
         </tr>
         {{ end }}
       </tbody>
