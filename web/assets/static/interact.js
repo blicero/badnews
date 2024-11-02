@@ -6,17 +6,17 @@
 // It is not a /big/ problem right now, but in the long run, I will have to
 // break this thing up into several smaller files.
 
-'use strict'
+'use strict';
 
-function defined (x) {
+function defined(x) {
     return undefined !== x && null !== x
 }
 
-function fmtDateNumber (n) {
+function fmtDateNumber(n) {
     return (n < 10 ? '0' : '') + n.toString()
 } // function fmtDateNumber(n)
 
-function timeStampString (t) {
+function timeStampString(t) {
     if ((typeof t) === 'string') {
         return t
     }
@@ -34,7 +34,7 @@ function timeStampString (t) {
     return s
 } // function timeStampString(t)
 
-function fmtDuration (seconds) {
+function fmtDuration(seconds) {
     let minutes = 0
     let hours = 0
 
@@ -57,7 +57,7 @@ function fmtDuration (seconds) {
     }
 } // function fmtDuration(seconds)
 
-function beaconLoop () {
+function beaconLoop() {
     try {
         if (settings.beacon.active) {
             const req = $.get('/ajax/beacon',
@@ -98,7 +98,7 @@ function beaconLoop () {
     }
 } // function beaconLoop()
 
-function beaconToggle () {
+function beaconToggle() {
     settings.beacon.active = !settings.beacon.active
     saveSetting('beacon', 'active', settings.beacon.active)
 
@@ -122,7 +122,7 @@ function toggle_hide_boring() {
 
 */
 
-function db_maintenance () {
+function db_maintenance() {
     const maintURL = '/ajax/db_maint'
 
     const req = $.get(
@@ -163,7 +163,7 @@ function scale_images() {
 } // function scale_images()
 
 // Found here: https://stackoverflow.com/questions/3971841/how-to-resize-images-proportionally-keeping-the-aspect-ratio#14731922
-function shrink_img (srcWidth, srcHeight, maxWidth, maxHeight) {
+function shrink_img(srcWidth, srcHeight, maxWidth, maxHeight) {
     const ratio = Math.min(maxWidth / srcWidth, maxHeight / srcHeight)
 
     return { width: srcWidth * ratio, height: srcHeight * ratio }
