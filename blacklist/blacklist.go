@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 01. 11. 2024 by Benjamin Walkenhorst
 // (c) 2024 Benjamin Walkenhorst
-// Time-stamp: <2024-11-02 18:52:52 krylon>
+// Time-stamp: <2024-11-02 21:42:11 krylon>
 
 // Package blacklist provides a way to filter news Items with regular expressions.
 package blacklist
@@ -10,6 +10,7 @@ package blacklist
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"io"
 	"os"
 	"regexp"
@@ -38,6 +39,41 @@ func (p *Pattern) Match(i *model.Item) bool {
 	}
 	return false
 } // func (p *Pattern) Match(i *model.Item) bool
+
+func (p *Pattern) MarshalJSON() ([]byte, error) {
+	var s = fmt.Sprintf(`{ "id": %d, "pattern": %q, "cnt": %d }`,
+		p.ID,
+		p.Pattern.String(),
+		p.Cnt.Load(),
+	)
+
+	return []byte(s), nil
+} // func (p *Pattern) MarshalJSON() ([]byte, error)
+
+func (p *Pattern) UnmarshalJSON(b []byte) error {
+	type dummy struct {
+		ID      int64  `json:"id"`
+		Pattern string `json:"pattern"`
+		Cnt     int64  `json:"cnt"`
+	}
+
+	var (
+		err error
+		d   dummy
+	)
+
+	if err = json.Unmarshal(b, &d); err != nil {
+		return err
+	}
+
+	p.ID = d.ID
+	p.Cnt.Store(d.Cnt)
+	if p.Pattern, err = regexp.Compile(d.Pattern); err != nil {
+		return err
+	}
+
+	return nil
+} // func (p *Pattern) UnmarshalJSON(b []byte) error
 
 // Blacklist is a collection of Patterns.
 type Blacklist struct {
@@ -174,3 +210,25 @@ func (bl *Blacklist) Dump(path string) error {
 
 	return nil
 } // func (bl Blacklist) Dump(path string) error
+
+// Add adds a Pattern to the Blacklist
+func (bl *Blacklist) Add(p *Pattern) {
+	bl.lock.Lock()
+	bl.List = append(bl.List, p)
+	bl.lock.Unlock()
+}
+
+// AddString creates a new Pattern from the given string and adds it to the Blacklist.
+func (bl *Blacklist) AddString(s string) error {
+	var p = new(Pattern)
+	var err error
+
+	if p.Pattern, err = regexp.Compile(s); err != nil {
+		return err
+	}
+
+	bl.lock.Lock()
+	defer bl.lock.Unlock()
+	bl.List = append(bl.List, p)
+	return nil
+} // func (bl *Blacklist) AddString(s string) error
