@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 10. 03. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2024-10-31 19:05:05 krylon>
+// Time-stamp: <2024-11-02 20:13:07 krylon>
 
 // Package advisor provides suggestions on what Tags one might want to attach
 // to news Items.
@@ -32,7 +32,7 @@ import (
 	"github.com/endeveit/guesslanguage"
 )
 
-const cacheTimeout = time.Minute * 60
+const cacheTimeout = time.Minute * 240
 
 // var nonword = regexp.MustCompile(`\W+`)
 

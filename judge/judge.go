@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 04. 10. 2024 by Benjamin Walkenhorst
 // (c) 2024 Benjamin Walkenhorst
-// Time-stamp: <2024-10-31 17:47:08 krylon>
+// Time-stamp: <2024-11-02 20:13:19 krylon>
 
 // Package judge provides the guessing of ratings for items that have not been manually rated.
 package judge
@@ -30,7 +30,7 @@ import (
 )
 
 // TODO I'll increase this value once I'm done testing.
-const cacheTimeout = time.Minute * 10
+const cacheTimeout = time.Minute * 240
 
 // Judge is a classifier to rate News Items as boring or interesting.
 type Judge struct {
