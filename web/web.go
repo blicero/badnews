@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 28. 09. 2024 by Benjamin Walkenhorst
 // (c) 2024 Benjamin Walkenhorst
-// Time-stamp: <2024-10-31 19:06:50 krylon>
+// Time-stamp: <2024-10-31 21:09:14 krylon>
 
 // Package web provides the web interface.
 package web
@@ -883,6 +883,8 @@ func (srv *Server) handleAjaxItems(w http.ResponseWriter, r *http.Request) {
 		buf         bytes.Buffer
 		tmpl        *template.Template
 		cnt, offset int64
+		hideBoring  bool
+		hbstr       string
 		res         Reply
 		msg, rating string
 		feeds       []model.Feed
@@ -919,7 +921,26 @@ func (srv *Server) handleAjaxItems(w http.ResponseWriter, r *http.Request) {
 		srv.log.Printf("[CANTHAPPEN] %s\n", res.Message)
 		hstatus = 400
 		goto SEND_RESPONSE
+	} else if err = r.ParseForm(); err != nil {
+		res.Message = fmt.Sprintf("Cannot parse form data: %s",
+			err.Error())
+		srv.log.Printf("[ERROR] %s\n", res.Message)
+		hstatus = 400
+		goto SEND_RESPONSE
 	}
+
+	hbstr = r.FormValue("hideBoring")
+	if hideBoring, err = strconv.ParseBool(hbstr); err != nil {
+		res.Message = fmt.Sprintf("Cannot parse hideBoring flag %q: %s",
+			hbstr,
+			err.Error())
+		srv.log.Printf("[ERROR] %s\n", res.Message)
+		hstatus = 500
+		goto SEND_RESPONSE
+	}
+
+	srv.log.Printf("[DEBUG] Hide Boring Items? %t\n",
+		hideBoring)
 
 	srv.log.Printf("[DEBUG] Load %d items, offset %d",
 		cnt,

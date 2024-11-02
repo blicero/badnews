@@ -1,11 +1,11 @@
 {{ define "item_view" }}
 {{/* Created on 01. 10. 2024 */}}
-{{/* Time-stamp: <2024-10-30 23:36:18 krylon> */}}
+{{/* Time-stamp: <2024-10-31 21:14:16 krylon> */}}
 {{ $feeds := .Feeds }}
 {{ $tags := .Tags }}
 {{ $suggestion_table := .Suggestions }}
 {{ range $id, $item := .Items }}
-<tr id="tr_item_{{ $id }}">
+<tr id="tr_item_{{ $id }}" {{ if (eq $item.Rating -1) }}class="boring"{{ end }}>
   <td>{{ fmt_time_minute $item.Timestamp }}</td>
   <td><a href="/feed/{{ $item.FeedID }}">{{ (index $feeds $item.FeedID).Title }}</a></td>
   <td><a href="{{ $item.URL }}">{{ $item.Headline }}</a></td>

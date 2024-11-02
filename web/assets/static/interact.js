@@ -1,4 +1,4 @@
-// Time-stamp: <2024-10-31 01:45:21 krylon>
+// Time-stamp: <2024-10-31 20:34:49 krylon>
 // -*- mode: javascript; coding: utf-8; -*-
 // Copyright 2015-2020 Benjamin Walkenhorst <krylon@gmx.net>
 //
@@ -108,6 +108,13 @@ function beaconToggle () {
         beaconDiv.classList.remove('error')
     }
 } // function beaconToggle()
+
+function toggle_hide_boring() {
+    const state = !settings.news.hideBoring
+    settings.news.hideBoring = state
+    saveSetting('news', 'hideBoring', state)
+    $("#toggle_hide_boring")[0].checked = state
+} // function toggle_hide_boring()
 
 /*
   The ‘content’ attribute of Window objects is deprecated.  Please use ‘window.top’ instead. interact.js:125:8
@@ -227,7 +234,9 @@ function load_items(cnt) {
     const url = `/ajax/items/${item_cnt}/${cnt}`
 
     const req = $.get(url,
-                      {},
+                      {
+                          "hideBoring": settings.news.hideBoring,
+                      },
                       (res) => {
                           if (res.status) {
                               const tbody = $('#items')[0]
