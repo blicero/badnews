@@ -1,5 +1,5 @@
 # -*- mode: org; fill-column: 78; -*-
-# Time-stamp: <2024-10-31 19:43:00 krylon>
+# Time-stamp: <2024-11-01 15:58:04 krylon>
 #
 #+TAGS: internals(i) ui(u) bug(b) feature(f)
 #+TAGS: database(d) design(e), meditation(m)
@@ -9,7 +9,7 @@
 #+TODO: MEDITATE(m) PLANNING(p) | SUSPENDED(s)
 #+PRIORITIES: A G D
 
-* BadNews [19/20]
+* BadNews [19/22]
   :PROPERTIES:
   :COOKIE_DATA: todo recursive
   :VISIBILITY: children
@@ -17,15 +17,16 @@
   BadNews is an RSS reader
 ** Clock table
    #+BEGIN: clocktable :scope file :maxlevel 202 :emphasize t
-   #+CAPTION: Clock summary at [2024-10-31 Do 19:42]
+   #+CAPTION: Clock summary at [2024-11-01 Fr 02:01]
    | Headline                                             | Time      |            |         |          |       |      |
    |------------------------------------------------------+-----------+------------+---------+----------+-------+------|
-   | *Total time*                                         | *4d 1:39* |            |         |          |       |      |
+   | *Total time*                                         | *4d 4:24* |            |         |          |       |      |
    |------------------------------------------------------+-----------+------------+---------+----------+-------+------|
-   | *BadNews [19/20]*                                    | *4d 1:39* |            |         |          |       |      |
-   | \_  /Features [11/11]/                               |           | /2d 4:01/  |         |          |       |      |
-   | \_    Rating and Tagging [11/11]                     |           |            | 2d 4:01 |          |       |      |
-   | \_      Rating [1/1]                                 |           |            |         |     6:30 |       |      |
+   | *BadNews [19/22]*                                    | *4d 4:24* |            |         |          |       |      |
+   | \_  /Features [11/13]/                               |           | /2d 6:46/  |         |          |       |      |
+   | \_    Rating and Tagging [11/11]                     |           |            | 2d 6:46 |          |       |      |
+   | \_      Rating [1/2]                                 |           |            |         |     9:15 |       |      |
+   | \_        Hide boring Items                          |           |            |         |          |  2:45 |      |
    | \_        Caching results                            |           |            |         |          |  0:27 |      |
    | \_      Tags [9/9]                                   |           |            |         | 1d 21:30 |       |      |
    | \_        Re-render everything tag when editing...   |           |            |         |          |  0:56 |      |
@@ -58,11 +59,24 @@
    | \_        Caching                                    |           |            |         |          |  1:32 |      |
    #+END:
 ** Journal
-** Features [11/11]
+** Features [11/13]
    :PROPERTIES:
    :COOKIE_DATA: todo recursive
    :VISIBILITY: children
    :END:
+*** TODO Blacklisting [0/1]
+    :PROPERTIES:
+    :COOKIE_DATA: todo recursive
+    :VISIBILITY: children
+    :END:
+    :LOGBOOK:
+    CLOCK: [2024-11-01 Fr 15:58]
+    :END:
+    I would like to be able to blacklist items based on regular expressions,
+    so they never find their way into the database (ideally) or are not
+    displayed in the web UI.
+**** TODO Storage
+     Do I store the patterns in the database?
 *** Rating and Tagging [11/11]
     :PROPERTIES:
     :COOKIE_DATA: todo recursive
@@ -73,7 +87,7 @@
     :END:
     I want to take the opportunity to rethink the way I did the tagging and
     rating in the old ticker app.
-**** DONE Rating [1/1]
+**** DONE Rating [1/2]
      CLOSED: [2024-10-20 So 17:07]
      :PROPERTIES:
      :COOKIE_DATA: todo recursive
@@ -88,6 +102,12 @@
      [2024-10-04 Fr 20:09]
      Okay, I can rate and un-rate items now, now I need a kind of Bayesian net
      to guess how interesting or boring the other items are.
+***** TODO Hide boring Items
+      :LOGBOOK:
+      CLOCK: [2024-10-31 Do 20:15]--[2024-10-31 Do 23:00] =>  2:45
+      :END:
+      I would like Items that I have marked explicitly as boring to not be
+      shown in the news ticker.
 ***** DONE Caching results
       CLOSED: [2024-10-07 Mo 16:09]
       :LOGBOOK:
