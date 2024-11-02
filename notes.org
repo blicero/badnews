@@ -1,5 +1,5 @@
 # -*- mode: org; fill-column: 78; -*-
-# Time-stamp: <2024-11-01 15:58:04 krylon>
+# Time-stamp: <2024-11-02 19:24:23 krylon>
 #
 #+TAGS: internals(i) ui(u) bug(b) feature(f)
 #+TAGS: database(d) design(e), meditation(m)
@@ -9,7 +9,7 @@
 #+TODO: MEDITATE(m) PLANNING(p) | SUSPENDED(s)
 #+PRIORITIES: A G D
 
-* BadNews [19/22]
+* BadNews [19/23]
   :PROPERTIES:
   :COOKIE_DATA: todo recursive
   :VISIBILITY: children
@@ -17,13 +17,14 @@
   BadNews is an RSS reader
 ** Clock table
    #+BEGIN: clocktable :scope file :maxlevel 202 :emphasize t
-   #+CAPTION: Clock summary at [2024-11-01 Fr 02:01]
+   #+CAPTION: Clock summary at [2024-11-02 Sa 19:24]
    | Headline                                             | Time      |            |         |          |       |      |
    |------------------------------------------------------+-----------+------------+---------+----------+-------+------|
-   | *Total time*                                         | *4d 4:24* |            |         |          |       |      |
+   | *Total time*                                         | *4d 7:00* |            |         |          |       |      |
    |------------------------------------------------------+-----------+------------+---------+----------+-------+------|
-   | *BadNews [19/22]*                                    | *4d 4:24* |            |         |          |       |      |
-   | \_  /Features [11/13]/                               |           | /2d 6:46/  |         |          |       |      |
+   | *BadNews [19/23]*                                    | *4d 7:00* |            |         |          |       |      |
+   | \_  /Features [11/14]/                               |           | /2d 9:22/  |         |          |       |      |
+   | \_    Blacklisting [0/1]                             |           |            |    2:36 |          |       |      |
    | \_    Rating and Tagging [11/11]                     |           |            | 2d 6:46 |          |       |      |
    | \_      Rating [1/2]                                 |           |            |         |     9:15 |       |      |
    | \_        Hide boring Items                          |           |            |         |          |  2:45 |      |
@@ -59,7 +60,7 @@
    | \_        Caching                                    |           |            |         |          |  1:32 |      |
    #+END:
 ** Journal
-** Features [11/13]
+** Features [11/14]
    :PROPERTIES:
    :COOKIE_DATA: todo recursive
    :VISIBILITY: children
@@ -70,7 +71,8 @@
     :VISIBILITY: children
     :END:
     :LOGBOOK:
-    CLOCK: [2024-11-01 Fr 15:58]
+    CLOCK: [2024-11-02 Sa 17:44]--[2024-11-02 Sa 19:23] =>  1:39
+    CLOCK: [2024-11-01 Fr 15:58]--[2024-11-01 Fr 16:55] =>  0:57
     :END:
     I would like to be able to blacklist items based on regular expressions,
     so they never find their way into the database (ideally) or are not
