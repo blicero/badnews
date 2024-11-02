@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 18. 09. 2024 by Benjamin Walkenhorst
 // (c) 2024 Benjamin Walkenhorst
-// Time-stamp: <2024-10-31 18:36:45 krylon>
+// Time-stamp: <2024-11-02 17:43:28 krylon>
 
 package common
 
@@ -131,6 +131,11 @@ func Path(p path.Path) string {
 		return filepath.Join(
 			BaseDir,
 			"advice_cache",
+		)
+	case path.Blacklist:
+		return filepath.Join(
+			BaseDir,
+			"blacklist.json",
 		)
 	default:
 		panic(fmt.Sprintf("Invalid Path value: %s", p))
