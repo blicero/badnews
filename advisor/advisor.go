@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 10. 03. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2024-11-02 20:13:07 krylon>
+// Time-stamp: <2024-11-04 18:44:12 krylon>
 
 // Package advisor provides suggestions on what Tags one might want to attach
 // to news Items.
@@ -255,7 +255,7 @@ func (adv *Advisor) Suggest(item *model.Item, n int) []SuggestedTag {
 	if serialized, err = adv.cache.Fetch(idstr); err != nil {
 		if err == cachego.ErrCacheExpired {
 			// Better luck next time
-		} else {
+		} else if adv.cache.Contains(idstr) {
 			adv.log.Printf("[ERROR] Error looking up Item %d in advice cache: %s\n",
 				item.ID,
 				err.Error())

@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 04. 10. 2024 by Benjamin Walkenhorst
 // (c) 2024 Benjamin Walkenhorst
-// Time-stamp: <2024-11-02 20:13:19 krylon>
+// Time-stamp: <2024-11-04 18:44:43 krylon>
 
 // Package judge provides the guessing of ratings for items that have not been manually rated.
 package judge
@@ -97,7 +97,7 @@ func (j *Judge) Rate(i *model.Item) (string, error) {
 	if rating, err = j.cache.Fetch(i.IDString()); err != nil {
 		if strings.Contains(err.Error(), "cache expired") {
 			// tough luck
-		} else {
+		} else if j.cache.Contains(i.IDString()) {
 			j.log.Printf("[ERROR] Failed to lookup Item %q (%d) in cache: %s\n",
 				i.Headline,
 				i.ID,
