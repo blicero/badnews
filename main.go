@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 18. 09. 2024 by Benjamin Walkenhorst
 // (c) 2024 Benjamin Walkenhorst
-// Time-stamp: <2024-10-31 19:22:05 krylon>
+// Time-stamp: <2024-11-04 18:35:57 krylon>
 
 package main
 
@@ -26,20 +26,22 @@ func main() {
 		common.BuildStamp.Format(common.TimestampFormat))
 
 	var (
-		err        error
-		rdr        *reader.Reader
-		srv        *web.Server
-		sigq       chan os.Signal
-		flushCache bool
-		minlog     = "TRACE"
-		baseDir    = common.Path(path.Base)
-		addr       = fmt.Sprintf("[::1]:%d", common.Port)
+		err             error
+		rdr             *reader.Reader
+		srv             *web.Server
+		sigq            chan os.Signal
+		flushCache      bool
+		minlog          = "TRACE"
+		baseDir         = common.Path(path.Base)
+		workerCntReader int
+		addr            = fmt.Sprintf("[::1]:%d", common.Port)
 	)
 
 	flag.StringVar(&baseDir, "basedir", baseDir, "Path for application-specific files")
 	flag.StringVar(&addr, "addr", addr, "Address for the web server to listen on")
 	flag.StringVar(&minlog, "loglevel", minlog, "Minimum level for log messages to be logged")
 	flag.BoolVar(&flushCache, "flush", false, "Flush cached ratings and tag suggestions")
+	flag.IntVar(&workerCntReader, "readercount", common.WorkerCntReader, "The number of workers for the Reader")
 	flag.Parse()
 
 	if baseDir != common.Path(path.Base) {
@@ -77,7 +79,7 @@ func main() {
 		}
 	}
 
-	if rdr, err = reader.New(4); err != nil {
+	if rdr, err = reader.New(workerCntReader); err != nil {
 		fmt.Fprintf(
 			os.Stderr,
 			"Error creating Reader: %s\n",
