@@ -1,5 +1,5 @@
 # -*- mode: org; fill-column: 78; -*-
-# Time-stamp: <2024-11-04 19:24:04 krylon>
+# Time-stamp: <2024-11-04 23:07:44 krylon>
 #
 #+TAGS: internals(i) ui(u) bug(b) feature(f)
 #+TAGS: database(d) design(e), meditation(m)
@@ -17,12 +17,12 @@
   BadNews is an RSS reader
 ** Clock table
    #+BEGIN: clocktable :scope file :maxlevel 202 :emphasize t
-   #+CAPTION: Clock summary at [2024-11-04 Mo 19:24]
+   #+CAPTION: Clock summary at [2024-11-04 Mo 23:07]
    | Headline                                             | Time       |            |         |          |       |      |
    |------------------------------------------------------+------------+------------+---------+----------+-------+------|
-   | *Total time*                                         | *4d 10:43* |            |         |          |       |      |
+   | *Total time*                                         | *4d 11:24* |            |         |          |       |      |
    |------------------------------------------------------+------------+------------+---------+----------+-------+------|
-   | *BadNews [22/24]*                                    | *4d 10:43* |            |         |          |       |      |
+   | *BadNews [22/24]*                                    | *4d 11:24* |            |         |          |       |      |
    | \_  /Features [13/14]/                               |            | /2d 12:49/ |         |          |       |      |
    | \_    Blacklisting [1/1]                             |            |            |    6:03 |          |       |      |
    | \_    Rating and Tagging [11/11]                     |            |            | 2d 6:46 |          |       |      |
@@ -39,7 +39,7 @@
    | \_          Disable linked Tags in menu              |            |            |         |          |       | 1:13 |
    | \_          Unlink Tags from Items                   |            |            |         |          |       | 1:13 |
    | \_          Fetch linked tags per item in handler... |            |            |         |          |       | 0:23 |
-   | \_  /Components [9/10]/                              |            | /1d 21:54/ |         |          |       |      |
+   | \_  /Components [9/10]/                              |            | /1d 22:35/ |         |          |       |      |
    | \_    Data model [0/0]                               |            |            |    0:27 |          |       |      |
    | \_    Database [1/1]                                 |            |            |   12:17 |          |       |      |
    | \_      Testing [0/0]                                |            |            |         |     3:02 |       |      |
@@ -56,9 +56,10 @@
    | \_        Hide long descriptions                     |            |            |         |          |  0:20 |      |
    | \_        Fix Links                                  |            |            |         |          |  0:03 |      |
    | \_      AJAX FTW [0/0]                               |            |            |         |     3:02 |       |      |
-   | \_    Tag Advisor [1/2]                              |            |            |    2:51 |          |       |      |
-   | \_      Performance [1/2]                            |            |            |         |     1:32 |       |      |
+   | \_    Tag Advisor [1/2]                              |            |            |    3:32 |          |       |      |
+   | \_      Performance [1/2]                            |            |            |         |     2:13 |       |      |
    | \_        Caching                                    |            |            |         |          |  1:32 |      |
+   | \_        Pre-computing advice                       |            |            |         |          |  0:41 |      |
    #+END:
 ** Journal
 ** Features [13/14]
@@ -368,6 +369,11 @@
       CLOCK: [2024-10-31 Do 17:49]--[2024-10-31 Do 18:34] =>  0:45
       :END:
 ***** TODO Pre-computing advice
+      :LOGBOOK:
+      CLOCK: [2024-11-04 Mo 22:26]--[2024-11-04 Mo 23:07] =>  0:41
+      :END:
+      This is something I can do in the background, this shouldn't be too
+      difficult.
 ** Bugs [0/0]
    :PROPERTIES:
    :COOKIE_DATA: todo recursive
