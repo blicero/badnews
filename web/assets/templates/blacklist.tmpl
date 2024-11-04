@@ -1,6 +1,6 @@
 {{ define "blacklist" }}
 {{/* Created on 02. 11. 2024 */}}
-{{/* Time-stamp: <2024-11-02 21:26:49 krylon> */}}
+{{/* Time-stamp: <2024-11-03 20:31:33 krylon> */}}
 <!DOCTYPE html>
 <html>
   {{ template "head" . }}
@@ -35,7 +35,7 @@
         {{ range .Blacklist.List }}
         <tr id="bl_pat_{{ .ID }}">
           <td>{{ .Pattern }}</td>
-          <td>{{ .Cnt }}</td>
+          <td>{{ .Cnt.Load }}</td>
           <td>
             <button type="button" class="btn">Edit</button>
             <button type="button" class="btn btn-danger">Remove</button>
