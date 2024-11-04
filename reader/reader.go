@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 24. 09. 2024 by Benjamin Walkenhorst
 // (c) 2024 Benjamin Walkenhorst
-// Time-stamp: <2024-11-02 18:35:49 krylon>
+// Time-stamp: <2024-11-04 18:33:45 krylon>
 
 // Package reader implements the fetching and parsing of RSS/Atom feeds.
 package reader
@@ -105,6 +105,14 @@ func (r *Reader) checkFeeds() {
 		feeds []model.Feed
 	)
 
+	if r.bl.Changed() {
+		if err = r.bl.Dump(common.Path(path.Blacklist)); err != nil {
+			r.log.Printf("[ERROR] Failed to dump Blacklist to %s: %s\n",
+				common.Path(path.Blacklist),
+				err.Error())
+		}
+	}
+
 	if feeds, err = r.getPendingFeeds(); err != nil {
 		r.log.Printf("[ERROR] Failed to load feeds that are due for a refresh: %s\n",
 			err.Error())
@@ -186,7 +194,7 @@ func (r *Reader) process(f model.Feed) error {
 		var exists bool
 
 		if r.bl.Match(&item) {
-			r.bl.Sort()
+			// r.bl.Sort()
 			continue
 		}
 
