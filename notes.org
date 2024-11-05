@@ -1,5 +1,5 @@
 # -*- mode: org; fill-column: 78; -*-
-# Time-stamp: <2024-11-04 23:07:44 krylon>
+# Time-stamp: <2024-11-05 15:46:33 krylon>
 #
 #+TAGS: internals(i) ui(u) bug(b) feature(f)
 #+TAGS: database(d) design(e), meditation(m)
@@ -9,7 +9,7 @@
 #+TODO: MEDITATE(m) PLANNING(p) | SUSPENDED(s)
 #+PRIORITIES: A G D
 
-* BadNews [22/24]
+* BadNews [22/25]
   :PROPERTIES:
   :COOKIE_DATA: todo recursive
   :VISIBILITY: children
@@ -17,12 +17,12 @@
   BadNews is an RSS reader
 ** Clock table
    #+BEGIN: clocktable :scope file :maxlevel 202 :emphasize t
-   #+CAPTION: Clock summary at [2024-11-04 Mo 23:07]
+   #+CAPTION: Clock summary at [2024-11-05 Di 15:46]
    | Headline                                             | Time       |            |         |          |       |      |
    |------------------------------------------------------+------------+------------+---------+----------+-------+------|
-   | *Total time*                                         | *4d 11:24* |            |         |          |       |      |
+   | *Total time*                                         | *4d 12:48* |            |         |          |       |      |
    |------------------------------------------------------+------------+------------+---------+----------+-------+------|
-   | *BadNews [22/24]*                                    | *4d 11:24* |            |         |          |       |      |
+   | *BadNews [22/25]*                                    | *4d 12:48* |            |         |          |       |      |
    | \_  /Features [13/14]/                               |            | /2d 12:49/ |         |          |       |      |
    | \_    Blacklisting [1/1]                             |            |            |    6:03 |          |       |      |
    | \_    Rating and Tagging [11/11]                     |            |            | 2d 6:46 |          |       |      |
@@ -39,14 +39,14 @@
    | \_          Disable linked Tags in menu              |            |            |         |          |       | 1:13 |
    | \_          Unlink Tags from Items                   |            |            |         |          |       | 1:13 |
    | \_          Fetch linked tags per item in handler... |            |            |         |          |       | 0:23 |
-   | \_  /Components [9/10]/                              |            | /1d 22:35/ |         |          |       |      |
+   | \_  /Components [9/11]/                              |            | /1d 23:59/ |         |          |       |      |
    | \_    Data model [0/0]                               |            |            |    0:27 |          |       |      |
    | \_    Database [1/1]                                 |            |            |   12:17 |          |       |      |
    | \_      Testing [0/0]                                |            |            |         |     3:02 |       |      |
    | \_      Queries respect transaction                  |            |            |         |     0:03 |       |      |
    | \_    Feed catcher / parser [0/0]                    |            |            |    5:41 |          |       |      |
    | \_      Testing                                      |            |            |         |     2:16 |       |      |
-   | \_    Web Interface [7/7]                            |            |            | 1d 0:38 |          |       |      |
+   | \_    Web Interface [7/8]                            |            |            | 1d 0:38 |          |       |      |
    | \_      Feeds overview                               |            |            |         |     1:42 |       |      |
    | \_      Message Area                                 |            |            |         |     7:10 |       |      |
    | \_      Appearances matter [5/5]                     |            |            |         |     4:40 |       |      |
@@ -56,10 +56,10 @@
    | \_        Hide long descriptions                     |            |            |         |          |  0:20 |      |
    | \_        Fix Links                                  |            |            |         |          |  0:03 |      |
    | \_      AJAX FTW [0/0]                               |            |            |         |     3:02 |       |      |
-   | \_    Tag Advisor [1/2]                              |            |            |    3:32 |          |       |      |
-   | \_      Performance [1/2]                            |            |            |         |     2:13 |       |      |
+   | \_    Tag Advisor [1/2]                              |            |            |    4:56 |          |       |      |
+   | \_      Performance [1/2]                            |            |            |         |     3:37 |       |      |
    | \_        Caching                                    |            |            |         |          |  1:32 |      |
-   | \_        Pre-computing advice                       |            |            |         |          |  0:41 |      |
+   | \_        Pre-computing advice                       |            |            |         |          |  2:05 |      |
    #+END:
 ** Journal
 ** Features [13/14]
@@ -205,7 +205,7 @@
       :LOGBOOK:
       CLOCK: [2024-10-19 Sa 20:37]--[2024-10-19 Sa 21:00] =>  0:23
       :END:
-** Components [9/10]
+** Components [9/11]
    :PROPERTIES:
    :COOKIE_DATA: todo recursive
    :VISIBILITY: children
@@ -265,7 +265,7 @@
      :LOGBOOK:
      CLOCK: [2024-09-26 Do 17:56]--[2024-09-26 Do 20:12] =>  2:16
      :END:
-*** Web Interface [7/7]
+*** Web Interface [7/8]
     :PROPERTIES:
     :COOKIE_DATA: todo recursive
     :VISIBILITY: children
@@ -279,6 +279,11 @@
     CLOCK: [2024-09-29 So 16:10]--[2024-09-29 So 16:30] =>  0:20
     :END:
     For an RSS reader, a web interface is the obvious approach, isn't it?
+**** TODO Paged Item view
+     Since we are doing AJAX, I could get away without reloading the entire
+     page. Not sure whether this is a good idea or not, but I think reloading
+     is in order, so that I can have a URL that refers to the specific page.
+     I could give the offset as a timestamp or offset in the URL.
 **** DONE Feeds overview
      CLOSED: [2024-10-31 Do 17:43]
      :LOGBOOK:
@@ -370,6 +375,7 @@
       :END:
 ***** TODO Pre-computing advice
       :LOGBOOK:
+      CLOCK: [2024-11-05 Di 14:22]--[2024-11-05 Di 15:46] =>  1:24
       CLOCK: [2024-11-04 Mo 22:26]--[2024-11-04 Mo 23:07] =>  0:41
       :END:
       This is something I can do in the background, this shouldn't be too
