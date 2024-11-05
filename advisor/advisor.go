@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 10. 03. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2024-11-04 18:44:12 krylon>
+// Time-stamp: <2024-11-05 15:07:17 krylon>
 
 // Package advisor provides suggestions on what Tags one might want to attach
 // to news Items.
@@ -319,6 +319,11 @@ func (adv *Advisor) Suggest(item *model.Item, n int) []SuggestedTag {
 
 	return list[:cnt]
 } // func (adv *Advisor) Suggest(item *model.Item) []SuggestedTag
+
+// InCache returns true if suggested Tags for the given Item is in the cache.
+func (adv *Advisor) InCache(item *model.Item) bool {
+	return adv.cache.Contains(item.IDString())
+} // func (adv *Advisor) InCache(item *model.Item) bool
 
 func (adv *Advisor) getLanguage(item *model.Item) (lng, fullText string) {
 	const (

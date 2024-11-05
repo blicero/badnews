@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 04. 10. 2024 by Benjamin Walkenhorst
 // (c) 2024 Benjamin Walkenhorst
-// Time-stamp: <2024-11-04 18:44:43 krylon>
+// Time-stamp: <2024-11-05 15:05:42 krylon>
 
 // Package judge provides the guessing of ratings for items that have not been manually rated.
 package judge
@@ -84,6 +84,12 @@ func New() (*Judge, error) {
 	return j, nil
 } // func New() (*Judge, error)
 
+// InCache returns true if a Rating for the given Item is already stored in the Cache
+func (j *Judge) InCache(i *model.Item) bool {
+	return j.cache.Contains(i.IDString())
+} // func (j *Judge) InCache(id int64) bool
+
+// Rate returns the Rating for the given Item as computed by the Bayesian model.
 func (j *Judge) Rate(i *model.Item) (string, error) {
 	var (
 		err                error
