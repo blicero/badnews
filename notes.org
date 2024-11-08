@@ -1,5 +1,5 @@
 # -*- mode: org; fill-column: 78; -*-
-# Time-stamp: <2024-11-05 15:46:33 krylon>
+# Time-stamp: <2024-11-08 18:55:12 krylon>
 #
 #+TAGS: internals(i) ui(u) bug(b) feature(f)
 #+TAGS: database(d) design(e), meditation(m)
@@ -9,7 +9,7 @@
 #+TODO: MEDITATE(m) PLANNING(p) | SUSPENDED(s)
 #+PRIORITIES: A G D
 
-* BadNews [22/25]
+* BadNews [23/25]
   :PROPERTIES:
   :COOKIE_DATA: todo recursive
   :VISIBILITY: children
@@ -17,12 +17,12 @@
   BadNews is an RSS reader
 ** Clock table
    #+BEGIN: clocktable :scope file :maxlevel 202 :emphasize t
-   #+CAPTION: Clock summary at [2024-11-05 Di 15:46]
+   #+CAPTION: Clock summary at [2024-11-08 Fr 18:55]
    | Headline                                             | Time       |            |         |          |       |      |
    |------------------------------------------------------+------------+------------+---------+----------+-------+------|
-   | *Total time*                                         | *4d 12:48* |            |         |          |       |      |
+   | *Total time*                                         | *4d 19:21* |            |         |          |       |      |
    |------------------------------------------------------+------------+------------+---------+----------+-------+------|
-   | *BadNews [22/25]*                                    | *4d 12:48* |            |         |          |       |      |
+   | *BadNews [23/25]*                                    | *4d 19:21* |            |         |          |       |      |
    | \_  /Features [13/14]/                               |            | /2d 12:49/ |         |          |       |      |
    | \_    Blacklisting [1/1]                             |            |            |    6:03 |          |       |      |
    | \_    Rating and Tagging [11/11]                     |            |            | 2d 6:46 |          |       |      |
@@ -39,7 +39,7 @@
    | \_          Disable linked Tags in menu              |            |            |         |          |       | 1:13 |
    | \_          Unlink Tags from Items                   |            |            |         |          |       | 1:13 |
    | \_          Fetch linked tags per item in handler... |            |            |         |          |       | 0:23 |
-   | \_  /Components [9/11]/                              |            | /1d 23:59/ |         |          |       |      |
+   | \_  /Components [10/11]/                             |            | /2d 6:32/  |         |          |       |      |
    | \_    Data model [0/0]                               |            |            |    0:27 |          |       |      |
    | \_    Database [1/1]                                 |            |            |   12:17 |          |       |      |
    | \_      Testing [0/0]                                |            |            |         |     3:02 |       |      |
@@ -56,10 +56,10 @@
    | \_        Hide long descriptions                     |            |            |         |          |  0:20 |      |
    | \_        Fix Links                                  |            |            |         |          |  0:03 |      |
    | \_      AJAX FTW [0/0]                               |            |            |         |     3:02 |       |      |
-   | \_    Tag Advisor [1/2]                              |            |            |    4:56 |          |       |      |
-   | \_      Performance [1/2]                            |            |            |         |     3:37 |       |      |
-   | \_        Caching                                    |            |            |         |          |  1:32 |      |
-   | \_        Pre-computing advice                       |            |            |         |          |  2:05 |      |
+   | \_    Tag Advisor [2/2]                              |            |            |   11:29 |          |       |      |
+   | \_      Performance [2/2]                            |            |            |         |    10:10 |       |      |
+   | \_        Caching                                    |            |            |         |          |  3:06 |      |
+   | \_        Pre-computing advice                       |            |            |         |          |  7:04 |      |
    #+END:
 ** Journal
 ** Features [13/14]
@@ -205,7 +205,7 @@
       :LOGBOOK:
       CLOCK: [2024-10-19 Sa 20:37]--[2024-10-19 Sa 21:00] =>  0:23
       :END:
-** Components [9/11]
+** Components [10/11]
    :PROPERTIES:
    :COOKIE_DATA: todo recursive
    :VISIBILITY: children
@@ -353,7 +353,7 @@
      and one main goal of the rewrite is to make it at least feel more
      responsive. So I am going to try and load as much of the content as
      possible via Ajax.
-*** Tag Advisor [1/2]
+*** Tag Advisor [2/2]
     :PROPERTIES:
     :COOKIE_DATA: todo recursive
     :VISIBILITY: children
@@ -362,7 +362,7 @@
     CLOCK: [2024-10-22 Di 17:09]--[2024-10-22 Di 17:23] =>  0:14
     CLOCK: [2024-10-22 Di 14:35]--[2024-10-22 Di 15:40] =>  1:05
     :END:
-**** Performance [1/2]
+**** Performance [2/2]
      :PROPERTIES:
      :COOKIE_DATA: todo recursive
      :VISIBILITY: children
@@ -370,16 +370,27 @@
 ***** DONE Caching
       CLOSED: [2024-10-31 Do 19:42]
       :LOGBOOK:
+      CLOCK: [2024-11-08 Fr 17:20]--[2024-11-08 Fr 18:54] =>  1:34
       CLOCK: [2024-10-31 Do 18:55]--[2024-10-31 Do 19:42] =>  0:47
       CLOCK: [2024-10-31 Do 17:49]--[2024-10-31 Do 18:34] =>  0:45
       :END:
-***** TODO Pre-computing advice
+***** DONE Pre-computing advice
+      CLOSED: [2024-11-08 Fr 18:54]
       :LOGBOOK:
+      CLOCK: [2024-11-05 Di 18:50]--[2024-11-05 Di 23:49] =>  4:59
       CLOCK: [2024-11-05 Di 14:22]--[2024-11-05 Di 15:46] =>  1:24
       CLOCK: [2024-11-04 Mo 22:26]--[2024-11-04 Mo 23:07] =>  0:41
       :END:
       This is something I can do in the background, this shouldn't be too
       difficult.
+
+      Ha. The youthful optimism of the slightly younger me who wrote the above
+      words. Concurrent access to the cache is a problem indeed.
+      [2024-11-07 Do 19:56]
+      I got a little sidetracked into building essentially a very
+      simple-minded replacement for cachego that works the way I want it to,
+      and as far as I can tell, it does work the way I want it to, so now I
+      can try using that one.
 ** Bugs [0/0]
    :PROPERTIES:
    :COOKIE_DATA: todo recursive
