@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 04. 10. 2024 by Benjamin Walkenhorst
 // (c) 2024 Benjamin Walkenhorst
-// Time-stamp: <2024-11-05 15:05:42 krylon>
+// Time-stamp: <2024-11-08 18:27:58 krylon>
 
 // Package judge provides the guessing of ratings for items that have not been manually rated.
 package judge
@@ -16,29 +16,55 @@ import (
 	"sync"
 	"time"
 
-	bt "go.etcd.io/bbolt" // Use the BoltDB backend
-
 	"github.com/blicero/badnews/common"
 	"github.com/blicero/badnews/common/path"
 	"github.com/blicero/badnews/database"
 	"github.com/blicero/badnews/logdomain"
 	"github.com/blicero/badnews/model"
+	"github.com/blicero/cacheme"
+	"github.com/blicero/cacheme/level"
 	"github.com/blicero/shield"
 	"github.com/endeveit/guesslanguage"
-	"github.com/faabiosr/cachego"
-	"github.com/faabiosr/cachego/bolt"
 )
 
-// TODO I'll increase this value once I'm done testing.
-const cacheTimeout = time.Minute * 240
+const (
+	cacheTimeout = time.Minute * 240 // TODO I'll increase this value once I'm done testing.
+	backoffDelay = time.Millisecond * 250
+	errTmp       = "resource temporarily unavailable"
+)
+
+var (
+	cache    cacheme.Backend
+	openLock sync.Mutex
+)
+
+func backOff() {
+	time.Sleep(backoffDelay)
+}
+
+func getCache() (cacheme.Backend, error) {
+	openLock.Lock()
+	defer openLock.Unlock()
+
+	if cache != nil {
+		return cache, nil
+	}
+
+	var err error
+
+	if cache, err = level.New(common.Path(path.JudgeCache)); err != nil {
+		return nil, err
+	}
+
+	return cache, nil
+} // func getCache() (cachego.Cache, error)
 
 // Judge is a classifier to rate News Items as boring or interesting.
 type Judge struct {
 	log   *log.Logger
 	jdg   map[string]shield.Shield
 	db    *database.Database
-	bdb   *bt.DB
-	cache cachego.Cache
+	cache cacheme.Backend
 	lock  sync.RWMutex
 }
 
@@ -71,7 +97,7 @@ func New() (*Judge, error) {
 		return nil, err
 	} else if j.db, err = database.Open(common.Path(path.Database)); err != nil {
 		return nil, err
-	} else if j.bdb, err = bt.Open(common.Path(path.JudgeCache), 0600, nil); err != nil {
+	} else if j.cache, err = getCache(); err != nil {
 		j.log.Printf("[CRITICAL] Cannot open jcache db at %s: %s\n",
 			common.Path(path.JudgeCache),
 			err.Error())
@@ -79,14 +105,24 @@ func New() (*Judge, error) {
 		return nil, err
 	}
 
-	j.cache = bolt.New(j.bdb)
-
 	return j, nil
 } // func New() (*Judge, error)
 
 // InCache returns true if a Rating for the given Item is already stored in the Cache
 func (j *Judge) InCache(i *model.Item) bool {
-	return j.cache.Contains(i.IDString())
+	var (
+		err   error
+		found bool
+	)
+
+	if _, found, _, err = j.cache.Lookup(i.IDString()); err != nil {
+		j.log.Printf("[ERROR] Error looking up Item %d in cache: %s\n",
+			i.ID,
+			err.Error())
+		return false
+	}
+
+	return found
 } // func (j *Judge) InCache(id int64) bool
 
 // Rate returns the Rating for the given Item as computed by the Bayesian model.
@@ -94,22 +130,19 @@ func (j *Judge) Rate(i *model.Item) (string, error) {
 	var (
 		err                error
 		rating, lang, body string
+		found              bool
 		s                  shield.Shield
 	)
 
 	j.lock.RLock()
 	defer j.lock.RUnlock()
 
-	if rating, err = j.cache.Fetch(i.IDString()); err != nil {
-		if strings.Contains(err.Error(), "cache expired") {
-			// tough luck
-		} else if j.cache.Contains(i.IDString()) {
-			j.log.Printf("[ERROR] Failed to lookup Item %q (%d) in cache: %s\n",
-				i.Headline,
-				i.ID,
-				err.Error())
-		}
-	} else if rating != "" {
+	if rating, found, _, err = j.cache.Lookup(i.IDString()); err != nil {
+		j.log.Printf("[ERROR] Failed to lookup Item %q (%d) in cache: %s\n",
+			i.Headline,
+			i.ID,
+			err.Error())
+	} else if found && rating != "" {
 		return rating, nil
 	}
 
@@ -135,7 +168,7 @@ func (j *Judge) Rate(i *model.Item) (string, error) {
 			rating)
 	}
 
-	if err = j.cache.Save(i.IDString(), rating, cacheTimeout); err != nil {
+	if err = j.cache.Install(i.IDString(), rating, cacheTimeout); err != nil {
 		j.log.Printf("[ERROR] Failed to save rating for Item %q (%d) in cache: %s\n",
 			i.Headline,
 			i.ID,
@@ -223,7 +256,12 @@ func (j *Judge) Learn(i *model.Item) error {
 		s = j.jdg["en"]
 	}
 
+JUDGE:
 	if err = s.Learn(bucket, body); err != nil {
+		if err.Error() == errTmp {
+			backOff()
+			goto JUDGE
+		}
 		j.log.Printf("[ERROR] Failed to learn Item %d (%q): %s\n",
 			i.ID,
 			i.Headline,

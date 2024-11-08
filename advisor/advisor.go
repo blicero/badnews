@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 10. 03. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2024-11-05 15:07:17 krylon>
+// Time-stamp: <2024-11-08 18:23:17 krylon>
 
 // Package advisor provides suggestions on what Tags one might want to attach
 // to news Items.
@@ -15,26 +15,51 @@ import (
 	"runtime"
 	"sort"
 	"strings"
+	"sync"
 	"time"
-
-	bt "go.etcd.io/bbolt" // Use the BoltDB backend
 
 	"github.com/blicero/badnews/common"
 	"github.com/blicero/badnews/common/path"
 	"github.com/blicero/badnews/database"
 	"github.com/blicero/badnews/logdomain"
 	"github.com/blicero/badnews/model"
+	"github.com/blicero/cacheme"
+	"github.com/blicero/cacheme/level"
 	"github.com/blicero/shield"
-	"github.com/faabiosr/cachego"
-	"github.com/faabiosr/cachego/bolt"
 
 	"github.com/blicero/krylib"
 	"github.com/endeveit/guesslanguage"
 )
 
-const cacheTimeout = time.Minute * 240
+const (
+	cacheTimeout = time.Minute * 240
+	backoffDelay = time.Millisecond * 250
+	errTmp       = "resource temporarily unavailable"
+)
 
-// var nonword = regexp.MustCompile(`\W+`)
+func backOff() {
+	time.Sleep(backoffDelay)
+}
+
+var (
+	cache    cacheme.Backend
+	openLock sync.Mutex
+)
+
+func getCache() (cacheme.Backend, error) {
+	openLock.Lock()
+	defer openLock.Unlock()
+
+	var err error
+
+	if cache != nil {
+		return cache, nil
+	} else if cache, err = level.New(common.Path(path.AdviceCache)); err != nil {
+		return nil, err
+	}
+
+	return cache, nil
+} // func getCache() (cachego.Cache, error)
 
 // SuggestedTag is a suggestion to attach a specific Tag to a specific Item.
 type SuggestedTag struct {
@@ -48,8 +73,7 @@ type Advisor struct {
 	log    *log.Logger
 	shield map[string]shield.Shield
 	tags   map[string]*model.Tag
-	bdb    *bt.DB
-	cache  cachego.Cache
+	cache  cacheme.Backend
 }
 
 // NewAdvisor returns a new Advisor, but it does not train it, yet.
@@ -85,14 +109,12 @@ func NewAdvisor() (*Advisor, error) {
 		return nil, err
 	} else if err = adv.loadTags(); err != nil {
 		return nil, err
-	} else if adv.bdb, err = bt.Open(common.Path(path.AdviceCache), 0600, nil); err != nil {
+	} else if adv.cache, err = getCache(); err != nil {
 		adv.log.Printf("[CRITICAL] Cannot open advice cache at %s: %s\n",
 			common.Path(path.AdviceCache),
 			err.Error())
 		return nil, err
 	}
-
-	adv.cache = bolt.New(adv.bdb)
 
 	return adv, nil
 } // func NewAdvisor() (*Advisor, error)
@@ -191,7 +213,12 @@ func (adv *Advisor) Learn(t *model.Tag, i *model.Item) error {
 		s = adv.shield["en"]
 	}
 
+LEARN:
 	if err = s.Learn(t.Name, body); err != nil {
+		if err.Error() == errTmp {
+			backOff()
+			goto LEARN
+		}
 		adv.log.Printf("[ERROR] Failed to learn Item %d (%q): %s\n",
 			i.ID,
 			i.Headline,
@@ -249,18 +276,16 @@ func (adv *Advisor) Suggest(item *model.Item, n int) []SuggestedTag {
 		lang, body, idstr, serialized string
 		buf                           []byte
 		s                             shield.Shield
+		found                         bool
 	)
 
 	idstr = item.IDString()
-	if serialized, err = adv.cache.Fetch(idstr); err != nil {
-		if err == cachego.ErrCacheExpired {
-			// Better luck next time
-		} else if adv.cache.Contains(idstr) {
-			adv.log.Printf("[ERROR] Error looking up Item %d in advice cache: %s\n",
-				item.ID,
-				err.Error())
-		}
-	} else if serialized != "" {
+	if serialized, found, _, err = adv.cache.Lookup(idstr); err != nil {
+		adv.log.Printf("[ERROR] Error looking up Item %d in advice cache: %s\n",
+			item.ID,
+			err.Error())
+		return nil
+	} else if found && serialized != "" {
 		var rlist []SuggestedTag
 
 		if err = json.Unmarshal([]byte(serialized), &rlist); err != nil {
@@ -311,7 +336,7 @@ func (adv *Advisor) Suggest(item *model.Item, n int) []SuggestedTag {
 	if buf, err = json.Marshal(list); err != nil {
 		adv.log.Printf("[ERROR] Failed to serialize result list: %s",
 			err.Error())
-	} else if err = adv.cache.Save(idstr, string(buf), cacheTimeout); err != nil {
+	} else if err = adv.cache.Install(idstr, string(buf), cacheTimeout); err != nil {
 		adv.log.Printf("[ERROR] Failed to cache tag advice for Item %d: %s",
 			item.ID,
 			err.Error())
@@ -322,7 +347,19 @@ func (adv *Advisor) Suggest(item *model.Item, n int) []SuggestedTag {
 
 // InCache returns true if suggested Tags for the given Item is in the cache.
 func (adv *Advisor) InCache(item *model.Item) bool {
-	return adv.cache.Contains(item.IDString())
+	var (
+		err   error
+		found bool
+	)
+
+	if _, found, _, err = adv.cache.Lookup(item.IDString()); err != nil {
+		adv.log.Printf("[ERROR] Error looking up Item %d in cache: %s\n",
+			item.ID,
+			err.Error())
+		return false
+	}
+
+	return found
 } // func (adv *Advisor) InCache(item *model.Item) bool
 
 func (adv *Advisor) getLanguage(item *model.Item) (lng, fullText string) {

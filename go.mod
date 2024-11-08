@@ -1,12 +1,12 @@
 module github.com/blicero/badnews
 
-go 1.23.1
+go 1.23.2
 
 require (
+	github.com/blicero/cacheme v0.1.0
 	github.com/blicero/krylib v0.2.1
 	github.com/blicero/shield v0.0.0-20241004181537-05f336ba3f75
 	github.com/endeveit/guesslanguage v0.0.0-20141216121003-b9ec07401dcb
-	github.com/faabiosr/cachego v0.22.2
 	github.com/google/uuid v1.6.0
 	github.com/gorilla/mux v1.8.1
 	github.com/gorilla/sessions v1.4.0
@@ -15,7 +15,6 @@ require (
 	github.com/mattn/go-sqlite3 v1.14.23
 	github.com/mborgerson/GoTruncateHtml v0.0.0-20150507032438-125d9154cd1e
 	github.com/mmcdole/gofeed v1.3.0
-	go.etcd.io/bbolt v1.3.11
 )
 
 require (
