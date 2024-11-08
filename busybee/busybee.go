@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 04. 11. 2024 by Benjamin Walkenhorst
 // (c) 2024 Benjamin Walkenhorst
-// Time-stamp: <2024-11-05 15:45:28 krylon>
+// Time-stamp: <2024-11-05 21:16:21 krylon>
 
 // Package busybee implements ahead-of-time rating and judging of news Items,
 // caching the results for (hopefully) improved performance in the web frontend.
@@ -27,9 +27,15 @@ import (
 )
 
 const (
-	runInterval = time.Second * 30 // TODO Increase after testing/debugging is done
-	checkPeriod = time.Second * 86400 * 2
+	runInterval  = time.Second * 30 // TODO Increase after testing/debugging is done
+	checkPeriod  = time.Second * 86400 * 2
+	errTmp       = "resource temporarily unavailable"
+	backoffDelay = time.Millisecond * 25
 )
+
+func backOff() {
+	time.Sleep(backoffDelay)
+}
 
 // BusyBee implements background workers that proactively compute suggested
 // ratings and Tags for news Items, caching the results.
@@ -114,8 +120,11 @@ func (bee *BusyBee) preComputeAdvice(period time.Duration) error {
 	)
 
 	if period > 0 {
-		period = 0 - period
+		period = -period
 	}
+
+	bee.log.Printf("[INFO] Precomputing advice for Items from the last %s\n",
+		-period)
 
 	db = bee.pool.Get()
 	defer bee.pool.Put(db)
@@ -127,19 +136,38 @@ func (bee *BusyBee) preComputeAdvice(period time.Duration) error {
 		return err
 	}
 
+	bee.log.Printf("[DEBUG] Processing %d Items\n", len(items))
+
+	var (
+		acnt, jcnt int
+	)
+
+	defer func() {
+		bee.log.Printf("[DEBUG] Precomputed Tags for %d Items, Ratings for %d Items\n",
+			acnt,
+			jcnt)
+	}()
+
 	for _, i := range items {
 		if !bee.active.Load() {
+			bee.log.Println("[TRACE] BusyBee has been stopped, aborting processing.")
 			break
 		}
 
+	JCACHE:
 		if !bee.jdg.InCache(i) {
 			if _, err = bee.jdg.Rate(i); err != nil {
+				if err.Error() == errTmp {
+					backOff()
+					goto JCACHE
+				}
 				bee.log.Printf("[ERROR] Failed to rate Item %d (%q): %s\n",
 					i.ID,
 					i.Headline,
 					err.Error())
 				return err
 			}
+			jcnt++
 		}
 
 		if !bee.adv.InCache(i) {
@@ -151,6 +179,7 @@ func (bee *BusyBee) preComputeAdvice(period time.Duration) error {
 					len(sugg),
 					suggCnt)
 			}
+			acnt++
 		}
 	}
 
