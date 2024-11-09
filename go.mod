@@ -3,7 +3,7 @@ module github.com/blicero/badnews
 go 1.23.2
 
 require (
-	github.com/blicero/cacheme v0.1.0
+	github.com/blicero/cacheme v0.1.1
 	github.com/blicero/krylib v0.2.1
 	github.com/blicero/shield v0.0.0-20241004181537-05f336ba3f75
 	github.com/endeveit/guesslanguage v0.0.0-20141216121003-b9ec07401dcb
