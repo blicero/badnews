@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 04. 11. 2024 by Benjamin Walkenhorst
 // (c) 2024 Benjamin Walkenhorst
-// Time-stamp: <2024-11-05 21:16:21 krylon>
+// Time-stamp: <2024-11-08 23:23:36 krylon>
 
 // Package busybee implements ahead-of-time rating and judging of news Items,
 // caching the results for (hopefully) improved performance in the web frontend.
@@ -27,8 +27,8 @@ import (
 )
 
 const (
-	runInterval  = time.Second * 30 // TODO Increase after testing/debugging is done
-	checkPeriod  = time.Second * 86400 * 2
+	runInterval  = time.Second * 300
+	checkPeriod  = time.Second * 86400
 	errTmp       = "resource temporarily unavailable"
 	backoffDelay = time.Millisecond * 25
 )
