@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 28. 09. 2024 by Benjamin Walkenhorst
 // (c) 2024 Benjamin Walkenhorst
-// Time-stamp: <2024-11-11 18:48:13 krylon>
+// Time-stamp: <2024-11-11 20:46:11 krylon>
 
 // Package web provides the web interface.
 package web
@@ -930,6 +930,55 @@ func (srv *Server) handleAjaxFeedDelete(w http.ResponseWriter, r *http.Request) 
 	srv.log.Printf("[TRACE] Handle request for %s from %s\n",
 		r.URL.EscapedPath(),
 		r.RemoteAddr)
+
+	var (
+		err   error
+		sess  *sessions.Session
+		rbuf  []byte
+		idstr string
+		fid   int64
+		db    *database.Database
+		res   Reply
+		rvars map[string]string
+	)
+
+	rvars = mux.Vars(r)
+	idstr = rvars["id"]
+
+	if fid, err = strconv.ParseInt(idstr, 10, 64); err != nil {
+		res.Message = fmt.Sprintf("Failed to parse Feed ID %q: %s\n",
+			idstr,
+			err.Error())
+		srv.log.Printf("[CANTHAPPEN] %s\n", res.Message)
+		hstatus = 400
+		goto SEND_RESPONSE
+	}
+
+	db = srv.pool.Get()
+	defer srv.pool.Put(db)
+
+SEND_RESPONSE:
+	if sess != nil {
+		if err = sess.Save(r, w); err != nil {
+			srv.log.Printf("[ERROR] Failed to set session cookie: %s\n",
+				err.Error())
+		}
+	}
+	res.Timestamp = time.Now()
+	if rbuf, err = json.Marshal(&res); err != nil {
+		srv.log.Printf("[ERROR] Error serializing response: %s\n",
+			err.Error())
+		rbuf = errJSON(err.Error())
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Cache-Control", "no-store, max-age=0")
+	w.WriteHeader(hstatus)
+	if _, err = w.Write(rbuf); err != nil {
+		msg = fmt.Sprintf("Failed to send result: %s",
+			err.Error())
+		srv.log.Println("[ERROR] " + msg)
+	}
 } // func (srv *Server) handleAjaxFeedDelete(w http.ResponseWriter, r *http.Request)
 
 func (srv *Server) handleAjaxItems(w http.ResponseWriter, r *http.Request) {
