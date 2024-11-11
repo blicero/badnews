@@ -1,5 +1,5 @@
 # -*- mode: org; fill-column: 78; -*-
-# Time-stamp: <2024-11-08 18:55:12 krylon>
+# Time-stamp: <2024-11-11 19:28:11 krylon>
 #
 #+TAGS: internals(i) ui(u) bug(b) feature(f)
 #+TAGS: database(d) design(e), meditation(m)
@@ -9,7 +9,7 @@
 #+TODO: MEDITATE(m) PLANNING(p) | SUSPENDED(s)
 #+PRIORITIES: A G D
 
-* BadNews [23/25]
+* BadNews [24/28]
   :PROPERTIES:
   :COOKIE_DATA: todo recursive
   :VISIBILITY: children
@@ -17,16 +17,16 @@
   BadNews is an RSS reader
 ** Clock table
    #+BEGIN: clocktable :scope file :maxlevel 202 :emphasize t
-   #+CAPTION: Clock summary at [2024-11-08 Fr 18:55]
+   #+CAPTION: Clock summary at [2024-11-11 Mo 19:28]
    | Headline                                             | Time       |            |         |          |       |      |
    |------------------------------------------------------+------------+------------+---------+----------+-------+------|
-   | *Total time*                                         | *4d 19:21* |            |         |          |       |      |
+   | *Total time*                                         | *5d 21:13* |            |         |          |       |      |
    |------------------------------------------------------+------------+------------+---------+----------+-------+------|
-   | *BadNews [23/25]*                                    | *4d 19:21* |            |         |          |       |      |
+   | *BadNews [24/28]*                                    | *5d 21:13* |            |         |          |       |      |
    | \_  /Features [13/14]/                               |            | /2d 12:49/ |         |          |       |      |
    | \_    Blacklisting [1/1]                             |            |            |    6:03 |          |       |      |
    | \_    Rating and Tagging [11/11]                     |            |            | 2d 6:46 |          |       |      |
-   | \_      Rating [1/2]                                 |            |            |         |     9:15 |       |      |
+   | \_      Rating [2/2]                                 |            |            |         |     9:15 |       |      |
    | \_        Hide boring Items                          |            |            |         |          |  2:45 |      |
    | \_        Caching results                            |            |            |         |          |  0:27 |      |
    | \_      Tags [9/9]                                   |            |            |         | 1d 21:30 |       |      |
@@ -39,8 +39,11 @@
    | \_          Disable linked Tags in menu              |            |            |         |          |       | 1:13 |
    | \_          Unlink Tags from Items                   |            |            |         |          |       | 1:13 |
    | \_          Fetch linked tags per item in handler... |            |            |         |          |       | 0:23 |
-   | \_  /Components [10/11]/                             |            | /2d 6:32/  |         |          |       |      |
-   | \_    Data model [0/0]                               |            |            |    0:27 |          |       |      |
+   | \_  /Components [10/14]/                             |            | /3d 8:24/  |         |          |       |      |
+   | \_    Data model [0/3]                               |            |            |    1:34 |          |       |      |
+   | \_      Feeds [0/3]                                  |            |            |         |     1:07 |       |      |
+   | \_        Delete Feeds [0/2]                         |            |            |         |          |  1:07 |      |
+   | \_          Delete from database                     |            |            |         |          |       | 1:07 |
    | \_    Database [1/1]                                 |            |            |   12:17 |          |       |      |
    | \_      Testing [0/0]                                |            |            |         |     3:02 |       |      |
    | \_      Queries respect transaction                  |            |            |         |     0:03 |       |      |
@@ -60,6 +63,7 @@
    | \_      Performance [2/2]                            |            |            |         |    10:10 |       |      |
    | \_        Caching                                    |            |            |         |          |  3:06 |      |
    | \_        Pre-computing advice                       |            |            |         |          |  7:04 |      |
+   | \_    Search [0/0]                                   |            |            | 1d 0:45 |          |       |      |
    #+END:
 ** Journal
 ** Features [13/14]
@@ -99,7 +103,7 @@
     :END:
     I want to take the opportunity to rethink the way I did the tagging and
     rating in the old ticker app.
-**** DONE Rating [1/2]
+**** DONE Rating [2/2]
      CLOSED: [2024-10-20 So 17:07]
      :PROPERTIES:
      :COOKIE_DATA: todo recursive
@@ -114,7 +118,8 @@
      [2024-10-04 Fr 20:09]
      Okay, I can rate and un-rate items now, now I need a kind of Bayesian net
      to guess how interesting or boring the other items are.
-***** TODO Hide boring Items
+***** SUSPENDED Hide boring Items
+      CLOSED: [2024-11-10 So 16:45]
       :LOGBOOK:
       CLOCK: [2024-10-31 Do 20:15]--[2024-10-31 Do 23:00] =>  2:45
       :END:
@@ -205,12 +210,12 @@
       :LOGBOOK:
       CLOCK: [2024-10-19 Sa 20:37]--[2024-10-19 Sa 21:00] =>  0:23
       :END:
-** Components [10/11]
+** Components [10/14]
    :PROPERTIES:
    :COOKIE_DATA: todo recursive
    :VISIBILITY: children
    :END:
-*** Data model [0/0]
+*** Data model [0/3]
     :PROPERTIES:
     :COOKIE_DATA: todo recursive
     :VISIBILITY: children
@@ -218,6 +223,30 @@
     :LOGBOOK:
     CLOCK: [2024-09-19 Do 16:25]--[2024-09-19 Do 16:52] =>  0:27
     :END:
+**** Feeds [0/3]
+     :PROPERTIES:
+     :COOKIE_DATA: todo recursive
+     :VISIBILITY: children
+     :END:
+***** TODO Delete Feeds [0/2]
+      :PROPERTIES:
+      :COOKIE_DATA: todo recursive
+      :VISIBILITY: children
+      :END:
+      :LOGBOOK:
+      CLOCK: [2024-11-11 Mo 18:20]--[2024-11-11 Mo 18:20] =>  0:00
+      :END:
+****** TODO Delete from database
+       :LOGBOOK:
+       CLOCK: [2024-11-11 Mo 18:20]--[2024-11-11 Mo 19:27] =>  1:07
+       :END:
+       That means:
+       - [ ] Delete all links between Tags and Items from this Feed.
+       - [ ] Delete the Items
+       - [ ] Delete the Feed
+****** TODO Clean up the Bayesian models
+       I may be lazy and just reset the models and generate them anew.
+       We'll see.
 *** Database [1/1]                                                 :database:
     :PROPERTIES:
     :COOKIE_DATA: todo recursive
@@ -391,6 +420,48 @@
       simple-minded replacement for cachego that works the way I want it to,
       and as far as I can tell, it does work the way I want it to, so now I
       can try using that one.
+*** Search [0/0]
+    :PROPERTIES:
+    :COOKIE_DATA: todo recursive
+    :VISIBILITY: children
+    :END:
+    :LOGBOOK:
+    CLOCK: [2024-11-11 Mo 18:03]--[2024-11-11 Mo 18:13] =>  0:10
+    CLOCK: [2024-11-10 So 16:47]--[2024-11-11 Mo 17:22] => 24:35
+    :END:
+    All the tagging and such doesn't do me any good, unless I can browse or
+    search that data in a meaningful way.
+    [2024-11-11 Mo 18:05]
+    In my previous news ticker, this was really slow. I used SQLite's full
+    text search feature, which I assume is not inherently slow. But I did have
+    a full-text-search-index over about two years worth news from numerous
+    sites, and some sites put the entire article into the description field of
+    the RSS feed. The entire database was over a Gigabyte in size the last
+    time I checked. Searching through that volume of data is going to have a
+    cost.
+    Earlier this year, I started a toy project to build a log aggregator that
+    would gather log files from several machines in one repository and started
+    designing a search feature for that.
+    To handle searches that might potentially run for quite a while, I had a
+    frontend to define my search parameters, submit the search through the web
+    UI, and the search would then run asynchronously in a seperate goroutine.
+    I could see in the web frontend if the search was still running, finished,
+    or if an error had occured. Once it was done, I could display the search
+    results in the frontend.
+    This sounds like an approach I could use here as well.
+    I could also look into limiting the amount of news items that are
+    processed for the search. *If* I use the FTS feature of SQLite, I could
+    for example only dump a subset of news items into the FTS index, maybe for
+    the last month, last couple of months, something like that.
+    I would then have to clean older items from the FTS index or generate it
+    from scratch periodically.
+    In my old news ticker, I had never come around to delete anything,
+    really. When I no longer wanted to read a particular feed, I would just
+    suspend it; but the news Items from that feed that were already in the
+    database and FTS remained there, contributing to its massive size.
+    So first of all, I think I should add the option to delete a feed that
+    removes all of its associated data from my application, including the
+    database, but also from the Bayesian models for Rating and Tagging.
 ** Bugs [0/0]
    :PROPERTIES:
    :COOKIE_DATA: todo recursive
