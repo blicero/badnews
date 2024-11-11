@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 28. 09. 2024 by Benjamin Walkenhorst
 // (c) 2024 Benjamin Walkenhorst
-// Time-stamp: <2024-11-02 21:31:03 krylon>
+// Time-stamp: <2024-11-11 18:48:13 krylon>
 
 // Package web provides the web interface.
 package web
@@ -204,6 +204,7 @@ func Create(addr string) (*Server, error) {
 	srv.router.HandleFunc("/ajax/items/{offset:(?:\\d+)}/{cnt:(?:\\d+)}", srv.handleAjaxItems)
 	srv.router.HandleFunc("/ajax/feed_items/{id:(?:\\d+)$}", srv.handleAjaxItemsByFeed)
 	srv.router.HandleFunc("/ajax/feed/{id:(?:\\d+)}/toggle", srv.handleAjaxFeedToggle)
+	srv.router.HandleFunc("/ajax/feed/{id:(?:\\d+)}/delete", srv.handleAjaxFeedDelete)
 	srv.router.HandleFunc("/ajax/item_rate", srv.handleAjaxRateItem)
 	srv.router.HandleFunc("/ajax/item_unrate/{id:(?:\\d+)$}", srv.handleAjaxUnrateItem)
 	srv.router.HandleFunc("/ajax/tag/all", srv.handleAjaxTagView)
@@ -924,6 +925,12 @@ SEND_RESPONSE:
 		srv.log.Println("[ERROR] " + msg)
 	}
 } // func (srv *Server) handleAjaxFeedToggle(w http.ResponseWriter, r *http.Request)
+
+func (srv *Server) handleAjaxFeedDelete(w http.ResponseWriter, r *http.Request) {
+	srv.log.Printf("[TRACE] Handle request for %s from %s\n",
+		r.URL.EscapedPath(),
+		r.RemoteAddr)
+} // func (srv *Server) handleAjaxFeedDelete(w http.ResponseWriter, r *http.Request)
 
 func (srv *Server) handleAjaxItems(w http.ResponseWriter, r *http.Request) {
 	srv.log.Printf("[TRACE] Handle request for %s from %s\n",

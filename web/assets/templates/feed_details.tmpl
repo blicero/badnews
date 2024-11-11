@@ -1,6 +1,6 @@
 {{ define "feed_details" }}
 {{/* Created on 09. 10. 2024 */}}
-{{/* Time-stamp: <2024-10-31 00:20:44 krylon> */}}
+{{/* Time-stamp: <2024-11-11 19:27:21 krylon> */}}
 <!DOCTYPE html>
 <html>
   {{ template "head" . }}
@@ -26,6 +26,16 @@
       <tr>
         <th>Last Refresh</th>
         <td>{{ fmt_time_minute .Feed.LastRefresh }}</td>
+      </tr>
+      <tr>
+        <th>Delete Feed?</th>
+        <td>
+          <button type="button"
+                  class="btn btn-danger"
+                  onclick="feed_delete({{ .Feed.ID }});">
+            Delete!
+          </button>
+        </td>
       </tr>
     </table>
 

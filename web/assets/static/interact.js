@@ -1,4 +1,4 @@
-// Time-stamp: <2024-11-02 21:49:42 krylon>
+// Time-stamp: <2024-11-11 19:27:14 krylon>
 // -*- mode: javascript; coding: utf-8; -*-
 // Copyright 2015-2020 Benjamin Walkenhorst <krylon@gmx.net>
 //
@@ -407,6 +407,21 @@ function toggle_feed_active(feed_id) {
         msg_add(status, 3)
     })
 } // function toggle_feed_active(feed_id)
+
+function feed_delete(id) {
+    const url = `/ajax/feed/${id}/delete`
+
+    if (!windows.confirm(`Do you really want to delete the Feed #${id}?`)) {
+        return
+    }
+
+    const req = $.get(url,
+                      {},
+                      (res) => {
+                          // Deal with it
+                      },
+                      'json')
+} // function feed_delete(id)
 
 function blacklist_add_pattern() {
     const url = "/ajax/blacklist/add"
