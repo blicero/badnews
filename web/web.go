@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 28. 09. 2024 by Benjamin Walkenhorst
 // (c) 2024 Benjamin Walkenhorst
-// Time-stamp: <2024-11-11 20:46:11 krylon>
+// Time-stamp: <2024-11-12 15:26:40 krylon>
 
 // Package web provides the web interface.
 package web
@@ -932,14 +932,16 @@ func (srv *Server) handleAjaxFeedDelete(w http.ResponseWriter, r *http.Request) 
 		r.RemoteAddr)
 
 	var (
-		err   error
-		sess  *sessions.Session
-		rbuf  []byte
-		idstr string
-		fid   int64
-		db    *database.Database
-		res   Reply
-		rvars map[string]string
+		err     error
+		sess    *sessions.Session
+		rbuf    []byte
+		idstr   string
+		fid     int64
+		feed    *model.Feed
+		db      *database.Database
+		res     Reply
+		rvars   map[string]string
+		hstatus = 200
 	)
 
 	rvars = mux.Vars(r)
@@ -954,8 +956,39 @@ func (srv *Server) handleAjaxFeedDelete(w http.ResponseWriter, r *http.Request) 
 		goto SEND_RESPONSE
 	}
 
+	srv.log.Printf("[INFO] Delete RSS Feed %d\n", err.Error())
+
 	db = srv.pool.Get()
 	defer srv.pool.Put(db)
+
+	if err = db.Begin(); err != nil {
+		res.Message = fmt.Sprintf("Failed to initiate transaction: %s",
+			err.Error())
+		srv.log.Printf("[ERROR] %s\n", res.Message)
+		hstatus = 500
+		goto SEND_RESPONSE
+	} else if feed, err = db.FeedGetByID(fid); err != nil {
+		res.Message = fmt.Sprintf("Failed to fetch Feed %d from Database: %s",
+			fid,
+			err.Error())
+		srv.log.Printf("[ERROR] %s\n", res.Message)
+		hstatus = 500
+		goto SEND_RESPONSE
+	} else if feed == nil {
+		res.Message = fmt.Sprintf("Feed %d was not found in Database",
+			fid)
+		srv.log.Printf("[ERROR] %s\n", res.Message)
+		hstatus = 500
+		goto SEND_RESPONSE
+	} else if err = db.TagLinkDeleteByFeed(feed); err != nil {
+		res.Message = fmt.Sprintf("Failed to delete Tag links to Items for Feed %s (%d): %s",
+			feed.Title,
+			feed.ID,
+			err.Error())
+		srv.log.Printf("[ERROR] %s\n", res.Message)
+		hstatus = 500
+		goto SEND_RESPONSE
+	}
 
 SEND_RESPONSE:
 	if sess != nil {
