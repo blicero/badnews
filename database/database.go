@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 19. 09. 2024 by Benjamin Walkenhorst
 // (c) 2024 Benjamin Walkenhorst
-// Time-stamp: <2024-11-12 15:32:20 krylon>
+// Time-stamp: <2024-11-12 18:17:49 krylon>
 
 // Package database provides persistence.
 package database
@@ -2535,7 +2535,7 @@ EXEC_QUERY:
 			waitForRetry()
 			goto EXEC_QUERY
 		} else {
-			err = fmt.Errorf("Cannot remove Tag links to Items belonging to Feed %s (%d)\n",
+			err = fmt.Errorf("Cannot remove Tag links to Items belonging to Feed %s (%d): %s\n",
 				f.Title,
 				f.ID,
 				err.Error())
