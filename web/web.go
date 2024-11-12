@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 28. 09. 2024 by Benjamin Walkenhorst
 // (c) 2024 Benjamin Walkenhorst
-// Time-stamp: <2024-11-12 15:26:40 krylon>
+// Time-stamp: <2024-11-12 18:32:25 krylon>
 
 // Package web provides the web interface.
 package web
@@ -956,7 +956,7 @@ func (srv *Server) handleAjaxFeedDelete(w http.ResponseWriter, r *http.Request) 
 		goto SEND_RESPONSE
 	}
 
-	srv.log.Printf("[INFO] Delete RSS Feed %d\n", err.Error())
+	srv.log.Printf("[INFO] Delete RSS Feed %d\n", fid)
 
 	db = srv.pool.Get()
 	defer srv.pool.Put(db)
@@ -967,7 +967,17 @@ func (srv *Server) handleAjaxFeedDelete(w http.ResponseWriter, r *http.Request) 
 		srv.log.Printf("[ERROR] %s\n", res.Message)
 		hstatus = 500
 		goto SEND_RESPONSE
-	} else if feed, err = db.FeedGetByID(fid); err != nil {
+	}
+
+	defer func() {
+		if res.Status {
+			db.Commit() // nolint: errcheck
+		} else {
+			db.Rollback() // nolint: errcheck
+		}
+	}()
+
+	if feed, err = db.FeedGetByID(fid); err != nil {
 		res.Message = fmt.Sprintf("Failed to fetch Feed %d from Database: %s",
 			fid,
 			err.Error())
@@ -988,7 +998,28 @@ func (srv *Server) handleAjaxFeedDelete(w http.ResponseWriter, r *http.Request) 
 		srv.log.Printf("[ERROR] %s\n", res.Message)
 		hstatus = 500
 		goto SEND_RESPONSE
+	} else if err = db.ItemDeleteByFeed(feed); err != nil {
+		res.Message = fmt.Sprintf("Failed to delete Items for Feed %s (%d): %s",
+			feed.Title,
+			feed.ID,
+			err.Error())
+		srv.log.Printf("[ERROR] %s\n", res.Message)
+		hstatus = 500
+		goto SEND_RESPONSE
+	} else if err = db.FeedDelete(feed); err != nil {
+		res.Message = fmt.Sprintf("Failed to delete Feed %s (%d): %s",
+			feed.Title,
+			feed.ID,
+			err.Error())
+		srv.log.Printf("[ERROR] %s\n", res.Message)
+		hstatus = 500
+		goto SEND_RESPONSE
 	}
+
+	res.Message = fmt.Sprintf("Feed %s (%d) has been deleted successfully",
+		feed.Title,
+		feed.ID)
+	res.Status = true
 
 SEND_RESPONSE:
 	if sess != nil {
@@ -1008,7 +1039,7 @@ SEND_RESPONSE:
 	w.Header().Set("Cache-Control", "no-store, max-age=0")
 	w.WriteHeader(hstatus)
 	if _, err = w.Write(rbuf); err != nil {
-		msg = fmt.Sprintf("Failed to send result: %s",
+		var msg = fmt.Sprintf("Failed to send result: %s",
 			err.Error())
 		srv.log.Println("[ERROR] " + msg)
 	}
