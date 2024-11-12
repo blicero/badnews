@@ -1,5 +1,5 @@
 # -*- mode: org; fill-column: 78; -*-
-# Time-stamp: <2024-11-11 21:05:54 krylon>
+# Time-stamp: <2024-11-12 15:37:19 krylon>
 #
 #+TAGS: internals(i) ui(u) bug(b) feature(f)
 #+TAGS: database(d) design(e), meditation(m)
@@ -17,12 +17,12 @@
   BadNews is an RSS reader
 ** Clock table
    #+BEGIN: clocktable :scope file :maxlevel 202 :emphasize t
-   #+CAPTION: Clock summary at [2024-11-11 Mo 21:05]
+   #+CAPTION: Clock summary at [2024-11-12 Di 15:37]
    | Headline                                             | Time       |            |         |          |       |      |
    |------------------------------------------------------+------------+------------+---------+----------+-------+------|
-   | *Total time*                                         | *5d 22:10* |            |         |          |       |      |
+   | *Total time*                                         | *5d 23:06* |            |         |          |       |      |
    |------------------------------------------------------+------------+------------+---------+----------+-------+------|
-   | *BadNews [24/28]*                                    | *5d 22:10* |            |         |          |       |      |
+   | *BadNews [24/28]*                                    | *5d 23:06* |            |         |          |       |      |
    | \_  /Features [13/14]/                               |            | /2d 12:49/ |         |          |       |      |
    | \_    Blacklisting [1/1]                             |            |            |    6:03 |          |       |      |
    | \_    Rating and Tagging [11/11]                     |            |            | 2d 6:46 |          |       |      |
@@ -39,11 +39,11 @@
    | \_          Disable linked Tags in menu              |            |            |         |          |       | 1:13 |
    | \_          Unlink Tags from Items                   |            |            |         |          |       | 1:13 |
    | \_          Fetch linked tags per item in handler... |            |            |         |          |       | 0:23 |
-   | \_  /Components [10/14]/                             |            | /3d 9:21/  |         |          |       |      |
-   | \_    Data model [0/3]                               |            |            |    2:31 |          |       |      |
-   | \_      Feeds [0/3]                                  |            |            |         |     2:04 |       |      |
-   | \_        Delete Feeds [0/2]                         |            |            |         |          |  2:04 |      |
-   | \_          Delete from database                     |            |            |         |          |       | 2:04 |
+   | \_  /Components [10/14]/                             |            | /3d 10:17/ |         |          |       |      |
+   | \_    Data model [0/3]                               |            |            |    3:27 |          |       |      |
+   | \_      Feeds [0/3]                                  |            |            |         |     3:00 |       |      |
+   | \_        Delete Feeds [0/2]                         |            |            |         |          |  3:00 |      |
+   | \_          Delete from database                     |            |            |         |          |       | 3:00 |
    | \_    Database [1/1]                                 |            |            |   12:17 |          |       |      |
    | \_      Testing [0/0]                                |            |            |         |     3:02 |       |      |
    | \_      Queries respect transaction                  |            |            |         |     0:03 |       |      |
@@ -238,6 +238,7 @@
       :END:
 ****** TODO Delete from database
        :LOGBOOK:
+       CLOCK: [2024-11-12 Di 14:41]--[2024-11-12 Di 15:37] =>  0:56
        CLOCK: [2024-11-11 Mo 20:08]--[2024-11-11 Mo 21:05] =>  0:57
        CLOCK: [2024-11-11 Mo 18:20]--[2024-11-11 Mo 19:27] =>  1:07
        :END:
