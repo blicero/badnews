@@ -1,5 +1,5 @@
 # -*- mode: org; fill-column: 78; -*-
-# Time-stamp: <2024-11-12 15:37:19 krylon>
+# Time-stamp: <2024-11-12 20:01:06 krylon>
 #
 #+TAGS: internals(i) ui(u) bug(b) feature(f)
 #+TAGS: database(d) design(e), meditation(m)
@@ -9,7 +9,7 @@
 #+TODO: MEDITATE(m) PLANNING(p) | SUSPENDED(s)
 #+PRIORITIES: A G D
 
-* BadNews [24/28]
+* BadNews [27/28]
   :PROPERTIES:
   :COOKIE_DATA: todo recursive
   :VISIBILITY: children
@@ -17,56 +17,57 @@
   BadNews is an RSS reader
 ** Clock table
    #+BEGIN: clocktable :scope file :maxlevel 202 :emphasize t
-   #+CAPTION: Clock summary at [2024-11-12 Di 15:37]
-   | Headline                                             | Time       |            |         |          |       |      |
-   |------------------------------------------------------+------------+------------+---------+----------+-------+------|
-   | *Total time*                                         | *5d 23:06* |            |         |          |       |      |
-   |------------------------------------------------------+------------+------------+---------+----------+-------+------|
-   | *BadNews [24/28]*                                    | *5d 23:06* |            |         |          |       |      |
-   | \_  /Features [13/14]/                               |            | /2d 12:49/ |         |          |       |      |
-   | \_    Blacklisting [1/1]                             |            |            |    6:03 |          |       |      |
-   | \_    Rating and Tagging [11/11]                     |            |            | 2d 6:46 |          |       |      |
-   | \_      Rating [2/2]                                 |            |            |         |     9:15 |       |      |
-   | \_        Hide boring Items                          |            |            |         |          |  2:45 |      |
-   | \_        Caching results                            |            |            |         |          |  0:27 |      |
-   | \_      Tags [9/9]                                   |            |            |         | 1d 21:30 |       |      |
-   | \_        Re-render everything tag when editing...   |            |            |         |          |  0:56 |      |
-   | \_        Recommend tags for Items                   |            |            |         |          |  5:59 |      |
-   | \_          Don't recommend Tags the Item already... |            |            |         |          |       | 0:57 |
-   | \_        Add newly created tags to tag_view         |            |            |         |          |  1:20 |      |
-   | \_        Order tags by hierarchy                    |            |            |         |          |  1:10 |      |
-   | \_        Link Tags to Items [3/3]                   |            |            |         |          | 14:24 |      |
-   | \_          Disable linked Tags in menu              |            |            |         |          |       | 1:13 |
-   | \_          Unlink Tags from Items                   |            |            |         |          |       | 1:13 |
-   | \_          Fetch linked tags per item in handler... |            |            |         |          |       | 0:23 |
-   | \_  /Components [10/14]/                             |            | /3d 10:17/ |         |          |       |      |
-   | \_    Data model [0/3]                               |            |            |    3:27 |          |       |      |
-   | \_      Feeds [0/3]                                  |            |            |         |     3:00 |       |      |
-   | \_        Delete Feeds [0/2]                         |            |            |         |          |  3:00 |      |
-   | \_          Delete from database                     |            |            |         |          |       | 3:00 |
-   | \_    Database [1/1]                                 |            |            |   12:17 |          |       |      |
-   | \_      Testing [0/0]                                |            |            |         |     3:02 |       |      |
-   | \_      Queries respect transaction                  |            |            |         |     0:03 |       |      |
-   | \_    Feed catcher / parser [0/0]                    |            |            |    5:41 |          |       |      |
-   | \_      Testing                                      |            |            |         |     2:16 |       |      |
-   | \_    Web Interface [7/8]                            |            |            | 1d 0:38 |          |       |      |
-   | \_      Feeds overview                               |            |            |         |     1:42 |       |      |
-   | \_      Message Area                                 |            |            |         |     7:10 |       |      |
-   | \_      Appearances matter [5/5]                     |            |            |         |     4:40 |       |      |
-   | \_        Feed Details                               |            |            |         |          |  0:57 |      |
-   | \_          Sort Feeds by Title                      |            |            |         |          |       | 0:16 |
-   | \_        Images                                     |            |            |         |          |  0:12 |      |
-   | \_        Hide long descriptions                     |            |            |         |          |  0:20 |      |
-   | \_        Fix Links                                  |            |            |         |          |  0:03 |      |
-   | \_      AJAX FTW [0/0]                               |            |            |         |     3:02 |       |      |
-   | \_    Tag Advisor [2/2]                              |            |            |   11:29 |          |       |      |
-   | \_      Performance [2/2]                            |            |            |         |    10:10 |       |      |
-   | \_        Caching                                    |            |            |         |          |  3:06 |      |
-   | \_        Pre-computing advice                       |            |            |         |          |  7:04 |      |
-   | \_    Search [0/0]                                   |            |            | 1d 0:45 |          |       |      |
+   #+CAPTION: Clock summary at [2024-11-12 Di 20:01]
+   | Headline                                             | Time      |            |         |          |       |      |
+   |------------------------------------------------------+-----------+------------+---------+----------+-------+------|
+   | *Total time*                                         | *6d 1:04* |            |         |          |       |      |
+   |------------------------------------------------------+-----------+------------+---------+----------+-------+------|
+   | *BadNews [27/28]*                                    | *6d 1:04* |            |         |          |       |      |
+   | \_  /Features [14/14]/                               |           | /2d 12:49/ |         |          |       |      |
+   | \_    Blacklisting [1/1]                             |           |            |    6:03 |          |       |      |
+   | \_    Rating and Tagging [12/12]                     |           |            | 2d 6:46 |          |       |      |
+   | \_      Rating [2/2]                                 |           |            |         |     9:15 |       |      |
+   | \_        Hide boring Items                          |           |            |         |          |  2:45 |      |
+   | \_        Caching results                            |           |            |         |          |  0:27 |      |
+   | \_      Tags [9/9]                                   |           |            |         | 1d 21:30 |       |      |
+   | \_        Re-render everything tag when editing...   |           |            |         |          |  0:56 |      |
+   | \_        Recommend tags for Items                   |           |            |         |          |  5:59 |      |
+   | \_          Don't recommend Tags the Item already... |           |            |         |          |       | 0:57 |
+   | \_        Add newly created tags to tag_view         |           |            |         |          |  1:20 |      |
+   | \_        Order tags by hierarchy                    |           |            |         |          |  1:10 |      |
+   | \_        Link Tags to Items [3/3]                   |           |            |         |          | 14:24 |      |
+   | \_          Disable linked Tags in menu              |           |            |         |          |       | 1:13 |
+   | \_          Unlink Tags from Items                   |           |            |         |          |       | 1:13 |
+   | \_          Fetch linked tags per item in handler... |           |            |         |          |       | 0:23 |
+   | \_  /Components [13/14]/                             |           | /3d 12:15/ |         |          |       |      |
+   | \_    Data model [3/3]                               |           |            |    5:25 |          |       |      |
+   | \_      Feeds [3/3]                                  |           |            |         |     4:58 |       |      |
+   | \_        Delete Feeds [2/2]                         |           |            |         |          |  4:58 |      |
+   | \_          Delete from database                     |           |            |         |          |       | 3:00 |
+   | \_          Clean up the Bayesian models             |           |            |         |          |       | 0:15 |
+   | \_    Database [1/1]                                 |           |            |   12:17 |          |       |      |
+   | \_      Testing [0/0]                                |           |            |         |     3:02 |       |      |
+   | \_      Queries respect transaction                  |           |            |         |     0:03 |       |      |
+   | \_    Feed catcher / parser [0/0]                    |           |            |    5:41 |          |       |      |
+   | \_      Testing                                      |           |            |         |     2:16 |       |      |
+   | \_    Web Interface [7/8]                            |           |            | 1d 0:38 |          |       |      |
+   | \_      Feeds overview                               |           |            |         |     1:42 |       |      |
+   | \_      Message Area                                 |           |            |         |     7:10 |       |      |
+   | \_      Appearances matter [5/5]                     |           |            |         |     4:40 |       |      |
+   | \_        Feed Details                               |           |            |         |          |  0:57 |      |
+   | \_          Sort Feeds by Title                      |           |            |         |          |       | 0:16 |
+   | \_        Images                                     |           |            |         |          |  0:12 |      |
+   | \_        Hide long descriptions                     |           |            |         |          |  0:20 |      |
+   | \_        Fix Links                                  |           |            |         |          |  0:03 |      |
+   | \_      AJAX FTW [0/0]                               |           |            |         |     3:02 |       |      |
+   | \_    Tag Advisor [2/2]                              |           |            |   11:29 |          |       |      |
+   | \_      Performance [2/2]                            |           |            |         |    10:10 |       |      |
+   | \_        Caching                                    |           |            |         |          |  3:06 |      |
+   | \_        Pre-computing advice                       |           |            |         |          |  7:04 |      |
+   | \_    Search [0/0]                                   |           |            | 1d 0:45 |          |       |      |
    #+END:
 ** Journal
-** Features [13/14]
+** Features [14/14]
    :PROPERTIES:
    :COOKIE_DATA: todo recursive
    :VISIBILITY: children
@@ -93,7 +94,7 @@
      least for the time being. No need to get fancy. If SQLite had native
      support for regular expressions, I would use it, but it doesn't, so I
      don't.
-*** Rating and Tagging [11/11]
+*** Rating and Tagging [12/12]
     :PROPERTIES:
     :COOKIE_DATA: todo recursive
     :VISIBILITY: children
@@ -210,12 +211,12 @@
       :LOGBOOK:
       CLOCK: [2024-10-19 Sa 20:37]--[2024-10-19 Sa 21:00] =>  0:23
       :END:
-** Components [10/14]
+** Components [13/14]
    :PROPERTIES:
    :COOKIE_DATA: todo recursive
    :VISIBILITY: children
    :END:
-*** Data model [0/3]
+*** Data model [3/3]
     :PROPERTIES:
     :COOKIE_DATA: todo recursive
     :VISIBILITY: children
@@ -223,32 +224,46 @@
     :LOGBOOK:
     CLOCK: [2024-09-19 Do 16:25]--[2024-09-19 Do 16:52] =>  0:27
     :END:
-**** Feeds [0/3]
+**** Feeds [3/3]
      :PROPERTIES:
      :COOKIE_DATA: todo recursive
      :VISIBILITY: children
      :END:
-***** TODO Delete Feeds [0/2]
+***** DONE Delete Feeds [2/2]
+      CLOSED: [2024-11-12 Di 20:00]
       :PROPERTIES:
       :COOKIE_DATA: todo recursive
       :VISIBILITY: children
       :END:
       :LOGBOOK:
+      CLOCK: [2024-11-12 Di 18:17]--[2024-11-12 Di 20:00] =>  1:43
       CLOCK: [2024-11-11 Mo 18:20]--[2024-11-11 Mo 18:20] =>  0:00
       :END:
-****** TODO Delete from database
+****** DONE Delete from database
+       CLOSED: [2024-11-12 Di 20:00]
        :LOGBOOK:
        CLOCK: [2024-11-12 Di 14:41]--[2024-11-12 Di 15:37] =>  0:56
        CLOCK: [2024-11-11 Mo 20:08]--[2024-11-11 Mo 21:05] =>  0:57
        CLOCK: [2024-11-11 Mo 18:20]--[2024-11-11 Mo 19:27] =>  1:07
        :END:
        That means:
-       - [ ] Delete all links between Tags and Items from this Feed.
-       - [ ] Delete the Items
-       - [ ] Delete the Feed
-****** TODO Clean up the Bayesian models
+       - [X] Delete all links between Tags and Items from this Feed.
+       - [X] Delete the Items
+       - [X] Delete the Feed
+****** SUSPENDED Clean up the Bayesian models
+       CLOSED: [2024-11-12 Di 18:12]
+       :LOGBOOK:
+       CLOCK: [2024-11-12 Di 18:11]--[2024-11-12 Di 18:12] =>  0:01
+       CLOCK: [2024-11-12 Di 17:42]--[2024-11-12 Di 17:56] =>  0:14
+       :END:
        I may be lazy and just reset the models and generate them anew.
        We'll see.
+       ...
+       On second thought, I might not, in fact, need to clean up the training
+       data for the Bayesian models. I *did* make those associations, after
+       all. And that part won't use up all that much space.
+       And if I really need to, I can just discard the existing training data
+       and train the models anew. 
 *** Database [1/1]                                                 :database:
     :PROPERTIES:
     :COOKIE_DATA: todo recursive
