@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 19. 09. 2024 by Benjamin Walkenhorst
 // (c) 2024 Benjamin Walkenhorst
-// Time-stamp: <2024-11-04 19:08:43 krylon>
+// Time-stamp: <2024-11-12 15:28:15 krylon>
 
 package database
 
@@ -65,7 +65,8 @@ INSERT INTO item (feed_id, url, timestamp, headline, description)
           VALUES (      ?,   ?,         ?,        ?,           ?)
 RETURNING id
 `,
-	query.ItemExists: "SELECT COUNT(id) FROM item WHERE url = ?",
+	query.ItemDeleteByFeed: "DELETE FROM item WHERE feed_id = ?",
+	query.ItemExists:       "SELECT COUNT(id) FROM item WHERE url = ?",
 	query.ItemGetRecent: `
 SELECT
     id,
@@ -211,6 +212,21 @@ INSERT INTO tag_link (tag_id, item_id)
               VALUES (     ?,       ?)
 `,
 	query.TagLinkDelete: "DELETE FROM tag_link WHERE tag_id = ? AND item_id = ?",
+	query.TagLinkDeleteByFeed: `
+-- This probably is not the most efficient way to do this.
+-- But a) we most likely won't be doing this very often, and
+-- b) it should be good enough to get started.
+WITH links (link_id, item_id, feed_id) AS (
+     SELECT l.id,
+            l.item_id,
+            i.feed_id
+     FROM tag_link l
+     INNER JOIN item i ON l.item_id = i.id
+)
+
+DELETE FROM tag_link
+WHERE item_id IN (SELECT item_id FROM links WHERE feed_id = ?)
+`,
 	query.TagLinkGetByItem: `
 SELECT
     t.id,
