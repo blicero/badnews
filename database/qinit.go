@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 19. 09. 2024 by Benjamin Walkenhorst
 // (c) 2024 Benjamin Walkenhorst
-// Time-stamp: <2024-10-13 20:06:14 krylon>
+// Time-stamp: <2024-11-13 20:59:26 krylon>
 
 package database
 
@@ -69,4 +69,24 @@ CREATE TABLE tag_link (
 `,
 	"CREATE INDEX tl_tag_idx ON tag_link (tag_id)",
 	"CREATE INDEX tl_item_idx ON tag_link (item_id)",
+
+	`
+CREATE TABLE search (
+    id INTEGER PRIMARY KEY,
+    title TEXT NOT NULL DEFAULT '',
+    time_created INTEGER NOT NULL,
+    time_started INTEGER,
+    time_finished INTEGER,
+    status INTEGER NOT NULL DEFAULT 0,
+    msg TEXT NOT NULL DEFAULT '',
+    tags TEXT NOT NULL DEFAULT '',
+    query_string TEXT NOT NULL,
+    regex INTEGER NOT NULL DEFAULT 0,
+    results TEXT,
+    CHECK (time_started IS NULL OR time_started >= time_created),
+    CHECK (time_finished IS NULL OR (time_started IS NOT NULL AND time_finished >= time_started))
+) STRICT
+`,
+	"CREATE INDEX search_active_idx ON search (time_started IS NOT NULL, time_finished IS NULL)",
+	"CREATE INDEX search_status_idx ON search (status)",
 }

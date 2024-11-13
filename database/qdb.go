@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 19. 09. 2024 by Benjamin Walkenhorst
 // (c) 2024 Benjamin Walkenhorst
-// Time-stamp: <2024-11-12 15:28:15 krylon>
+// Time-stamp: <2024-11-13 21:00:04 krylon>
 
 package database
 
@@ -248,5 +248,66 @@ SELECT
 FROM tag_link l
 INNER JOIN item i ON l.item_id = i.id
 WHERE tag_id = ?
+`,
+	query.SearchAdd: `
+INSERT INTO search (title, time_created, tags, query_string, regex)
+            VALUES (    ?,            ?,    ?,            ?,     ?)
+RETURNING id
+`,
+	query.SearchDelete: "DELETE FROM search WHERE id = ?",
+	query.SearchGetByID: `
+SELECT
+    title,
+    time_created,
+    time_started,
+    time_finished,
+    status,
+    msg,
+    tags,
+    query_string,
+    regex,
+    results
+FROM search
+WHERE id = ?
+`,
+	query.SearchGetActive: `
+SELECT
+    id,
+    title,
+    time_created,
+    time_started,
+    status,
+    msg,
+    tags,
+    query_string,
+    regex
+FROM search
+WHERE time_started IS NOT NULL AND time_finished IS NULL
+ORDER BY time_started
+`,
+	query.SearchGetAll: `
+SELECT
+    id,
+    title,
+    time_created,
+    time_started,
+    time_finished,
+    status,
+    msg,
+    tags,
+    query_string,
+    regex,
+    results
+FROM search
+ORDER BY time_created
+`,
+	query.SearchStart: "UPDATE search SET time_started = ?, time_finished = NULL WHERE id = ?",
+	query.SearchFinish: `
+UPDATE search
+SET time_finished = ?,
+    status = ?,
+    msg = ?,
+    results = ?
+WHERE id = ?
 `,
 }

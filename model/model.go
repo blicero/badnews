@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 19. 09. 2024 by Benjamin Walkenhorst
 // (c) 2024 Benjamin Walkenhorst
-// Time-stamp: <2024-10-21 16:48:08 krylon>
+// Time-stamp: <2024-11-13 20:56:55 krylon>
 
 // Package model provides the data types used across the application.
 package model
@@ -128,7 +128,7 @@ func (i *Item) HasTag(id int64) bool {
 	return false
 } // func (i *Item) HasTag(id int64) bool
 
-// Returns the ID as a string
+// IDString returns the ID as a string
 func (i *Item) IDString() string {
 	if i._idstr != "" {
 		return i._idstr
@@ -147,3 +147,26 @@ type Tag struct {
 	Level    int64  `json:"level"`
 	FullName string `json:"full_name"`
 }
+
+// Search represents the parameters of a search query.
+// Regex, if true, indicates the Query text should be handled as a regular
+// expression.
+type Search struct {
+	ID           int64     `json:"id"`
+	Title        string    `json:"title"`
+	TimeCreated  time.Time `json:"time_created"`
+	TimeStarted  time.Time `json:"time_started"`
+	TimeFinished time.Time `json:"time_finished"`
+	Status       bool      `json:"status"`
+	Message      string    `json:"message"`
+	Tags         []int64   `json:"tags"`
+	QueryString  string    `json:"query_string"`
+	Regex        bool      `json:"regexp"`
+	Results      []*Item   `json:"results"`
+}
+
+// IsFinished returns true if the Search query has a Finished timestamp that is
+// later than its Started timestamp.
+func (s *Search) IsFinished() bool {
+	return s.TimeFinished.After(s.TimeStarted)
+} // func (s *Search) IsFinished() bool
