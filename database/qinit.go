@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 19. 09. 2024 by Benjamin Walkenhorst
 // (c) 2024 Benjamin Walkenhorst
-// Time-stamp: <2024-11-13 20:59:26 krylon>
+// Time-stamp: <2024-11-14 17:19:01 krylon>
 
 package database
 
@@ -80,6 +80,7 @@ CREATE TABLE search (
     status INTEGER NOT NULL DEFAULT 0,
     msg TEXT NOT NULL DEFAULT '',
     tags TEXT NOT NULL DEFAULT '',
+    tags_all INTEGER NOT NULL DEFAULT 0,
     query_string TEXT NOT NULL,
     regex INTEGER NOT NULL DEFAULT 0,
     results TEXT,

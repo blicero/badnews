@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 19. 09. 2024 by Benjamin Walkenhorst
 // (c) 2024 Benjamin Walkenhorst
-// Time-stamp: <2024-11-13 20:58:44 krylon>
+// Time-stamp: <2024-11-14 18:15:54 krylon>
 
 // Package database provides persistence.
 package database
@@ -2734,7 +2734,7 @@ func (db *Database) SearchAdd(s *model.Search) error {
 	tags = strings.Join(tagIDs, ",")
 
 EXEC_QUERY:
-	if rows, err = stmt.Query(s.TimeCreated.Unix(), tags, s.QueryString, s.Regex); err != nil {
+	if rows, err = stmt.Query(s.Title, s.TimeCreated.Unix(), tags, s.TagsAll, s.QueryString, s.Regex); err != nil {
 		if worthARetry(err) {
 			waitForRetry()
 			goto EXEC_QUERY
@@ -2870,7 +2870,7 @@ EXEC_QUERY:
 			tags, results       []string
 		)
 
-		if err = rows.Scan(&s.Title, &tcreated, &tstarted, &tfinished, &s.Status, &s.Message, &tagStr, &s.QueryString, &s.Regex, &resultStr); err != nil {
+		if err = rows.Scan(&s.Title, &tcreated, &tstarted, &tfinished, &s.Status, &s.Message, &tagStr, &s.TagsAll, &s.QueryString, &s.Regex, &resultStr); err != nil {
 			msg = fmt.Sprintf("Error scanning row for Search %d: %s",
 				id,
 				err.Error())
@@ -2928,3 +2928,349 @@ EXEC_QUERY:
 
 	return nil, nil
 } // func (db *Database) SearchGetByID(id int64) (*model.Search, error)
+
+// SearchGetActive returns all Search queries that have been marked as started but not finished.
+func (db *Database) SearchGetActive() ([]*model.Search, error) {
+	const qid query.ID = query.SearchGetActive
+	var (
+		err  error
+		msg  string
+		stmt *sql.Stmt
+	)
+
+	if stmt, err = db.getQuery(qid); err != nil {
+		db.log.Printf("[ERROR] Cannot prepare query %s: %s\n",
+			qid,
+			err.Error())
+		return nil, err
+	} else if db.tx != nil {
+		stmt = db.tx.Stmt(stmt)
+	}
+
+	var rows *sql.Rows
+
+EXEC_QUERY:
+	if rows, err = stmt.Query(); err != nil {
+		if worthARetry(err) {
+			waitForRetry()
+			goto EXEC_QUERY
+		}
+
+		return nil, err
+	}
+
+	defer rows.Close() // nolint: errcheck,gosec
+	var queries = make([]*model.Search, 0, 8)
+
+	for rows.Next() {
+		var (
+			s                 = new(model.Search)
+			tcreated          int64
+			tstarted          *int64
+			tagStr, resultStr string
+			tags, results     []string
+		)
+
+		if err = rows.Scan(&s.Title, &tcreated, &tstarted, &s.Status, &s.Message, &tagStr, &s.TagsAll, &s.QueryString, &s.Regex, &resultStr); err != nil {
+			msg = fmt.Sprintf("Error scanning row for pending Search queries: %s",
+				err.Error())
+			db.log.Printf("[ERROR] %s\n", msg)
+			return nil, errors.New(msg)
+		}
+
+		s.TimeCreated = time.Unix(tcreated, 0)
+		if tstarted != nil {
+			s.TimeStarted = time.Unix(*tstarted, 0)
+		}
+
+		tags = strings.Split(tagStr, ",")
+		results = strings.Split(resultStr, ",")
+
+		if len(tags) > 0 {
+			s.Tags = make([]int64, len(tags))
+
+			for idx, t := range tags {
+				var tid int64
+				if tid, err = strconv.ParseInt(t, 10, 64); err != nil {
+					db.log.Printf("[ERROR] Cannot parse Tag ID %q: %s\n",
+						t,
+						err.Error())
+					return nil, err
+				}
+				s.Tags[idx] = tid
+			}
+		}
+
+		if len(results) > 0 {
+			s.Results = make([]*model.Item, len(results))
+
+			for idx, r := range results {
+				var rid int64
+				if rid, err = strconv.ParseInt(r, 10, 64); err != nil {
+					db.log.Printf("[ERROR] Cannot parse Item ID %q: %s\n",
+						r,
+						err.Error())
+					return nil, err
+				} else if s.Results[idx], err = db.ItemGetByID(rid); err != nil {
+					db.log.Printf("[ERROR] Failed to load Item %d: %s\n",
+						rid,
+						err.Error())
+					return nil, err
+				}
+			}
+		}
+
+		queries = append(queries, s)
+	}
+
+	return queries, nil
+} // func (db *Database) SearchGetActive() ([]*model.Search, error)
+
+// SearchGetAll loads all existing search queries.
+func (db *Database) SearchGetAll() ([]*model.Search, error) {
+	const qid query.ID = query.SearchGetAll
+	var (
+		err  error
+		msg  string
+		stmt *sql.Stmt
+	)
+
+	if stmt, err = db.getQuery(qid); err != nil {
+		db.log.Printf("[ERROR] Cannot prepare query %s: %s\n",
+			qid,
+			err.Error())
+		return nil, err
+	} else if db.tx != nil {
+		stmt = db.tx.Stmt(stmt)
+	}
+
+	var rows *sql.Rows
+
+EXEC_QUERY:
+	if rows, err = stmt.Query(); err != nil {
+		if worthARetry(err) {
+			waitForRetry()
+			goto EXEC_QUERY
+		}
+
+		return nil, err
+	}
+
+	defer rows.Close() // nolint: errcheck,gosec
+	var queries = make([]*model.Search, 0, 8)
+
+	for rows.Next() {
+		var (
+			s                   = new(model.Search)
+			tcreated            int64
+			tstarted, tfinished *int64
+			tagStr, resultStr   string
+			tags, results       []string
+		)
+
+		if err = rows.Scan(&s.Title, &tcreated, &tstarted, &tfinished, &s.Status, &s.Message, &tagStr, &s.TagsAll, &s.QueryString, &s.Regex, &resultStr); err != nil {
+			msg = fmt.Sprintf("Error scanning row for pending Search queries: %s",
+				err.Error())
+			db.log.Printf("[ERROR] %s\n", msg)
+			return nil, errors.New(msg)
+		}
+
+		s.TimeCreated = time.Unix(tcreated, 0)
+		if tstarted != nil {
+			s.TimeStarted = time.Unix(*tstarted, 0)
+		}
+		if tfinished != nil {
+			s.TimeFinished = time.Unix(*tfinished, 0)
+		}
+
+		tags = strings.Split(tagStr, ",")
+		results = strings.Split(resultStr, ",")
+
+		if len(tags) > 0 {
+			s.Tags = make([]int64, len(tags))
+
+			for idx, t := range tags {
+				var tid int64
+				if tid, err = strconv.ParseInt(t, 10, 64); err != nil {
+					db.log.Printf("[ERROR] Cannot parse Tag ID %q: %s\n",
+						t,
+						err.Error())
+					return nil, err
+				}
+				s.Tags[idx] = tid
+			}
+		}
+
+		if len(results) > 0 {
+			s.Results = make([]*model.Item, len(results))
+
+			for idx, r := range results {
+				var rid int64
+				if rid, err = strconv.ParseInt(r, 10, 64); err != nil {
+					db.log.Printf("[ERROR] Cannot parse Item ID %q: %s\n",
+						r,
+						err.Error())
+					return nil, err
+				} else if s.Results[idx], err = db.ItemGetByID(rid); err != nil {
+					db.log.Printf("[ERROR] Failed to load Item %d: %s\n",
+						rid,
+						err.Error())
+					return nil, err
+				}
+			}
+		}
+
+		queries = append(queries, s)
+	}
+
+	return queries, nil
+} // func (db *Database) SearchGetAll() ([]*model.Search, error)
+
+// SearchStart sets the start time of the given Search query to the current
+// time, marking it as active.
+func (db *Database) SearchStart(s *model.Search) error {
+	const qid query.ID = query.SearchStart
+	var (
+		err    error
+		msg    string
+		stmt   *sql.Stmt
+		tx     *sql.Tx
+		status bool
+	)
+
+	if stmt, err = db.getQuery(qid); err != nil {
+		db.log.Printf("[ERROR] Cannot prepare query %s: %s\n",
+			qid,
+			err.Error())
+		return err
+	} else if db.tx != nil {
+		tx = db.tx
+	} else {
+	BEGIN_AD_HOC:
+		if tx, err = db.db.Begin(); err != nil {
+			if worthARetry(err) {
+				waitForRetry()
+				goto BEGIN_AD_HOC
+			} else {
+				msg = fmt.Sprintf("Error starting transaction: %s\n",
+					err.Error())
+				db.log.Printf("[ERROR] %s\n", msg)
+				return errors.New(msg)
+			}
+
+		} else {
+			defer func() {
+				var err2 error
+				if status {
+					if err2 = tx.Commit(); err2 != nil {
+						db.log.Printf("[ERROR] Failed to commit ad-hoc transaction: %s\n",
+							err2.Error())
+					}
+				} else if err2 = tx.Rollback(); err2 != nil {
+					db.log.Printf("[ERROR] Rollback of ad-hoc transaction failed: %s\n",
+						err2.Error())
+				}
+			}()
+		}
+	}
+
+	stmt = tx.Stmt(stmt)
+	var startStamp = time.Now()
+
+EXEC_QUERY:
+	if _, err = stmt.Exec(startStamp.Unix(), s.ID); err != nil {
+		if worthARetry(err) {
+			waitForRetry()
+			goto EXEC_QUERY
+		} else {
+			err = fmt.Errorf("Cannot add Search to Database: %s",
+				err.Error())
+			db.log.Printf("[ERROR] %s\n", err.Error())
+			return err
+		}
+	}
+
+	s.TimeStarted = startStamp
+	status = true
+	return nil
+} // func (db *Database) SearchStart(s *model.Search) error
+
+// SearchFinish sets the Finished timestamp of the given Search query to the
+// current time, marking it as finished. It also updates the status, message, and
+// results fields accordingly.
+func (db *Database) SearchFinish(s *model.Search) error {
+	const qid query.ID = query.SearchFinish
+	var (
+		err    error
+		msg    string
+		stmt   *sql.Stmt
+		tx     *sql.Tx
+		status bool
+	)
+
+	if stmt, err = db.getQuery(qid); err != nil {
+		db.log.Printf("[ERROR] Cannot prepare query %s: %s\n",
+			qid,
+			err.Error())
+		return err
+	} else if db.tx != nil {
+		tx = db.tx
+	} else {
+	BEGIN_AD_HOC:
+		if tx, err = db.db.Begin(); err != nil {
+			if worthARetry(err) {
+				waitForRetry()
+				goto BEGIN_AD_HOC
+			} else {
+				msg = fmt.Sprintf("Error starting transaction: %s\n",
+					err.Error())
+				db.log.Printf("[ERROR] %s\n", msg)
+				return errors.New(msg)
+			}
+
+		} else {
+			defer func() {
+				var err2 error
+				if status {
+					if err2 = tx.Commit(); err2 != nil {
+						db.log.Printf("[ERROR] Failed to commit ad-hoc transaction: %s\n",
+							err2.Error())
+					}
+				} else if err2 = tx.Rollback(); err2 != nil {
+					db.log.Printf("[ERROR] Rollback of ad-hoc transaction failed: %s\n",
+						err2.Error())
+				}
+			}()
+		}
+	}
+
+	stmt = tx.Stmt(stmt)
+	var (
+		finishStamp = time.Now()
+		resultsList = make([]string, len(s.Results))
+		resultStr   string
+	)
+
+	for idx, item := range s.Results {
+		resultsList[idx] = strconv.FormatInt(item.ID, 10)
+	}
+
+	resultStr = strings.Join(resultsList, ",")
+
+EXEC_QUERY:
+	if _, err = stmt.Exec(finishStamp.Unix(), s.Status, s.Message, resultStr, s.ID); err != nil {
+		if worthARetry(err) {
+			waitForRetry()
+			goto EXEC_QUERY
+		} else {
+			err = fmt.Errorf("Cannot add Search to Database: %s",
+				err.Error())
+			db.log.Printf("[ERROR] %s\n", err.Error())
+			return err
+		}
+	}
+
+	s.TimeStarted = finishStamp
+	status = true
+	return nil
+} // func (db *Database) SearchFinish(s *model.Search) error

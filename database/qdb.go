@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 19. 09. 2024 by Benjamin Walkenhorst
 // (c) 2024 Benjamin Walkenhorst
-// Time-stamp: <2024-11-13 21:00:04 krylon>
+// Time-stamp: <2024-11-14 17:19:44 krylon>
 
 package database
 
@@ -250,8 +250,8 @@ INNER JOIN item i ON l.item_id = i.id
 WHERE tag_id = ?
 `,
 	query.SearchAdd: `
-INSERT INTO search (title, time_created, tags, query_string, regex)
-            VALUES (    ?,            ?,    ?,            ?,     ?)
+INSERT INTO search (title, time_created, tags, tags_all, query_string, regex)
+            VALUES (    ?,            ?,    ?,        ?,            ?,     ?)
 RETURNING id
 `,
 	query.SearchDelete: "DELETE FROM search WHERE id = ?",
@@ -264,6 +264,7 @@ SELECT
     status,
     msg,
     tags,
+    tags_all,
     query_string,
     regex,
     results
@@ -279,6 +280,7 @@ SELECT
     status,
     msg,
     tags,
+    tags_all,
     query_string,
     regex
 FROM search
@@ -295,6 +297,7 @@ SELECT
     status,
     msg,
     tags,
+    tags_all,
     query_string,
     regex,
     results
