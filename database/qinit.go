@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 19. 09. 2024 by Benjamin Walkenhorst
 // (c) 2024 Benjamin Walkenhorst
-// Time-stamp: <2024-11-14 17:19:01 krylon>
+// Time-stamp: <2024-11-15 17:24:43 krylon>
 
 package database
 
@@ -72,20 +72,25 @@ CREATE TABLE tag_link (
 
 	`
 CREATE TABLE search (
-    id INTEGER PRIMARY KEY,
-    title TEXT NOT NULL DEFAULT '',
-    time_created INTEGER NOT NULL,
-    time_started INTEGER,
-    time_finished INTEGER,
-    status INTEGER NOT NULL DEFAULT 0,
-    msg TEXT NOT NULL DEFAULT '',
-    tags TEXT NOT NULL DEFAULT '',
-    tags_all INTEGER NOT NULL DEFAULT 0,
-    query_string TEXT NOT NULL,
-    regex INTEGER NOT NULL DEFAULT 0,
-    results TEXT,
+    id			INTEGER PRIMARY KEY,
+    title		TEXT NOT NULL DEFAULT '',
+    time_created	INTEGER NOT NULL,
+    time_started	INTEGER,
+    time_finished	INTEGER,
+    status		INTEGER NOT NULL DEFAULT 0,
+    msg			TEXT NOT NULL DEFAULT '',
+    tags		TEXT NOT NULL DEFAULT '',
+    tags_all		INTEGER NOT NULL DEFAULT 0,
+    filter_by_period	INTEGER NOT NULL DEFAULT 0,
+    filter_period_begin INTEGER NOT NULL DEFAULT 0,
+    filter_period_end	INTEGER NOT NULL DEFAULT 0,
+    query_string	TEXT NOT NULL,
+    regex		INTEGER NOT NULL DEFAULT 0,
+    results		TEXT,
     CHECK (time_started IS NULL OR time_started >= time_created),
-    CHECK (time_finished IS NULL OR (time_started IS NOT NULL AND time_finished >= time_started))
+    CHECK (time_finished IS NULL OR (time_started IS NOT NULL AND time_finished >= time_started)),
+    CHECK ((filter_by_period = 0 AND filter_period_begin = 0 AND filter_period_end = 0) OR
+           (filter_period_begin > 0 AND filter_period_end > 0 AND filter_period_begin < filter_period_end))
 ) STRICT
 `,
 	"CREATE INDEX search_active_idx ON search (time_started IS NOT NULL, time_finished IS NULL)",

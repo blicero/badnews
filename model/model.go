@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 19. 09. 2024 by Benjamin Walkenhorst
 // (c) 2024 Benjamin Walkenhorst
-// Time-stamp: <2024-11-14 17:18:38 krylon>
+// Time-stamp: <2024-11-15 17:21:28 krylon>
 
 // Package model provides the data types used across the application.
 package model
@@ -154,18 +154,20 @@ type Tag struct {
 // TagsAll, if true, indicates the query is looking for Items that have ALL the
 // supplied Tags linked to them.
 type Search struct {
-	ID           int64     `json:"id"`
-	Title        string    `json:"title"`
-	TimeCreated  time.Time `json:"time_created"`
-	TimeStarted  time.Time `json:"time_started"`
-	TimeFinished time.Time `json:"time_finished"`
-	Status       bool      `json:"status"`
-	Message      string    `json:"message"`
-	Tags         []int64   `json:"tags"`
-	TagsAll      bool      `json:"tags_all"`
-	QueryString  string    `json:"query_string"`
-	Regex        bool      `json:"regexp"`
-	Results      []*Item   `json:"results"`
+	ID             int64        `json:"id"`
+	Title          string       `json:"title"`
+	TimeCreated    time.Time    `json:"time_created"`
+	TimeStarted    time.Time    `json:"time_started"`
+	TimeFinished   time.Time    `json:"time_finished"`
+	Status         bool         `json:"status"`
+	Message        string       `json:"message"`
+	Tags           []int64      `json:"tags"`
+	TagsAll        bool         `json:"tags_all"`
+	FilterByPeriod bool         `json:"filter_by_period"`
+	FilterPeriod   [2]time.Time `json:"filter_period"`
+	QueryString    string       `json:"query_string"`
+	Regex          bool         `json:"regexp"`
+	Results        []*Item      `json:"results"`
 }
 
 // IsFinished returns true if the Search query has a Finished timestamp that is
