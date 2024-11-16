@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 19. 09. 2024 by Benjamin Walkenhorst
 // (c) 2024 Benjamin Walkenhorst
-// Time-stamp: <2024-11-14 17:19:44 krylon>
+// Time-stamp: <2024-11-16 15:23:22 krylon>
 
 package database
 
@@ -119,6 +119,18 @@ ORDER BY timestamp DESC
 LIMIT ?
 OFFSET ?
 `,
+	query.ItemGetByPeriod: `
+SELECT
+    id,
+    feed_id,
+    url,
+    timestamp,
+    headline,
+    description,
+    rating
+FROM item
+WHERE timestamp BETWEEN ? AND ?
+`,
 	query.ItemGetRated: `
 SELECT
     id,
@@ -130,6 +142,18 @@ SELECT
     rating
 FROM item
 WHERE rating <> 0
+ORDER BY timestamp DESC
+`,
+	query.ItemGetAll: `
+SELECT
+    id,
+    feed_id,
+    url,
+    timestamp,
+    headline,
+    description,
+    rating
+FROM item
 ORDER BY timestamp DESC
 `,
 	query.ItemRate:   "UPDATE item SET rating = ? WHERE id = ?",

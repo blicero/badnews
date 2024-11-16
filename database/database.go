@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 19. 09. 2024 by Benjamin Walkenhorst
 // (c) 2024 Benjamin Walkenhorst
-// Time-stamp: <2024-11-14 18:15:54 krylon>
+// Time-stamp: <2024-11-16 15:24:18 krylon>
 
 // Package database provides persistence.
 package database
@@ -1496,6 +1496,65 @@ EXEC_QUERY:
 	return items, nil
 } // func (db *Database) ItemGetByFeed(f *model.Feed, limit, offset int64) ([]*model.Item, error)
 
+// ItemGetByPeriod loads all Items from the given period
+func (db *Database) ItemGetByPeriod(begin, end time.Time) ([]*model.Item, error) {
+	const qid query.ID = query.ItemGetByPeriod
+	var (
+		err  error
+		msg  string
+		stmt *sql.Stmt
+	)
+
+	if stmt, err = db.getQuery(qid); err != nil {
+		db.log.Printf("[ERROR] Cannot prepare query %s: %s\n",
+			qid,
+			err.Error())
+		return nil, err
+	} else if db.tx != nil {
+		stmt = db.tx.Stmt(stmt)
+	}
+
+	var rows *sql.Rows
+
+EXEC_QUERY:
+	if rows, err = stmt.Query(begin.Unix(), end.Unix()); err != nil {
+		if worthARetry(err) {
+			waitForRetry()
+			goto EXEC_QUERY
+		}
+
+		return nil, err
+	}
+
+	defer rows.Close() // nolint: errcheck,gosec
+	var items = make([]*model.Item, 0, 16)
+
+	for rows.Next() {
+		var (
+			timestamp int64
+			ustr      string
+			i         = new(model.Item)
+		)
+
+		if err = rows.Scan(&i.ID, i.FeedID, &ustr, &timestamp, &i.Headline, &i.Description, &i.Rating); err != nil {
+			msg = fmt.Sprintf("Error scanning row for Feed: %s",
+				err.Error())
+			db.log.Printf("[ERROR] %s\n", msg)
+			return nil, errors.New(msg)
+		} else if i.URL, err = url.Parse(ustr); err != nil {
+			db.log.Printf("[ERROR] Cannot parse URL %q: %s\n",
+				ustr,
+				err.Error())
+			return nil, err
+		}
+
+		i.Timestamp = time.Unix(timestamp, 0)
+		items = append(items, i)
+	}
+
+	return items, nil
+} // func (db *Database) ItemGetByFeed(f *model.Feed, limit, offset int64) ([]*model.Item, error)
+
 // ItemGetRated loads all items that have been manually rated.
 func (db *Database) ItemGetRated() ([]model.Item, error) {
 	const qid query.ID = query.ItemGetRated
@@ -1554,6 +1613,74 @@ EXEC_QUERY:
 
 	return items, nil
 } // func (db *Database) ItemGetRated() ([]model.Item, error)
+
+// ItemGetFiltered processes all(!) Items in the database, checks them against the
+// given filter function, and sends the ones that pass in the given channel.
+// When finished, this method closes the channel.
+func (db *Database) ItemGetFiltered(q chan<- *model.Item, filter func(*model.Item) bool) error {
+	const qid query.ID = query.ItemGetAll
+
+	var (
+		err  error
+		msg  string
+		stmt *sql.Stmt
+	)
+
+	defer func() {
+		close(q)
+	}()
+
+	if stmt, err = db.getQuery(qid); err != nil {
+		db.log.Printf("[ERROR] Cannot prepare query %s: %s\n",
+			qid,
+			err.Error())
+		return err
+	} else if db.tx != nil {
+		stmt = db.tx.Stmt(stmt)
+	}
+
+	var rows *sql.Rows
+
+EXEC_QUERY:
+	if rows, err = stmt.Query(); err != nil {
+		if worthARetry(err) {
+			waitForRetry()
+			goto EXEC_QUERY
+		}
+
+		return err
+	}
+
+	defer rows.Close() // nolint: errcheck,gosec
+
+	for rows.Next() {
+		var (
+			timestamp int64
+			ustr      string
+			i         = new(model.Item)
+		)
+
+		if err = rows.Scan(&i.ID, i.FeedID, &ustr, &timestamp, &i.Headline, &i.Description, &i.Rating); err != nil {
+			msg = fmt.Sprintf("Error scanning row for Feed: %s",
+				err.Error())
+			db.log.Printf("[ERROR] %s\n", msg)
+			return errors.New(msg)
+		} else if i.URL, err = url.Parse(ustr); err != nil {
+			db.log.Printf("[ERROR] Cannot parse URL %q: %s\n",
+				ustr,
+				err.Error())
+			return err
+		}
+
+		i.Timestamp = time.Unix(timestamp, 0)
+
+		if filter(i) {
+			q <- i
+		}
+	}
+
+	return nil
+} // func (db *Database) ItemGetFiltered(q chan<-*model.Item, filter func(*model.Item) bool) error
 
 // ItemRate sets an Item's rating to the given value
 func (db *Database) ItemRate(i *model.Item, r int8) error {
@@ -2666,6 +2793,72 @@ EXEC_QUERY:
 		}
 
 		items = append(items, item)
+	}
+
+	return items, nil
+} // func (db *Database) TagLinkGetByTag(tag *model.Tag) ([]*model.Item, error)
+
+// TagLinkGetByTagMap loads all Items that have the given Tag attached to them.
+// This method returns the results as a map rather than a slice.
+func (db *Database) TagLinkGetByTagMap(tag *model.Tag) (map[int64]*model.Item, error) {
+	const qid query.ID = query.TagLinkGetByTag
+	var (
+		err  error
+		msg  string
+		stmt *sql.Stmt
+	)
+
+	if stmt, err = db.getQuery(qid); err != nil {
+		db.log.Printf("[ERROR] Cannot prepare query %s: %s\n",
+			qid,
+			err.Error())
+		return nil, err
+	} else if db.tx != nil {
+		stmt = db.tx.Stmt(stmt)
+	}
+
+	var rows *sql.Rows
+
+EXEC_QUERY:
+	if rows, err = stmt.Query(tag.ID); err != nil {
+		if worthARetry(err) {
+			waitForRetry()
+			goto EXEC_QUERY
+		}
+
+		return nil, err
+	}
+
+	defer rows.Close() // nolint: errcheck,gosec
+	var items = make(map[int64]*model.Item, 16)
+
+	for rows.Next() {
+		var (
+			rating, stamp int64
+			ustr          string
+			item          = new(model.Item)
+		)
+
+		if err = rows.Scan(&item.ID, &item.FeedID, &ustr, &stamp, &item.Headline, &item.Description, &rating); err != nil {
+			msg = fmt.Sprintf("Error scanning row for Item: %s",
+				err.Error())
+			db.log.Printf("[ERROR] %s\n", msg)
+			return nil, errors.New(msg)
+		}
+
+		item.Rating = int8(rating)
+		item.Timestamp = time.Unix(stamp, 0)
+		if item.URL, err = url.Parse(ustr); err != nil {
+			db.log.Printf("[ERROR] Invalid URL for Item %q (%d): %s\n\t%s\n",
+				item.Headline,
+				item.ID,
+				err.Error(),
+				ustr)
+			return nil, err
+		}
+
+		// items = append(items, item)
+		items[item.ID] = item
 	}
 
 	return items, nil

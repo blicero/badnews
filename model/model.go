@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 19. 09. 2024 by Benjamin Walkenhorst
 // (c) 2024 Benjamin Walkenhorst
-// Time-stamp: <2024-11-15 17:21:28 krylon>
+// Time-stamp: <2024-11-16 14:54:03 krylon>
 
 // Package model provides the data types used across the application.
 package model
@@ -168,10 +168,37 @@ type Search struct {
 	QueryString    string       `json:"query_string"`
 	Regex          bool         `json:"regexp"`
 	Results        []*Item      `json:"results"`
+	pattern        *regexp.Regexp
 }
+
+func (s *Search) getPattern() *regexp.Regexp {
+	if !s.Regex {
+		return nil
+	} else if s.pattern != nil {
+		return s.pattern
+	}
+
+	s.pattern = regexp.MustCompile(s.QueryString)
+	return s.pattern
+} // func (s *Search) getPattern() *regexp.Regexp
 
 // IsFinished returns true if the Search query has a Finished timestamp that is
 // later than its Started timestamp.
 func (s *Search) IsFinished() bool {
 	return s.TimeFinished.After(s.TimeStarted)
 } // func (s *Search) IsFinished() bool
+
+// Match returns true if the Search QueryString matches the givem Item.
+// If the Search also filters by period, the Item's Timestamp is checked first.
+func (s *Search) Match(item *Item) bool {
+	if s.FilterByPeriod {
+		if item.Timestamp.Before(s.FilterPeriod[0]) || item.Timestamp.After(s.FilterPeriod[1]) {
+			return false
+		}
+	}
+	if s.Regex {
+		return s.getPattern().MatchString(item.Plaintext())
+	} else {
+		return strings.Contains(item.Plaintext(), s.QueryString)
+	}
+} // func (s *Search) Match(item *Item) bool
