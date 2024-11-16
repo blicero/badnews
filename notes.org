@@ -1,5 +1,5 @@
 # -*- mode: org; fill-column: 78; -*-
-# Time-stamp: <2024-11-15 22:49:55 krylon>
+# Time-stamp: <2024-11-16 16:20:18 krylon>
 #
 #+TAGS: internals(i) ui(u) bug(b) feature(f)
 #+TAGS: database(d) design(e), meditation(m)
@@ -17,12 +17,12 @@
   BadNews is an RSS reader
 ** Clock table
    #+BEGIN: clocktable :scope file :maxlevel 202 :emphasize t
-   #+CAPTION: Clock summary at [2024-11-15 Fr 22:49]
+   #+CAPTION: Clock summary at [2024-11-16 Sa 16:20]
    | Headline                                             | Time       |            |          |          |       |      |
    |------------------------------------------------------+------------+------------+----------+----------+-------+------|
-   | *Total time*                                         | *6d 10:42* |            |          |          |       |      |
+   | *Total time*                                         | *6d 12:23* |            |          |          |       |      |
    |------------------------------------------------------+------------+------------+----------+----------+-------+------|
-   | *BadNews [27/28]*                                    | *6d 10:42* |            |          |          |       |      |
+   | *BadNews [27/28]*                                    | *6d 12:23* |            |          |          |       |      |
    | \_  /Features [14/14]/                               |            | /2d 12:49/ |          |          |       |      |
    | \_    Blacklisting [1/1]                             |            |            |     6:03 |          |       |      |
    | \_    Rating and Tagging [12/12]                     |            |            |  2d 6:46 |          |       |      |
@@ -39,7 +39,7 @@
    | \_          Disable linked Tags in menu              |            |            |          |          |       | 1:13 |
    | \_          Unlink Tags from Items                   |            |            |          |          |       | 1:13 |
    | \_          Fetch linked tags per item in handler... |            |            |          |          |       | 0:23 |
-   | \_  /Components [13/14]/                             |            | /3d 21:53/ |          |          |       |      |
+   | \_  /Components [13/14]/                             |            | /3d 23:34/ |          |          |       |      |
    | \_    Data model [3/3]                               |            |            |     5:25 |          |       |      |
    | \_      Feeds [3/3]                                  |            |            |          |     4:58 |       |      |
    | \_        Delete Feeds [2/2]                         |            |            |          |          |  4:58 |      |
@@ -64,8 +64,8 @@
    | \_      Performance [2/2]                            |            |            |          |    10:10 |       |      |
    | \_        Caching                                    |            |            |          |          |  3:06 |      |
    | \_        Pre-computing advice                       |            |            |          |          |  7:04 |      |
-   | \_    Search [0/1]                                   |            |            | 1d 10:23 |          |       |      |
-   | \_      Execute Searches                             |            |            |          |     5:35 |       |      |
+   | \_    Search [0/1]                                   |            |            | 1d 12:04 |          |       |      |
+   | \_      Execute Searches                             |            |            |          |     7:16 |       |      |
    #+END:
 ** Journal
 ** Features [14/14]
@@ -485,6 +485,8 @@
     database, but also from the Bayesian models for Rating and Tagging.
 **** TODO Execute Searches
      :LOGBOOK:
+     CLOCK: [2024-11-16 Sa 14:43]--[2024-11-16 Sa 16:20] =>  1:37
+     CLOCK: [2024-11-16 Sa 10:53]--[2024-11-16 Sa 10:57] =>  0:04
      CLOCK: [2024-11-15 Fr 17:14]--[2024-11-15 Fr 22:49] =>  5:35
      :END:
      I did this in a prior toy application, so it is not entirely unknown
