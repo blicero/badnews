@@ -2,15 +2,19 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 14. 11. 2024 by Benjamin Walkenhorst
 // (c) 2024 Benjamin Walkenhorst
-// Time-stamp: <2024-11-14 18:14:57 krylon>
+// Time-stamp: <2024-11-18 20:47:28 krylon>
 
 package database
 
 import (
 	"fmt"
+	"io"
+	"os"
+	"path/filepath"
 	"testing"
 	"time"
 
+	"github.com/blicero/badnews/common"
 	"github.com/blicero/badnews/model"
 )
 
@@ -110,3 +114,146 @@ func TestSearchGetByID(t *testing.T) {
 		}
 	}
 } // func TestSearchGetByID(t *testing.T)
+
+// 2024-11-18, 18:47
+// I am now at a point where I think I can test running a Search.
+// To do so, I need a bunch of Items in the database.
+// The easiest - but most tedious - way is to create a bunch more Items
+// or use a database filled with existing data.
+// I think I will do just that.
+
+var searchdb *Database
+
+func TestSearchSampleDBOpen(t *testing.T) {
+	// First, we copy the testing database to our testing folder
+	// Then we open the copy.
+	const srcpath = "./testdata/badnews.db"
+	var (
+		err      error
+		src, dst *os.File
+		dstpath  = filepath.Join(
+			common.BaseDir,
+			"searchtest.db",
+		)
+	)
+
+	if src, err = os.Open(srcpath); err != nil {
+		t.Fatalf("Failed to open sample database %s for copying: %s",
+			srcpath,
+			err.Error())
+	}
+
+	defer src.Close() // nolint: errcheck
+
+	if dst, err = os.Create(dstpath); err != nil {
+		t.Fatalf("Failed to create destination file for testing database %s: %s",
+			dstpath,
+			err.Error())
+	}
+
+	defer dst.Close() // nolint: errcheck
+
+	if _, err = io.Copy(dst, src); err != nil {
+		t.Fatalf("Failed to copy contents of sample database %s to testing folder %s: %s",
+			srcpath,
+			dstpath,
+			err.Error())
+	} else if err = dst.Close(); err != nil {
+		t.Fatalf("Failed to close filehandle for testing db %s: %s",
+			dstpath,
+			err.Error())
+	}
+
+	if searchdb, err = Open(dstpath); err != nil {
+		searchdb = nil
+		t.Fatalf("Failed to open test db %s: %s",
+			dstpath,
+			err.Error())
+	}
+} // func TestSearchSampleDBOpen(t *testing.T)
+
+var sampleSearches []*model.Search = []*model.Search{
+	{
+		Title:       "Fußball",
+		TimeCreated: time.Now(),
+		QueryString: "Fußball",
+	},
+	{
+		Title:       "Astronomy",
+		TimeCreated: time.Now(),
+		Tags:        []int64{84},
+	},
+	{
+		Title:       "Unix desktops",
+		TimeCreated: time.Now(),
+		Tags:        []int64{4, 9, 109, 110, 119, 120},
+		QueryString: "(?:KDE|GNOME|Plasma)",
+		Regex:       true,
+	},
+}
+
+func TestSearchSampleDBSearchAdd(t *testing.T) {
+	if searchdb == nil {
+		t.SkipNow()
+	}
+
+	var (
+		err    error
+		status bool
+	)
+
+	if err = searchdb.Begin(); err != nil {
+		t.Fatalf("Failed to start transaction in Search DB: %s",
+			err.Error())
+	} else {
+		defer func() {
+			if status {
+				searchdb.Commit() // nolint: errcheck
+			} else {
+				searchdb.Rollback() // nolint: errcheck
+			}
+		}()
+	}
+
+	for _, s := range sampleSearches {
+		if err = searchdb.SearchAdd(s); err != nil {
+			t.Fatalf("Failed to add search query to DB: %s",
+				err.Error())
+		}
+	}
+
+	status = true
+} // func TestSearchSampleDBSearchAdd(t *testing.T)
+
+func TestSearchExecute(t *testing.T) {
+	if searchdb == nil {
+		t.SkipNow()
+	}
+
+	var (
+		err error
+	)
+
+	for _, s := range sampleSearches {
+		if err = searchdb.SearchStart(s); err != nil {
+			t.Fatalf("Error marking Search %s (%d) as started: %s",
+				s.Title,
+				s.ID,
+				err.Error())
+		} else if err = searchdb.SearchExecute(s); err != nil {
+			t.Fatalf("Failed to execute Search %s (%d): %s",
+				s.Title,
+				s.ID,
+				err.Error())
+		} else if !s.Status {
+			t.Errorf("Search %s (%d) did not execute successfully: %s",
+				s.Title,
+				s.ID,
+				s.Message)
+		} else if len(s.Results) == 0 {
+			t.Errorf("Search %s (%d) did not produce results, but it should have",
+				s.Title,
+				s.ID)
+		}
+	}
+} // func TestSearchExecute(t *testing.T)

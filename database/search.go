@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 15. 11. 2024 by Benjamin Walkenhorst
 // (c) 2024 Benjamin Walkenhorst
-// Time-stamp: <2024-11-18 18:28:49 krylon>
+// Time-stamp: <2024-11-18 20:42:17 krylon>
 
 package database
 
@@ -54,6 +54,11 @@ func (db *Database) SearchExecute(s *model.Search) error {
 		items = results
 	} else {
 		var itemQ = make(chan *model.Item)
+
+		// TODO I should run the db.ItemGetFiltered in the current
+		//      goroutine, so I can handle the error it might return,
+		//      and spawn another goroutine to gather the results.
+		//      Use sync.WaitGroup to coordinate activity.
 
 		go db.ItemGetFiltered(itemQ, s.Match) // nolint: errcheck
 
