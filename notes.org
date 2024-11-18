@@ -1,5 +1,5 @@
 # -*- mode: org; fill-column: 78; -*-
-# Time-stamp: <2024-11-16 16:20:18 krylon>
+# Time-stamp: <2024-11-18 18:36:43 krylon>
 #
 #+TAGS: internals(i) ui(u) bug(b) feature(f)
 #+TAGS: database(d) design(e), meditation(m)
@@ -17,12 +17,12 @@
   BadNews is an RSS reader
 ** Clock table
    #+BEGIN: clocktable :scope file :maxlevel 202 :emphasize t
-   #+CAPTION: Clock summary at [2024-11-16 Sa 16:20]
+   #+CAPTION: Clock summary at [2024-11-18 Mo 18:36]
    | Headline                                             | Time       |            |          |          |       |      |
    |------------------------------------------------------+------------+------------+----------+----------+-------+------|
-   | *Total time*                                         | *6d 12:23* |            |          |          |       |      |
+   | *Total time*                                         | *6d 17:11* |            |          |          |       |      |
    |------------------------------------------------------+------------+------------+----------+----------+-------+------|
-   | *BadNews [27/28]*                                    | *6d 12:23* |            |          |          |       |      |
+   | *BadNews [27/28]*                                    | *6d 17:11* |            |          |          |       |      |
    | \_  /Features [14/14]/                               |            | /2d 12:49/ |          |          |       |      |
    | \_    Blacklisting [1/1]                             |            |            |     6:03 |          |       |      |
    | \_    Rating and Tagging [12/12]                     |            |            |  2d 6:46 |          |       |      |
@@ -39,7 +39,7 @@
    | \_          Disable linked Tags in menu              |            |            |          |          |       | 1:13 |
    | \_          Unlink Tags from Items                   |            |            |          |          |       | 1:13 |
    | \_          Fetch linked tags per item in handler... |            |            |          |          |       | 0:23 |
-   | \_  /Components [13/14]/                             |            | /3d 23:34/ |          |          |       |      |
+   | \_  /Components [13/14]/                             |            | /4d 4:22/  |          |          |       |      |
    | \_    Data model [3/3]                               |            |            |     5:25 |          |       |      |
    | \_      Feeds [3/3]                                  |            |            |          |     4:58 |       |      |
    | \_        Delete Feeds [2/2]                         |            |            |          |          |  4:58 |      |
@@ -64,8 +64,8 @@
    | \_      Performance [2/2]                            |            |            |          |    10:10 |       |      |
    | \_        Caching                                    |            |            |          |          |  3:06 |      |
    | \_        Pre-computing advice                       |            |            |          |          |  7:04 |      |
-   | \_    Search [0/1]                                   |            |            | 1d 12:04 |          |       |      |
-   | \_      Execute Searches                             |            |            |          |     7:16 |       |      |
+   | \_    Search [0/2]                                   |            |            | 1d 16:52 |          |       |      |
+   | \_      Execute Searches                             |            |            |          |    12:04 |       |      |
    #+END:
 ** Journal
 ** Features [14/14]
@@ -438,7 +438,7 @@
       simple-minded replacement for cachego that works the way I want it to,
       and as far as I can tell, it does work the way I want it to, so now I
       can try using that one.
-*** Search [0/1]
+*** Search [0/2]
     :PROPERTIES:
     :COOKIE_DATA: todo recursive
     :VISIBILITY: children
@@ -485,6 +485,10 @@
     database, but also from the Bayesian models for Rating and Tagging.
 **** TODO Execute Searches
      :LOGBOOK:
+     CLOCK: [2024-11-18 Mo 18:18]--[2024-11-18 Mo 18:36] =>  0:18
+     CLOCK: [2024-11-16 Sa 18:38]--[2024-11-16 Sa 22:42] =>  4:04
+     CLOCK: [2024-11-16 Sa 18:01]--[2024-11-16 Sa 18:25] =>  0:24
+     CLOCK: [2024-11-16 Sa 17:29]--[2024-11-16 Sa 17:31] =>  0:02
      CLOCK: [2024-11-16 Sa 14:43]--[2024-11-16 Sa 16:20] =>  1:37
      CLOCK: [2024-11-16 Sa 10:53]--[2024-11-16 Sa 10:57] =>  0:04
      CLOCK: [2024-11-15 Fr 17:14]--[2024-11-15 Fr 22:49] =>  5:35
@@ -509,6 +513,13 @@
      As far as the interface goes, I think I should have a method on the
      Database, something like SearchPerform, that gets a Search object as its
      parameter and if successful fills in the results on that object.
+
+     [2024-11-18 Mo 18:34]
+     Okay, I have my code at a stage where I /think/ it should what it is
+     supposed to. It compiles, and my linters are no longer yelling at it.
+     So I am going to write some tests now, to see how hopelessly naive my
+     optimism really is.
+**** TODO Testing
 ** Bugs [0/0]
    :PROPERTIES:
    :COOKIE_DATA: todo recursive
