@@ -2,12 +2,13 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 15. 11. 2024 by Benjamin Walkenhorst
 // (c) 2024 Benjamin Walkenhorst
-// Time-stamp: <2024-11-18 20:42:17 krylon>
+// Time-stamp: <2024-11-18 21:24:44 krylon>
 
 package database
 
 import (
 	"fmt"
+	"sync"
 	"time"
 
 	"github.com/blicero/badnews/model"
@@ -53,20 +54,33 @@ func (db *Database) SearchExecute(s *model.Search) error {
 
 		items = results
 	} else {
-		var itemQ = make(chan *model.Item)
+		var (
+			wg    sync.WaitGroup
+			itemQ = make(chan *model.Item)
+		)
+
+		items = make([]*model.Item, 0, 16)
+		wg.Add(1)
+
+		go func() {
+			defer wg.Done()
+			for i := range itemQ {
+				items = append(items, i)
+			}
+		}()
 
 		// TODO I should run the db.ItemGetFiltered in the current
 		//      goroutine, so I can handle the error it might return,
 		//      and spawn another goroutine to gather the results.
 		//      Use sync.WaitGroup to coordinate activity.
 
-		go db.ItemGetFiltered(itemQ, s.Match) // nolint: errcheck
-
-		items = make([]*model.Item, 0, 16)
-
-		for i := range itemQ {
-			items = append(items, i)
+		if err = db.ItemGetFiltered(itemQ, s.Match); err != nil {
+			db.log.Printf("[ERROR] Failed to load filtered Items: %s\n",
+				err.Error())
+			return err
 		}
+
+		wg.Wait()
 	}
 
 	s.Results = items
