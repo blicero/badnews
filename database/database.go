@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 19. 09. 2024 by Benjamin Walkenhorst
 // (c) 2024 Benjamin Walkenhorst
-// Time-stamp: <2024-11-18 21:25:39 krylon>
+// Time-stamp: <2024-11-18 22:17:03 krylon>
 
 // Package database provides persistence.
 package database
@@ -1536,7 +1536,7 @@ EXEC_QUERY:
 			i         = new(model.Item)
 		)
 
-		if err = rows.Scan(&i.ID, i.FeedID, &ustr, &timestamp, &i.Headline, &i.Description, &i.Rating); err != nil {
+		if err = rows.Scan(&i.ID, &i.FeedID, &ustr, &timestamp, &i.Headline, &i.Description, &i.Rating); err != nil {
 			msg = fmt.Sprintf("Error scanning row for Feed: %s",
 				err.Error())
 			db.log.Printf("[ERROR] %s\n", msg)

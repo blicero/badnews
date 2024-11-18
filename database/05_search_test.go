@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 14. 11. 2024 by Benjamin Walkenhorst
 // (c) 2024 Benjamin Walkenhorst
-// Time-stamp: <2024-11-18 20:47:28 krylon>
+// Time-stamp: <2024-11-18 22:16:35 krylon>
 
 package database
 
@@ -189,6 +189,18 @@ var sampleSearches []*model.Search = []*model.Search{
 		Tags:        []int64{4, 9, 109, 110, 119, 120},
 		QueryString: "(?:KDE|GNOME|Plasma)",
 		Regex:       true,
+	},
+	{
+		// In my sample database, this should return 3 items, 685, 544, 680.
+		Title:          "By Period",
+		TimeCreated:    time.Now(),
+		FilterByPeriod: true,
+		FilterPeriod: [2]time.Time{
+			// 2024-10-01 00:00:00 -- 2024-10-06 23:59:59
+			time.Unix(1727733600, 0),
+			time.Unix(1728251999, 0),
+		},
+		QueryString: "BSD",
 	},
 }
 
