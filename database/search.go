@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 15. 11. 2024 by Benjamin Walkenhorst
 // (c) 2024 Benjamin Walkenhorst
-// Time-stamp: <2024-11-16 16:19:15 krylon>
+// Time-stamp: <2024-11-18 18:28:49 krylon>
 
 package database
 
@@ -11,7 +11,6 @@ import (
 	"time"
 
 	"github.com/blicero/badnews/model"
-	"github.com/blicero/krylib"
 )
 
 // I outsourced (so to speak) the Search process into a separate file. I will
@@ -33,12 +32,50 @@ func (db *Database) SearchExecute(s *model.Search) error {
 	if len(s.Tags) > 0 {
 		// In this case, we load the Items by the associated Tags
 		if items, err = db.searchLoadByTags(s); err != nil {
-			// do that thing
+			db.log.Printf("[ERROR] Failed to search by Tags: %s\n",
+				err.Error())
+			return err
 		}
+	} else if s.FilterByPeriod {
+		if items, err = db.ItemGetByPeriod(s.FilterPeriod[0], s.FilterPeriod[1]); err != nil {
+			db.log.Printf("[ERROR] Failed to load Items by Period: %s\n",
+				err.Error())
+			return err
+		}
+
+		var results = make([]*model.Item, 0, len(items))
+
+		for _, i := range items {
+			if s.Match(i) {
+				results = append(results, i)
+			}
+		}
+
+		items = results
 	} else {
+		var itemQ = make(chan *model.Item)
+
+		go db.ItemGetFiltered(itemQ, s.Match) // nolint: errcheck
+
+		items = make([]*model.Item, 0, 16)
+
+		for i := range itemQ {
+			items = append(items, i)
+		}
 	}
 
-	return krylib.ErrNotImplemented
+	s.Results = items
+	s.Status = true
+
+	if err = db.SearchFinish(s); err != nil {
+		db.log.Printf("[ERROR] Error marking Search %s (%d) as finished in database: %s\n",
+			s.Title,
+			s.ID,
+			err.Error())
+		return err
+	}
+
+	return nil
 } // func (db *Database) SearchExecute(s *model.Search) error
 
 func (db *Database) searchLoadByTags(s *model.Search) ([]*model.Item, error) {
@@ -119,7 +156,7 @@ func (db *Database) searchLoadByTags(s *model.Search) ([]*model.Item, error) {
 		} else {
 			// Make a channel, spawn a goroutine, call db.ItemGetFiltered
 			var itemQ = make(chan *model.Item)
-			go db.ItemGetFiltered(itemQ, s.Match)
+			go db.ItemGetFiltered(itemQ, s.Match) // nolint: errcheck
 			items = make([]*model.Item, 0, 16)
 
 			for i := range itemQ {

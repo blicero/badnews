@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 19. 09. 2024 by Benjamin Walkenhorst
 // (c) 2024 Benjamin Walkenhorst
-// Time-stamp: <2024-11-16 15:24:18 krylon>
+// Time-stamp: <2024-11-18 18:27:31 krylon>
 
 // Package database provides persistence.
 package database
@@ -3463,7 +3463,7 @@ EXEC_QUERY:
 		}
 	}
 
-	s.TimeStarted = finishStamp
+	s.TimeFinished = finishStamp
 	status = true
 	return nil
 } // func (db *Database) SearchFinish(s *model.Search) error
