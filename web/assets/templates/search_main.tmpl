@@ -1,0 +1,43 @@
+{{ define "search_main" }}
+{{/* Created on 19. 11. 2024 */}}
+{{/* Time-stamp: <2024-11-20 16:27:45 krylon> */}}
+<!DOCTYPE html>
+<html>
+  {{ template "head" . }}
+
+  <body>
+    {{ template "intro" . }}
+
+    <script>
+     $(document).ready(() => {
+       load_search_queries()
+     })
+    </script>
+
+    <h2>Search Queries</h2>
+
+    <div id="queries">
+      <div class="spinner-border text-secondary" role="status">
+        <span class="visually-hidden">Loading Queries...</span>
+      </div>
+    </div>
+
+    <hr />
+
+    <h2>Search Form</h2>
+
+    <div id="search_form">
+      {{ template "search_form" . }}
+    </div>
+
+    <hr />
+
+    <h2>Results</h2>
+
+    <div id="search_results">
+    </div>
+
+    {{ template "footer" . }}
+  </body>
+</html>
+{{ end }}

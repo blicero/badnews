@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 28. 09. 2024 by Benjamin Walkenhorst
 // (c) 2024 Benjamin Walkenhorst
-// Time-stamp: <2024-11-12 18:32:25 krylon>
+// Time-stamp: <2024-11-20 20:32:44 krylon>
 
 // Package web provides the web interface.
 package web
@@ -197,6 +197,7 @@ func Create(addr string) (*Server, error) {
 	srv.router.HandleFunc("/feed/all", srv.handleFeedPage)
 	srv.router.HandleFunc("/tags/all", srv.handleTagAll)
 	srv.router.HandleFunc("/blacklist", srv.handleBlacklist)
+	srv.router.HandleFunc("/search/main", srv.handleSearchMain)
 
 	// AJAX Handlers
 	srv.router.HandleFunc("/ajax/beacon", srv.handleBeacon)
@@ -707,6 +708,53 @@ func (srv *Server) handleBlacklist(w http.ResponseWriter, r *http.Request) {
 		srv.sendErrorMessage(w, msg)
 	}
 } // func (srv *Server) handleBlacklist(w http.ResponseWriter, r *http.Request)
+
+func (srv *Server) handleSearchMain(w http.ResponseWriter, r *http.Request) {
+	srv.log.Printf("[TRACE] Handle request for %s from %s\n",
+		r.URL.EscapedPath(),
+		r.RemoteAddr)
+
+	const tmplName = "search_main"
+
+	var (
+		err  error
+		msg  string
+		tmpl *template.Template
+		sess *sessions.Session
+		data = tmplDataBase{
+			Title: "Items",
+			Debug: true,
+			URL:   r.URL.EscapedPath(),
+		}
+	)
+
+	if sess, err = srv.store.Get(r, sessionNameFrontend); err != nil {
+		msg = fmt.Sprintf("Error getting client session from session store: %s",
+			err.Error())
+		srv.log.Println("[CRITICAL] " + msg)
+		srv.sendErrorMessage(w, msg)
+		return
+	} else if tmpl = srv.tmpl.Lookup(tmplName); tmpl == nil {
+		msg = fmt.Sprintf("Could not find template %q", tmplName)
+		srv.log.Println("[CRITICAL] " + msg)
+		srv.sendErrorMessage(w, msg)
+		return
+	}
+
+	if err = sess.Save(r, w); err != nil {
+		srv.log.Printf("[ERROR] Failed to set session cookie: %s\n",
+			err.Error())
+	}
+	w.Header().Set("Cache-Control", "no-store, max-age=0")
+	w.Header().Set("Content-Type", "text/html")
+	w.WriteHeader(200)
+	if err = tmpl.Execute(w, &data); err != nil {
+		msg = fmt.Sprintf("Error rendering template %q: %s",
+			tmplName,
+			err.Error())
+		srv.sendErrorMessage(w, msg)
+	}
+} // func (srv *Server) handleSearchMain(w http.ResponseWriter, r *http.Request)
 
 ////////////////////////////////////////////////////////////////////////////////
 //// Ajax handlers /////////////////////////////////////////////////////////////
@@ -2456,3 +2504,61 @@ SEND_RESPONSE:
 		srv.log.Println("[ERROR] " + msg)
 	}
 } // func (srv *Server) handleAjaxBlacklistAdd(w http.ResponseWriter, r *http.Request)
+
+func (srv *Server) handleAjaxSearchQueries(w http.ResponseWriter, r *http.Request) {
+	srv.log.Printf("[TRACE] Handle request for %s from %s\n",
+		r.URL.EscapedPath(),
+		r.RemoteAddr)
+	const tmplName = "search_queries"
+	var (
+		err      error
+		db       *database.Database
+		sess     *sessions.Session
+		tmpl     *template.Template
+		buf      bytes.Buffer
+		rbuf     []byte
+		res      = Reply{Payload: make(map[string]string, 3)}
+		msg, pat string
+		hstatus  = 200
+		data     = tmplDataSearchQueries{
+			tmplDataBase: tmplDataBase{
+				Title: "Search Queries",
+				Debug: common.Debug,
+				URL:   r.URL.EscapedPath(),
+			},
+		}
+	)
+
+	if tmpl = srv.tmpl.Lookup(tmplName); tmpl == nil {
+		res.Message = fmt.Sprintf("Template %s was not found", tmplName)
+		srv.log.Printf("[ERROR] %s\n", res.Message)
+		hstatus = 500
+		goto SEND_RESPONSE
+	}
+
+	db = srv.pool.Get()
+	defer srv.pool.Put(db)
+
+SEND_RESPONSE:
+	if sess != nil {
+		if err = sess.Save(r, w); err != nil {
+			srv.log.Printf("[ERROR] Failed to set session cookie: %s\n",
+				err.Error())
+		}
+	}
+	res.Timestamp = time.Now()
+	if rbuf, err = json.Marshal(&res); err != nil {
+		srv.log.Printf("[ERROR] Error serializing response: %s\n",
+			err.Error())
+		rbuf = errJSON(err.Error())
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Cache-Control", "no-store, max-age=0")
+	w.WriteHeader(hstatus)
+	if _, err = w.Write(rbuf); err != nil {
+		msg = fmt.Sprintf("Failed to send result: %s",
+			err.Error())
+		srv.log.Println("[ERROR] " + msg)
+	}
+} // func (srv *Server) handleAjaxSearchQueries(w http.ResponseWriter, r *http.Request)
