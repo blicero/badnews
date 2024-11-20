@@ -1,5 +1,5 @@
 # -*- mode: org; fill-column: 78; -*-
-# Time-stamp: <2024-11-18 22:18:02 krylon>
+# Time-stamp: <2024-11-20 20:32:57 krylon>
 #
 #+TAGS: internals(i) ui(u) bug(b) feature(f)
 #+TAGS: database(d) design(e), meditation(m)
@@ -9,7 +9,7 @@
 #+TODO: MEDITATE(m) PLANNING(p) | SUSPENDED(s)
 #+PRIORITIES: A G D
 
-* BadNews [28/29]
+* BadNews [28/33]
   :PROPERTIES:
   :COOKIE_DATA: todo recursive
   :VISIBILITY: children
@@ -17,55 +17,57 @@
   BadNews is an RSS reader
 ** Clock table
    #+BEGIN: clocktable :scope file :maxlevel 202 :emphasize t
-   #+CAPTION: Clock summary at [2024-11-18 Mo 22:18]
-   | Headline                                             | Time       |            |          |          |       |      |
-   |------------------------------------------------------+------------+------------+----------+----------+-------+------|
-   | *Total time*                                         | *6d 20:04* |            |          |          |       |      |
-   |------------------------------------------------------+------------+------------+----------+----------+-------+------|
-   | *BadNews [28/29]*                                    | *6d 20:04* |            |          |          |       |      |
-   | \_  /Features [14/14]/                               |            | /2d 12:49/ |          |          |       |      |
-   | \_    Blacklisting [1/1]                             |            |            |     6:03 |          |       |      |
-   | \_    Rating and Tagging [12/12]                     |            |            |  2d 6:46 |          |       |      |
-   | \_      Rating [2/2]                                 |            |            |          |     9:15 |       |      |
-   | \_        Hide boring Items                          |            |            |          |          |  2:45 |      |
-   | \_        Caching results                            |            |            |          |          |  0:27 |      |
-   | \_      Tags [9/9]                                   |            |            |          | 1d 21:30 |       |      |
-   | \_        Re-render everything tag when editing...   |            |            |          |          |  0:56 |      |
-   | \_        Recommend tags for Items                   |            |            |          |          |  5:59 |      |
-   | \_          Don't recommend Tags the Item already... |            |            |          |          |       | 0:57 |
-   | \_        Add newly created tags to tag_view         |            |            |          |          |  1:20 |      |
-   | \_        Order tags by hierarchy                    |            |            |          |          |  1:10 |      |
-   | \_        Link Tags to Items [3/3]                   |            |            |          |          | 14:24 |      |
-   | \_          Disable linked Tags in menu              |            |            |          |          |       | 1:13 |
-   | \_          Unlink Tags from Items                   |            |            |          |          |       | 1:13 |
-   | \_          Fetch linked tags per item in handler... |            |            |          |          |       | 0:23 |
-   | \_  /Components [14/15]/                             |            | /4d 7:15/  |          |          |       |      |
-   | \_    Data model [3/3]                               |            |            |     5:25 |          |       |      |
-   | \_      Feeds [3/3]                                  |            |            |          |     4:58 |       |      |
-   | \_        Delete Feeds [2/2]                         |            |            |          |          |  4:58 |      |
-   | \_          Delete from database                     |            |            |          |          |       | 3:00 |
-   | \_          Clean up the Bayesian models             |            |            |          |          |       | 0:15 |
-   | \_    Database [1/1]                                 |            |            |    12:17 |          |       |      |
-   | \_      Testing [0/0]                                |            |            |          |     3:02 |       |      |
-   | \_      Queries respect transaction                  |            |            |          |     0:03 |       |      |
-   | \_    Feed catcher / parser [0/0]                    |            |            |     5:41 |          |       |      |
-   | \_      Testing                                      |            |            |          |     2:16 |       |      |
-   | \_    Web Interface [7/8]                            |            |            |  1d 0:38 |          |       |      |
-   | \_      Feeds overview                               |            |            |          |     1:42 |       |      |
-   | \_      Message Area                                 |            |            |          |     7:10 |       |      |
-   | \_      Appearances matter [5/5]                     |            |            |          |     4:40 |       |      |
-   | \_        Feed Details                               |            |            |          |          |  0:57 |      |
-   | \_          Sort Feeds by Title                      |            |            |          |          |       | 0:16 |
-   | \_        Images                                     |            |            |          |          |  0:12 |      |
-   | \_        Hide long descriptions                     |            |            |          |          |  0:20 |      |
-   | \_        Fix Links                                  |            |            |          |          |  0:03 |      |
-   | \_      AJAX FTW [0/0]                               |            |            |          |     3:02 |       |      |
-   | \_    Tag Advisor [2/2]                              |            |            |    11:29 |          |       |      |
-   | \_      Performance [2/2]                            |            |            |          |    10:10 |       |      |
-   | \_        Caching                                    |            |            |          |          |  3:06 |      |
-   | \_        Pre-computing advice                       |            |            |          |          |  7:04 |      |
-   | \_    Search [1/1]                                   |            |            | 1d 19:45 |          |       |      |
-   | \_      Execute Searches                             |            |            |          |    14:57 |       |      |
+   #+CAPTION: Clock summary at [2024-11-20 Mi 20:32]
+   | Headline                                             | Time      |            |          |          |       |      |
+   |------------------------------------------------------+-----------+------------+----------+----------+-------+------|
+   | *Total time*                                         | *7d 2:37* |            |          |          |       |      |
+   |------------------------------------------------------+-----------+------------+----------+----------+-------+------|
+   | *BadNews [28/33]*                                    | *7d 2:37* |            |          |          |       |      |
+   | \_  /Features [14/14]/                               |           | /2d 12:49/ |          |          |       |      |
+   | \_    Blacklisting [1/1]                             |           |            |     6:03 |          |       |      |
+   | \_    Rating and Tagging [12/12]                     |           |            |  2d 6:46 |          |       |      |
+   | \_      Rating [2/2]                                 |           |            |          |     9:15 |       |      |
+   | \_        Hide boring Items                          |           |            |          |          |  2:45 |      |
+   | \_        Caching results                            |           |            |          |          |  0:27 |      |
+   | \_      Tags [9/9]                                   |           |            |          | 1d 21:30 |       |      |
+   | \_        Re-render everything tag when editing...   |           |            |          |          |  0:56 |      |
+   | \_        Recommend tags for Items                   |           |            |          |          |  5:59 |      |
+   | \_          Don't recommend Tags the Item already... |           |            |          |          |       | 0:57 |
+   | \_        Add newly created tags to tag_view         |           |            |          |          |  1:20 |      |
+   | \_        Order tags by hierarchy                    |           |            |          |          |  1:10 |      |
+   | \_        Link Tags to Items [3/3]                   |           |            |          |          | 14:24 |      |
+   | \_          Disable linked Tags in menu              |           |            |          |          |       | 1:13 |
+   | \_          Unlink Tags from Items                   |           |            |          |          |       | 1:13 |
+   | \_          Fetch linked tags per item in handler... |           |            |          |          |       | 0:23 |
+   | \_  /Components [14/19]/                             |           | /4d 13:48/ |          |          |       |      |
+   | \_    Data model [3/3]                               |           |            |     5:25 |          |       |      |
+   | \_      Feeds [3/3]                                  |           |            |          |     4:58 |       |      |
+   | \_        Delete Feeds [2/2]                         |           |            |          |          |  4:58 |      |
+   | \_          Delete from database                     |           |            |          |          |       | 3:00 |
+   | \_          Clean up the Bayesian models             |           |            |          |          |       | 0:15 |
+   | \_    Database [1/1]                                 |           |            |    12:17 |          |       |      |
+   | \_      Testing [0/0]                                |           |            |          |     3:02 |       |      |
+   | \_      Queries respect transaction                  |           |            |          |     0:03 |       |      |
+   | \_    Feed catcher / parser [0/0]                    |           |            |     5:41 |          |       |      |
+   | \_      Testing                                      |           |            |          |     2:16 |       |      |
+   | \_    Web Interface [7/12]                           |           |            |  1d 7:11 |          |       |      |
+   | \_      Search [0/3]                                 |           |            |          |     6:33 |       |      |
+   | \_        Overview                                   |           |            |          |          |  5:42 |      |
+   | \_      Feeds overview                               |           |            |          |     1:42 |       |      |
+   | \_      Message Area                                 |           |            |          |     7:10 |       |      |
+   | \_      Appearances matter [5/5]                     |           |            |          |     4:40 |       |      |
+   | \_        Feed Details                               |           |            |          |          |  0:57 |      |
+   | \_          Sort Feeds by Title                      |           |            |          |          |       | 0:16 |
+   | \_        Images                                     |           |            |          |          |  0:12 |      |
+   | \_        Hide long descriptions                     |           |            |          |          |  0:20 |      |
+   | \_        Fix Links                                  |           |            |          |          |  0:03 |      |
+   | \_      AJAX FTW [0/0]                               |           |            |          |     3:02 |       |      |
+   | \_    Tag Advisor [2/2]                              |           |            |    11:29 |          |       |      |
+   | \_      Performance [2/2]                            |           |            |          |    10:10 |       |      |
+   | \_        Caching                                    |           |            |          |          |  3:06 |      |
+   | \_        Pre-computing advice                       |           |            |          |          |  7:04 |      |
+   | \_    Search [1/1]                                   |           |            | 1d 19:45 |          |       |      |
+   | \_      Execute Searches                             |           |            |          |    14:57 |       |      |
    #+END:
 ** Journal
 ** Features [14/14]
@@ -212,7 +214,7 @@
       :LOGBOOK:
       CLOCK: [2024-10-19 Sa 20:37]--[2024-10-19 Sa 21:00] =>  0:23
       :END:
-** Components [14/15]
+** Components [14/19]
    :PROPERTIES:
    :COOKIE_DATA: todo recursive
    :VISIBILITY: children
@@ -312,7 +314,7 @@
      :LOGBOOK:
      CLOCK: [2024-09-26 Do 17:56]--[2024-09-26 Do 20:12] =>  2:16
      :END:
-*** Web Interface [7/8]
+*** Web Interface [7/12]
     :PROPERTIES:
     :COOKIE_DATA: todo recursive
     :VISIBILITY: children
@@ -326,6 +328,22 @@
     CLOCK: [2024-09-29 So 16:10]--[2024-09-29 So 16:30] =>  0:20
     :END:
     For an RSS reader, a web interface is the obvious approach, isn't it?
+**** TODO Search [0/3]
+     :PROPERTIES:
+     :COOKIE_DATA: todo recursive
+     :VISIBILITY: children
+     :END:
+     :LOGBOOK:
+     CLOCK: [2024-11-19 Di 18:16]--[2024-11-19 Di 19:01] =>  0:45
+     CLOCK: [2024-11-19 Di 15:19]--[2024-11-19 Di 15:25] =>  0:06
+     :END:
+***** TODO Overview
+      :LOGBOOK:
+      CLOCK: [2024-11-20 Mi 16:21]--[2024-11-20 Mi 20:32] =>  4:11
+      CLOCK: [2024-11-20 Mi 13:10]--[2024-11-20 Mi 14:41] =>  1:31
+      :END:
+***** TODO Form
+***** TODO Result View
 **** TODO Paged Item view
      Since we are doing AJAX, I could get away without reloading the entire
      page. Not sure whether this is a good idea or not, but I think reloading
@@ -483,6 +501,11 @@
     So first of all, I think I should add the option to delete a feed that
     removes all of its associated data from my application, including the
     database, but also from the Bayesian models for Rating and Tagging.
+
+    [2024-11-18 Mo 22:18]
+    The search "engine", if you will, seems to work for the moment.
+    Next, I'll have to think about how I want to integrate searching into the
+    web UI, and how background searches should be run.
 **** DONE Execute Searches
      CLOSED: [2024-11-18 Mo 22:17]
      :LOGBOOK:
