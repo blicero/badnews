@@ -1,5 +1,5 @@
 # -*- mode: org; fill-column: 78; -*-
-# Time-stamp: <2024-11-20 20:32:57 krylon>
+# Time-stamp: <2024-11-21 15:28:36 krylon>
 #
 #+TAGS: internals(i) ui(u) bug(b) feature(f)
 #+TAGS: database(d) design(e), meditation(m)
@@ -17,12 +17,12 @@
   BadNews is an RSS reader
 ** Clock table
    #+BEGIN: clocktable :scope file :maxlevel 202 :emphasize t
-   #+CAPTION: Clock summary at [2024-11-20 Mi 20:32]
+   #+CAPTION: Clock summary at [2024-11-21 Do 15:28]
    | Headline                                             | Time      |            |          |          |       |      |
    |------------------------------------------------------+-----------+------------+----------+----------+-------+------|
-   | *Total time*                                         | *7d 2:37* |            |          |          |       |      |
+   | *Total time*                                         | *7d 3:56* |            |          |          |       |      |
    |------------------------------------------------------+-----------+------------+----------+----------+-------+------|
-   | *BadNews [28/33]*                                    | *7d 2:37* |            |          |          |       |      |
+   | *BadNews [28/33]*                                    | *7d 3:56* |            |          |          |       |      |
    | \_  /Features [14/14]/                               |           | /2d 12:49/ |          |          |       |      |
    | \_    Blacklisting [1/1]                             |           |            |     6:03 |          |       |      |
    | \_    Rating and Tagging [12/12]                     |           |            |  2d 6:46 |          |       |      |
@@ -39,7 +39,7 @@
    | \_          Disable linked Tags in menu              |           |            |          |          |       | 1:13 |
    | \_          Unlink Tags from Items                   |           |            |          |          |       | 1:13 |
    | \_          Fetch linked tags per item in handler... |           |            |          |          |       | 0:23 |
-   | \_  /Components [14/19]/                             |           | /4d 13:48/ |          |          |       |      |
+   | \_  /Components [14/19]/                             |           | /4d 15:07/ |          |          |       |      |
    | \_    Data model [3/3]                               |           |            |     5:25 |          |       |      |
    | \_      Feeds [3/3]                                  |           |            |          |     4:58 |       |      |
    | \_        Delete Feeds [2/2]                         |           |            |          |          |  4:58 |      |
@@ -50,9 +50,10 @@
    | \_      Queries respect transaction                  |           |            |          |     0:03 |       |      |
    | \_    Feed catcher / parser [0/0]                    |           |            |     5:41 |          |       |      |
    | \_      Testing                                      |           |            |          |     2:16 |       |      |
-   | \_    Web Interface [7/12]                           |           |            |  1d 7:11 |          |       |      |
-   | \_      Search [0/3]                                 |           |            |          |     6:33 |       |      |
-   | \_        Overview                                   |           |            |          |          |  5:42 |      |
+   | \_    Web Interface [7/12]                           |           |            |  1d 8:30 |          |       |      |
+   | \_      Search [0/3]                                 |           |            |          |     7:52 |       |      |
+   | \_        Overview                                   |           |            |          |          |  6:08 |      |
+   | \_        Form                                       |           |            |          |          |  0:53 |      |
    | \_      Feeds overview                               |           |            |          |     1:42 |       |      |
    | \_      Message Area                                 |           |            |          |     7:10 |       |      |
    | \_      Appearances matter [5/5]                     |           |            |          |     4:40 |       |      |
@@ -339,10 +340,14 @@
      :END:
 ***** TODO Overview
       :LOGBOOK:
+      CLOCK: [2024-11-21 Do 14:09]--[2024-11-21 Do 14:35] =>  0:26
       CLOCK: [2024-11-20 Mi 16:21]--[2024-11-20 Mi 20:32] =>  4:11
       CLOCK: [2024-11-20 Mi 13:10]--[2024-11-20 Mi 14:41] =>  1:31
       :END:
 ***** TODO Form
+      :LOGBOOK:
+      CLOCK: [2024-11-21 Do 14:35]--[2024-11-21 Do 15:28] =>  0:53
+      :END:
 ***** TODO Result View
 **** TODO Paged Item view
      Since we are doing AJAX, I could get away without reloading the entire
