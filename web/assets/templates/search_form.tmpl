@@ -1,0 +1,29 @@
+{{ define "search_form" }}
+{{/* Created on 21. 11. 2024 */}}
+{{/* Time-stamp: <2024-11-21 15:24:42 krylon> */}}
+<table class="table table-secondary table-striped horizontal">
+  <tbody>
+    <tr>
+      <th>Title</th>
+      <td><input type="text" id="search_title" />
+    </tr>
+    <tr>
+      <th>Tags</th>
+      <td>
+        Search for <b>all</b> tags? <input type="checkbox" id="search_tag_all" /><br />
+        <span class="debug">
+          TODO
+        </span>
+      </td>
+    </tr>
+    <tr>
+      <th>
+        Query string
+      </th>
+      <td>
+        <input type="text" id="search_query_string" />
+      </td>
+    </tr>
+  </tbody>
+</table>
+{{ end }}

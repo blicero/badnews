@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 28. 09. 2024 by Benjamin Walkenhorst
 // (c) 2024 Benjamin Walkenhorst
-// Time-stamp: <2024-11-20 20:32:44 krylon>
+// Time-stamp: <2024-11-21 14:12:57 krylon>
 
 // Package web provides the web interface.
 package web
@@ -215,6 +215,7 @@ func Create(addr string) (*Server, error) {
 	srv.router.HandleFunc("/ajax/tag/unlink/{tag:(?:\\d+)}/{item:(?:\\d+)}", srv.handleAjaxTagLinkRemove)
 	srv.router.HandleFunc("/ajax/tag/form", srv.handleAjaxTagForm)
 	srv.router.HandleFunc("/ajax/blacklist/add", srv.handleAjaxBlacklistAdd)
+	srv.router.HandleFunc("/ajax/search/all", srv.handleAjaxSearchQueries)
 
 	return srv, nil
 } // func Create(addr string) (*Server, error)
@@ -2511,16 +2512,16 @@ func (srv *Server) handleAjaxSearchQueries(w http.ResponseWriter, r *http.Reques
 		r.RemoteAddr)
 	const tmplName = "search_queries"
 	var (
-		err      error
-		db       *database.Database
-		sess     *sessions.Session
-		tmpl     *template.Template
-		buf      bytes.Buffer
-		rbuf     []byte
-		res      = Reply{Payload: make(map[string]string, 3)}
-		msg, pat string
-		hstatus  = 200
-		data     = tmplDataSearchQueries{
+		err     error
+		db      *database.Database
+		sess    *sessions.Session
+		tmpl    *template.Template
+		buf     bytes.Buffer
+		rbuf    []byte
+		res     = Reply{Payload: make(map[string]string, 3)}
+		msg     string
+		hstatus = 200
+		data    = tmplDataSearchQueries{
 			tmplDataBase: tmplDataBase{
 				Title: "Search Queries",
 				Debug: common.Debug,
@@ -2538,6 +2539,23 @@ func (srv *Server) handleAjaxSearchQueries(w http.ResponseWriter, r *http.Reques
 
 	db = srv.pool.Get()
 	defer srv.pool.Put(db)
+
+	if data.Queries, err = db.SearchGetAll(); err != nil {
+		res.Message = fmt.Sprintf("Failed loading Search Queries from database: %s",
+			err.Error())
+		srv.log.Printf("[ERROR] %s\n", res.Message)
+		hstatus = 500
+		goto SEND_RESPONSE
+	} else if err = tmpl.Execute(&buf, &data); err != nil {
+		res.Message = fmt.Sprintf("Error rendering template %s: %s",
+			tmplName,
+			err.Error())
+		srv.log.Printf("[ERROR] %s\n", res.Message)
+		hstatus = 500
+		goto SEND_RESPONSE
+	}
+
+	res.Payload["content"] = buf.String()
 
 SEND_RESPONSE:
 	if sess != nil {
