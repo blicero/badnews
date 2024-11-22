@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 28. 09. 2024 by Benjamin Walkenhorst
 // (c) 2024 Benjamin Walkenhorst
-// Time-stamp: <2024-11-21 14:12:57 krylon>
+// Time-stamp: <2024-11-22 15:42:55 krylon>
 
 // Package web provides the web interface.
 package web
@@ -720,12 +720,15 @@ func (srv *Server) handleSearchMain(w http.ResponseWriter, r *http.Request) {
 	var (
 		err  error
 		msg  string
+		db   *database.Database
 		tmpl *template.Template
 		sess *sessions.Session
-		data = tmplDataBase{
-			Title: "Items",
-			Debug: true,
-			URL:   r.URL.EscapedPath(),
+		data = tmplDataSearchMain{
+			tmplDataBase: tmplDataBase{
+				Title: "Items",
+				Debug: true,
+				URL:   r.URL.EscapedPath(),
+			},
 		}
 	)
 
@@ -737,6 +740,17 @@ func (srv *Server) handleSearchMain(w http.ResponseWriter, r *http.Request) {
 		return
 	} else if tmpl = srv.tmpl.Lookup(tmplName); tmpl == nil {
 		msg = fmt.Sprintf("Could not find template %q", tmplName)
+		srv.log.Println("[CRITICAL] " + msg)
+		srv.sendErrorMessage(w, msg)
+		return
+	}
+
+	db = srv.pool.Get()
+	defer srv.pool.Put(db)
+
+	if data.Tags, err = db.TagGetSorted(); err != nil {
+		msg = fmt.Sprintf("Failed to load sorted Tag list: %s",
+			err.Error())
 		srv.log.Println("[CRITICAL] " + msg)
 		srv.sendErrorMessage(w, msg)
 		return
@@ -2530,7 +2544,13 @@ func (srv *Server) handleAjaxSearchQueries(w http.ResponseWriter, r *http.Reques
 		}
 	)
 
-	if tmpl = srv.tmpl.Lookup(tmplName); tmpl == nil {
+	if sess, err = srv.store.Get(r, sessionNameFrontend); err != nil {
+		res.Message = fmt.Sprintf("Error getting client session from session store: %s",
+			err.Error())
+		srv.log.Println("[CRITICAL] " + res.Message)
+		hstatus = 500
+		goto SEND_RESPONSE
+	} else if tmpl = srv.tmpl.Lookup(tmplName); tmpl == nil {
 		res.Message = fmt.Sprintf("Template %s was not found", tmplName)
 		srv.log.Printf("[ERROR] %s\n", res.Message)
 		hstatus = 500
@@ -2556,6 +2576,7 @@ func (srv *Server) handleAjaxSearchQueries(w http.ResponseWriter, r *http.Reques
 	}
 
 	res.Payload["content"] = buf.String()
+	res.Status = true
 
 SEND_RESPONSE:
 	if sess != nil {

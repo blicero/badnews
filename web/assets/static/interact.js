@@ -1,4 +1,4 @@
-// Time-stamp: <2024-11-20 16:25:33 krylon>
+// Time-stamp: <2024-11-22 19:53:50 krylon>
 // -*- mode: javascript; coding: utf-8; -*-
 // Copyright 2015-2020 Benjamin Walkenhorst <krylon@gmx.net>
 //
@@ -485,3 +485,7 @@ function load_search_queries() {
         'json'
     )
 } // function load_search_queries()
+
+function search_tag_add() {
+    const sel_id = '#search_tag_select'
+} // function search_tag_add()

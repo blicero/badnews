@@ -1,19 +1,35 @@
 {{ define "search_form" }}
 {{/* Created on 21. 11. 2024 */}}
-{{/* Time-stamp: <2024-11-21 15:24:42 krylon> */}}
+{{/* Time-stamp: <2024-11-22 19:53:54 krylon> */}}
 <table class="table table-secondary table-striped horizontal">
   <tbody>
     <tr>
       <th>Title</th>
-      <td><input type="text" id="search_title" />
+      <td>
+        <input type="text" id="search_title" />
+        <input type="hidden" id="search_id" value="" />
+      </td>
     </tr>
     <tr>
       <th>Tags</th>
       <td>
-        Search for <b>all</b> tags? <input type="checkbox" id="search_tag_all" /><br />
-        <span class="debug">
-          TODO
-        </span>
+        <div id="search_tag_choice">
+          Search for <b>all</b> tags? <input type="checkbox" id="search_tag_all" /><br />
+          <select id="search_tag_select" class="btn btn-secondary">
+            {{ range $idx, $tag := .Tags }}
+            <option value="{{ $tag.ID }}"
+                    id="search_tag_opt_{{ $tag.ID }}">
+              {{ nbsp (twice $tag.Level) }}{{ $tag.Name }}
+            </option>
+            {{ end }}
+          </select>
+          <input type="button"
+                 class="btn btn-success"
+                 value="Add"
+                 onclick="
+        </div>
+        <div class="search_tag_list">
+        </div>
       </td>
     </tr>
     <tr>

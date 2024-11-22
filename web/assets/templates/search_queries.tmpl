@@ -1,0 +1,38 @@
+{{ define "search_queries" }}
+{{/* Created on 21. 11. 2024 */}}
+{{/* Time-stamp: <2024-11-21 18:35:23 krylon> */}}
+<table id="search_queries" class="table table-success table-striped">
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Title</th>
+      <th>Status</th>
+      <th>Created</th>
+      <th>Start / End</th>
+    </tr>
+  </thead>
+  <tbody>
+    {{ range .Queries }}
+    <tr>
+      <th>{{ .ID }}</th>
+      <th>{{ .Title }}</th>
+      <th>
+        {{ if .IsFinished }}
+        {{ if .Status }}
+        Finished successfully
+        {{ else }}
+        Error: {{ .Message }}
+        {{ end }}
+        {{ end }}
+      </th>
+      <th>
+        {{ fmt_time_minute .TimeCreated }}
+      </th>
+      <th>
+        <span class="debug">TODO</span>
+      </th>
+    </tr>
+    {{ end }}
+  </tbody>
+</table>
+{{ end }}
