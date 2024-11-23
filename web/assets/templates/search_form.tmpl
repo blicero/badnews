@@ -1,6 +1,6 @@
 {{ define "search_form" }}
 {{/* Created on 21. 11. 2024 */}}
-{{/* Time-stamp: <2024-11-22 19:53:54 krylon> */}}
+{{/* Time-stamp: <2024-11-23 22:51:48 krylon> */}}
 <table class="table table-secondary table-striped horizontal">
   <tbody>
     <tr>
@@ -13,6 +13,19 @@
     <tr>
       <th>Tags</th>
       <td>
+        <script>
+         const tags = {
+           {{ range .Tags }}
+           "{{ .ID }}": {
+             "ID": {{ .ID }},
+             "Name": "{{ .Name }}",
+             "Parent": {{ .Parent }},
+             "Level": {{ .Level }},
+             "FullName": "{{ .FullName }}",
+           },
+           {{ end }}
+         }
+        </script>
         <div id="search_tag_choice">
           Search for <b>all</b> tags? <input type="checkbox" id="search_tag_all" /><br />
           <select id="search_tag_select" class="btn btn-secondary">
@@ -26,7 +39,7 @@
           <input type="button"
                  class="btn btn-success"
                  value="Add"
-                 onclick="
+                 onclick="search_tag_add();" />
         </div>
         <div class="search_tag_list">
         </div>
