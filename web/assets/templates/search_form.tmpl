@@ -1,6 +1,6 @@
 {{ define "search_form" }}
 {{/* Created on 21. 11. 2024 */}}
-{{/* Time-stamp: <2024-11-24 14:48:23 krylon> */}}
+{{/* Time-stamp: <2024-11-24 15:42:28 krylon> */}}
 <table class="table table-secondary table-striped horizontal">
   <tbody>
     <tr>
@@ -26,6 +26,8 @@
            {{ end }}
          }
 
+         var search_tags = {}
+
          function search_tag_add() {
            const sel_id = '#search_tag_select'
            const msg = "search_tag_add() - IMPLEMENTME!!!"
@@ -37,6 +39,7 @@
            const txt = render_search_tag(tag_id)
            const div = $("#search_tag_list")[0]
            div.innerHTML += txt
+           search_tags[tag_id] = true
          } // function search_tag_add()
 
          function render_search_tag(tag_id) {
@@ -46,14 +49,16 @@
            const txt = `<span id="${span_id}">
            <b>${tag.name}</b>
            <img src="/static/delete.png"
-                onclick="remove_search_tag(${span_id});" />
+                onclick="remove_search_tag(${tag_id});" />
            </span>`
            return txt
          } // function render_search_tag(tag)
 
-         function remove_search_tag(span_id) {
+         function remove_search_tag(tag_id) {
+           const span_id = `#search_tag_${tag_id}`
            const node = $(span_id)[0]
            node.remove()
+           delete(search_tags[tag_id])
          } // function remove_search_tag(span_id)
         </script>
         <div id="search_tag_choice">
