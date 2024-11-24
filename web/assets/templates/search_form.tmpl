@@ -1,6 +1,6 @@
 {{ define "search_form" }}
 {{/* Created on 21. 11. 2024 */}}
-{{/* Time-stamp: <2024-11-23 22:51:48 krylon> */}}
+{{/* Time-stamp: <2024-11-24 14:48:23 krylon> */}}
 <table class="table table-secondary table-striped horizontal">
   <tbody>
     <tr>
@@ -17,14 +17,44 @@
          const tags = {
            {{ range .Tags }}
            "{{ .ID }}": {
-             "ID": {{ .ID }},
-             "Name": "{{ .Name }}",
-             "Parent": {{ .Parent }},
-             "Level": {{ .Level }},
-             "FullName": "{{ .FullName }}",
+             "id": {{ .ID }},
+             "name": "{{ .Name }}",
+             "parent": {{ .Parent }},
+             "level": {{ .Level }},
+             "fullname": "{{ .FullName }}",
            },
            {{ end }}
          }
+
+         function search_tag_add() {
+           const sel_id = '#search_tag_select'
+           const msg = "search_tag_add() - IMPLEMENTME!!!"
+           msg_add(msg)
+           console.log(msg)
+
+           const sel = $(sel_id)[0]
+           const tag_id = sel.value
+           const txt = render_search_tag(tag_id)
+           const div = $("#search_tag_list")[0]
+           div.innerHTML += txt
+         } // function search_tag_add()
+
+         function render_search_tag(tag_id) {
+           const tag = tags[tag_id]
+           const span_id = `search_tag_${tag_id}`
+
+           const txt = `<span id="${span_id}">
+           <b>${tag.name}</b>
+           <img src="/static/delete.png"
+                onclick="remove_search_tag(${span_id});" />
+           </span>`
+           return txt
+         } // function render_search_tag(tag)
+
+         function remove_search_tag(span_id) {
+           const node = $(span_id)[0]
+           node.remove()
+         } // function remove_search_tag(span_id)
         </script>
         <div id="search_tag_choice">
           Search for <b>all</b> tags? <input type="checkbox" id="search_tag_all" /><br />
@@ -41,7 +71,7 @@
                  value="Add"
                  onclick="search_tag_add();" />
         </div>
-        <div class="search_tag_list">
+        <div id="search_tag_list">
         </div>
       </td>
     </tr>
