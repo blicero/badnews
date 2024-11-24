@@ -1,5 +1,5 @@
 # -*- mode: org; fill-column: 78; -*-
-# Time-stamp: <2024-11-22 22:24:06 krylon>
+# Time-stamp: <2024-11-24 14:50:20 krylon>
 #
 #+TAGS: internals(i) ui(u) bug(b) feature(f)
 #+TAGS: database(d) design(e), meditation(m)
@@ -17,12 +17,12 @@
   BadNews is an RSS reader
 ** Clock table
    #+BEGIN: clocktable :scope file :maxlevel 202 :emphasize t
-   #+CAPTION: Clock summary at [2024-11-22 Fr 22:24]
+   #+CAPTION: Clock summary at [2024-11-24 So 14:50]
    | Headline                                             | Time       |            |          |          |       |      |
    |------------------------------------------------------+------------+------------+----------+----------+-------+------|
-   | *Total time*                                         | *7d 11:28* |            |          |          |       |      |
+   | *Total time*                                         | *7d 11:47* |            |          |          |       |      |
    |------------------------------------------------------+------------+------------+----------+----------+-------+------|
-   | *BadNews [28/33]*                                    | *7d 11:28* |            |          |          |       |      |
+   | *BadNews [28/33]*                                    | *7d 11:47* |            |          |          |       |      |
    | \_  /Features [14/14]/                               |            | /2d 12:49/ |          |          |       |      |
    | \_    Blacklisting [1/1]                             |            |            |     6:03 |          |       |      |
    | \_    Rating and Tagging [12/12]                     |            |            |  2d 6:46 |          |       |      |
@@ -39,7 +39,7 @@
    | \_          Disable linked Tags in menu              |            |            |          |          |       | 1:13 |
    | \_          Unlink Tags from Items                   |            |            |          |          |       | 1:13 |
    | \_          Fetch linked tags per item in handler... |            |            |          |          |       | 0:23 |
-   | \_  /Components [14/19]/                             |            | /4d 22:39/ |          |          |       |      |
+   | \_  /Components [14/19]/                             |            | /4d 22:58/ |          |          |       |      |
    | \_    Data model [3/3]                               |            |            |     5:25 |          |       |      |
    | \_      Feeds [3/3]                                  |            |            |          |     4:58 |       |      |
    | \_        Delete Feeds [2/2]                         |            |            |          |          |  4:58 |      |
@@ -50,10 +50,10 @@
    | \_      Queries respect transaction                  |            |            |          |     0:03 |       |      |
    | \_    Feed catcher / parser [0/0]                    |            |            |     5:41 |          |       |      |
    | \_      Testing                                      |            |            |          |     2:16 |       |      |
-   | \_    Web Interface [7/12]                           |            |            | 1d 16:02 |          |       |      |
-   | \_      Search [0/3]                                 |            |            |          |    15:24 |       |      |
+   | \_    Web Interface [7/12]                           |            |            | 1d 16:21 |          |       |      |
+   | \_      Search [0/3]                                 |            |            |          |    15:43 |       |      |
    | \_        Overview                                   |            |            |          |          |  7:00 |      |
-   | \_        Form                                       |            |            |          |          |  7:33 |      |
+   | \_        Form                                       |            |            |          |          |  7:52 |      |
    | \_      Feeds overview                               |            |            |          |     1:42 |       |      |
    | \_      Message Area                                 |            |            |          |     7:10 |       |      |
    | \_      Appearances matter [5/5]                     |            |            |          |     4:40 |       |      |
@@ -347,6 +347,7 @@
       :END:
 ***** TODO Form
       :LOGBOOK:
+      CLOCK: [2024-11-24 So 14:31]--[2024-11-24 So 14:50] =>  0:19
       CLOCK: [2024-11-22 Fr 15:36]--[2024-11-22 Fr 19:55] =>  4:19
       CLOCK: [2024-11-21 Do 19:17]--[2024-11-21 Do 21:38] =>  2:21
       CLOCK: [2024-11-21 Do 14:35]--[2024-11-21 Do 15:28] =>  0:53
