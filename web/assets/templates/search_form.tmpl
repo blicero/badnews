@@ -1,8 +1,109 @@
 {{ define "search_form" }}
 {{/* Created on 21. 11. 2024 */}}
-{{/* Time-stamp: <2024-11-24 15:42:28 krylon> */}}
+{{/* Time-stamp: <2024-11-25 18:22:19 krylon> */}}
 <table class="table table-secondary table-striped horizontal">
   <tbody>
+    <script>
+     const tags = {
+       {{ range .Tags }}
+       "{{ .ID }}": {
+         "id": {{ .ID }},
+         "name": "{{ .Name }}",
+         "parent": {{ .Parent }},
+         "level": {{ .Level }},
+         "fullname": "{{ .FullName }}",
+       },
+       {{ end }}
+     }
+
+     var search_tags = {}
+
+     function search_tag_add() {
+       const sel_id = '#search_tag_select'
+       const sel = $(sel_id)[0]
+       const tag_id = sel.value
+       const txt = render_search_tag(tag_id)
+       const div = $("#search_tag_list")[0]
+       div.innerHTML += txt
+       search_tags[tag_id] = true
+     } // function search_tag_add()
+
+     function render_search_tag(tag_id) {
+       const tag = tags[tag_id]
+       const span_id = `search_tag_${tag_id}`
+
+       const txt = `<span id="${span_id}">
+       <b>${tag.name}</b>
+       <img src="/static/delete.png"
+       onclick="remove_search_tag(${tag_id});" />
+       </span>`
+       return txt
+     } // function render_search_tag(tag)
+
+     function remove_search_tag(tag_id) {
+       const span_id = `#search_tag_${tag_id}`
+       const node = $(span_id)[0]
+       node.remove()
+       delete(search_tags[tag_id])
+     } // function remove_search_tag(span_id)
+
+     function search_form_submit() {
+       const url = "/ajax/search/submit"
+       let arg = {}
+
+       const id_input = $("#search_id")[0]
+       const title_input = $("#search_title")[0]
+       const query_input = $("#search_query_string")[0]
+       const regex_input = $("#search_regex")[0]
+
+       arg.title = title_input.value
+       arg.tags = []
+       for (var t in search_tags) {
+         arg.tags.push(t)
+       }
+       arg.tags.sort()
+       arg.query = query_input.value
+       arg.regex = regex_input.checked
+
+       const search_id = id_input.value
+       if (search_id != "") {
+         arg.id = search_id
+       }
+
+       const req = $.post(
+         url,
+         arg,
+         (res) => {
+           if (res.status) {
+             // reload Search list, clear form
+           } else {
+             msg_add(res.message)
+             console.log(res.message)
+             alert(res.message)
+           }
+         },
+         'json'
+       )
+
+       req.fail((reply, status, xhr) => {
+         msg_add(status, 3)
+       })
+     } // function search_form_submit()
+
+     function clear_search_form() {
+       const id_input = $("#search_id")[0]
+       const title_input = $("#search_title")[0]
+       const query_input = $("#search_query_string")[0]
+       const regex_input = $("#search_regex")[0]
+       const tag_div = $("#search_tag_list")[0]
+
+       id_input.value = ""
+       title_input.value = ""
+       query_input.value = ""
+       regex_input.checked = false
+       tag_div.innerHTML = ""
+     } // function clear_search_form()
+    </script>
     <tr>
       <th>Title</th>
       <td>
@@ -13,54 +114,6 @@
     <tr>
       <th>Tags</th>
       <td>
-        <script>
-         const tags = {
-           {{ range .Tags }}
-           "{{ .ID }}": {
-             "id": {{ .ID }},
-             "name": "{{ .Name }}",
-             "parent": {{ .Parent }},
-             "level": {{ .Level }},
-             "fullname": "{{ .FullName }}",
-           },
-           {{ end }}
-         }
-
-         var search_tags = {}
-
-         function search_tag_add() {
-           const sel_id = '#search_tag_select'
-           const msg = "search_tag_add() - IMPLEMENTME!!!"
-           msg_add(msg)
-           console.log(msg)
-
-           const sel = $(sel_id)[0]
-           const tag_id = sel.value
-           const txt = render_search_tag(tag_id)
-           const div = $("#search_tag_list")[0]
-           div.innerHTML += txt
-           search_tags[tag_id] = true
-         } // function search_tag_add()
-
-         function render_search_tag(tag_id) {
-           const tag = tags[tag_id]
-           const span_id = `search_tag_${tag_id}`
-
-           const txt = `<span id="${span_id}">
-           <b>${tag.name}</b>
-           <img src="/static/delete.png"
-                onclick="remove_search_tag(${tag_id});" />
-           </span>`
-           return txt
-         } // function render_search_tag(tag)
-
-         function remove_search_tag(tag_id) {
-           const span_id = `#search_tag_${tag_id}`
-           const node = $(span_id)[0]
-           node.remove()
-           delete(search_tags[tag_id])
-         } // function remove_search_tag(span_id)
-        </script>
         <div id="search_tag_choice">
           Search for <b>all</b> tags? <input type="checkbox" id="search_tag_all" /><br />
           <select id="search_tag_select" class="btn btn-secondary">
@@ -85,7 +138,17 @@
         Query string
       </th>
       <td>
-        <input type="text" id="search_query_string" />
+        <input type="text" id="search_query_string" />{{ nbsp 3 }}
+        Regex? <input type="checkbox" id="search_regex" />
+      </td>
+    </tr>
+    <tr>
+      <th></th>
+      <td>
+        <input type="button"
+               class="btn btn-success"
+               value="Submit"
+               onclick="search_form_submit();" />
       </td>
     </tr>
   </tbody>

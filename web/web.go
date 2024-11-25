@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 28. 09. 2024 by Benjamin Walkenhorst
 // (c) 2024 Benjamin Walkenhorst
-// Time-stamp: <2024-11-22 15:42:55 krylon>
+// Time-stamp: <2024-11-25 18:26:37 krylon>
 
 // Package web provides the web interface.
 package web
@@ -216,6 +216,7 @@ func Create(addr string) (*Server, error) {
 	srv.router.HandleFunc("/ajax/tag/form", srv.handleAjaxTagForm)
 	srv.router.HandleFunc("/ajax/blacklist/add", srv.handleAjaxBlacklistAdd)
 	srv.router.HandleFunc("/ajax/search/all", srv.handleAjaxSearchQueries)
+	srv.router.HandleFunc("/ajax/search/submit", srv.handleAjaxSearchSubmit)
 
 	return srv, nil
 } // func Create(addr string) (*Server, error)
@@ -2601,3 +2602,65 @@ SEND_RESPONSE:
 		srv.log.Println("[ERROR] " + msg)
 	}
 } // func (srv *Server) handleAjaxSearchQueries(w http.ResponseWriter, r *http.Request)
+
+func (srv *Server) handleAjaxSearchSubmit(w http.ResponseWriter, r *http.Request) {
+	srv.log.Printf("[TRACE] Handle request for %s from %s\n",
+		r.URL.EscapedPath(),
+		r.RemoteAddr)
+
+	var (
+		err     error
+		sess    *sessions.Session
+		rbuf    []byte
+		db      *database.Database
+		res     = Reply{Payload: make(map[string]string, 3)}
+		msg     string
+		hstatus = 200
+	)
+
+	// var example = url.Values{
+	// 	"query":  []string{"SQL"},
+	// 	"regex":  []string{"false"},
+	// 	"tags[]": []string{"5", "6"},
+	// 	"title":  []string{"SQL"},
+	// }
+
+	if err = r.ParseForm(); err != nil {
+		res.Message = fmt.Sprintf("Error parsing form data: %s",
+			err.Error())
+		srv.log.Printf("[ERROR] %s\n", res.Message)
+		hstatus = 400
+		goto SEND_RESPONSE
+	}
+
+	srv.log.Printf("[DEBUG] Received Search query:\n%#v\n\n",
+		r.Form)
+
+	db = srv.pool.Get()
+	defer srv.pool.Put(db)
+
+	res.Message = "Submitting Search queries is not implemented, yet."
+
+SEND_RESPONSE:
+	if sess != nil {
+		if err = sess.Save(r, w); err != nil {
+			srv.log.Printf("[ERROR] Failed to set session cookie: %s\n",
+				err.Error())
+		}
+	}
+	res.Timestamp = time.Now()
+	if rbuf, err = json.Marshal(&res); err != nil {
+		srv.log.Printf("[ERROR] Error serializing response: %s\n",
+			err.Error())
+		rbuf = errJSON(err.Error())
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Cache-Control", "no-store, max-age=0")
+	w.WriteHeader(hstatus)
+	if _, err = w.Write(rbuf); err != nil {
+		msg = fmt.Sprintf("Failed to send result: %s",
+			err.Error())
+		srv.log.Println("[ERROR] " + msg)
+	}
+} // func (srv *Server) handleAjaxSearchSubmit(w http.ResponseWriter, r *http.Request)
