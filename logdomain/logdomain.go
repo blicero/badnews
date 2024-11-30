@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 18. 09. 2024 by Benjamin Walkenhorst
 // (c) 2024 Benjamin Walkenhorst
-// Time-stamp: <2024-11-04 22:31:35 krylon>
+// Time-stamp: <2024-11-30 20:57:55 krylon>
 
 package logdomain
 
@@ -19,6 +19,7 @@ const (
 	Advisor
 	Blacklist
 	BusyBee
+	Search
 )
 
 func AllDomains() []ID {
@@ -31,5 +32,6 @@ func AllDomains() []ID {
 		Advisor,
 		Blacklist,
 		BusyBee,
+		Search,
 	}
 } // func AllDomains() []ID
