@@ -1,5 +1,5 @@
 # -*- mode: org; fill-column: 78; -*-
-# Time-stamp: <2024-11-30 20:17:44 krylon>
+# Time-stamp: <2024-11-30 22:18:22 krylon>
 #
 #+TAGS: internals(i) ui(u) bug(b) feature(f)
 #+TAGS: database(d) design(e), meditation(m)
@@ -9,7 +9,7 @@
 #+TODO: MEDITATE(m) PLANNING(p) | SUSPENDED(s)
 #+PRIORITIES: A G D
 
-* BadNews [29/33]
+* BadNews [29/35]
   :PROPERTIES:
   :COOKIE_DATA: todo recursive
   :VISIBILITY: children
@@ -17,12 +17,12 @@
   BadNews is an RSS reader
 ** Clock table
    #+BEGIN: clocktable :scope file :maxlevel 202 :emphasize t
-   #+CAPTION: Clock summary at [2024-11-30 Sa 20:17]
+   #+CAPTION: Clock summary at [2024-11-30 Sa 22:18]
    | Headline                                             | Time       |            |          |          |       |      |
    |------------------------------------------------------+------------+------------+----------+----------+-------+------|
-   | *Total time*                                         | *7d 17:25* |            |          |          |       |      |
+   | *Total time*                                         | *7d 19:12* |            |          |          |       |      |
    |------------------------------------------------------+------------+------------+----------+----------+-------+------|
-   | *BadNews [29/33]*                                    | *7d 17:25* |            |          |          |       |      |
+   | *BadNews [29/35]*                                    | *7d 19:12* |            |          |          |       |      |
    | \_  /Features [14/14]/                               |            | /2d 12:49/ |          |          |       |      |
    | \_    Blacklisting [1/1]                             |            |            |     6:03 |          |       |      |
    | \_    Rating and Tagging [12/12]                     |            |            |  2d 6:46 |          |       |      |
@@ -39,13 +39,13 @@
    | \_          Disable linked Tags in menu              |            |            |          |          |       | 1:13 |
    | \_          Unlink Tags from Items                   |            |            |          |          |       | 1:13 |
    | \_          Fetch linked tags per item in handler... |            |            |          |          |       | 0:23 |
-   | \_  /Components [15/19]/                             |            | /5d 4:36/  |          |          |       |      |
+   | \_  /Components [15/21]/                             |            | /5d 6:23/  |          |          |       |      |
    | \_    Data model [3/3]                               |            |            |     5:25 |          |       |      |
    | \_      Feeds [3/3]                                  |            |            |          |     4:58 |       |      |
    | \_        Delete Feeds [2/2]                         |            |            |          |          |  4:58 |      |
    | \_          Delete from database                     |            |            |          |          |       | 3:00 |
    | \_          Clean up the Bayesian models             |            |            |          |          |       | 0:15 |
-   | \_    Database [1/1]                                 |            |            |    12:17 |          |       |      |
+   | \_    Database [1/2]                                 |            |            |    12:17 |          |       |      |
    | \_      Testing [0/0]                                |            |            |          |     3:02 |       |      |
    | \_      Queries respect transaction                  |            |            |          |     0:03 |       |      |
    | \_    Feed catcher / parser [0/0]                    |            |            |     5:41 |          |       |      |
@@ -67,7 +67,8 @@
    | \_      Performance [2/2]                            |            |            |          |    10:10 |       |      |
    | \_        Caching                                    |            |            |          |          |  3:06 |      |
    | \_        Pre-computing advice                       |            |            |          |          |  7:04 |      |
-   | \_    Search [1/1]                                   |            |            | 1d 19:45 |          |       |      |
+   | \_    Search [1/2]                                   |            |            | 1d 21:32 |          |       |      |
+   | \_      Scheduling or something                      |            |            |          |     1:47 |       |      |
    | \_      Execute Searches                             |            |            |          |    14:57 |       |      |
    #+END:
 ** Journal
@@ -215,7 +216,7 @@
       :LOGBOOK:
       CLOCK: [2024-10-19 Sa 20:37]--[2024-10-19 Sa 21:00] =>  0:23
       :END:
-** Components [15/19]
+** Components [15/21]
    :PROPERTIES:
    :COOKIE_DATA: todo recursive
    :VISIBILITY: children
@@ -268,7 +269,7 @@
        all. And that part won't use up all that much space.
        And if I really need to, I can just discard the existing training data
        and train the models anew. 
-*** Database [1/1]                                                 :database:
+*** Database [1/2]                                                 :database:
     :PROPERTIES:
     :COOKIE_DATA: todo recursive
     :VISIBILITY: children
@@ -285,6 +286,9 @@
     CLOCK: [2024-09-20 Fr 10:19]--[2024-09-20 Fr 10:55] =>  0:36
     CLOCK: [2024-09-19 Do 16:52]--[2024-09-19 Do 21:01] =>  4:09
     :END:
+**** TODO [#E] Global Connection Pool
+     I think it might be a good idea to use just a single connection pool
+     instead of individual connections or multiple pools scattered everywhere.
 **** Testing [0/0]
      :LOGBOOK:
      CLOCK: [2024-10-13 So 18:36]--[2024-10-13 So 18:47] =>  0:11
@@ -472,7 +476,7 @@
       simple-minded replacement for cachego that works the way I want it to,
       and as far as I can tell, it does work the way I want it to, so now I
       can try using that one.
-*** Search [1/1]
+*** Search [1/2]
     :PROPERTIES:
     :COOKIE_DATA: todo recursive
     :VISIBILITY: children
@@ -522,6 +526,11 @@
     The search "engine", if you will, seems to work for the moment.
     Next, I'll have to think about how I want to integrate searching into the
     web UI, and how background searches should be run.
+**** TODO Scheduling or something
+     :LOGBOOK:
+     CLOCK: [2024-11-30 Sa 20:30]--[2024-11-30 Sa 22:17] =>  1:47
+     :END:
+     I want search queries to be executed asynchronously in the background.
 **** DONE Execute Searches
      CLOSED: [2024-11-18 Mo 22:17]
      :LOGBOOK:
