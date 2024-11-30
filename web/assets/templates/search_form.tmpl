@@ -1,6 +1,6 @@
 {{ define "search_form" }}
 {{/* Created on 21. 11. 2024 */}}
-{{/* Time-stamp: <2024-11-25 18:22:19 krylon> */}}
+{{/* Time-stamp: <2024-11-30 20:02:55 krylon> */}}
 <table class="table table-secondary table-striped horizontal">
   <tbody>
     <script>
@@ -55,24 +55,29 @@
        const title_input = $("#search_title")[0]
        const query_input = $("#search_query_string")[0]
        const regex_input = $("#search_regex")[0]
+       const tag_all_input = $("#search_tag_all")[0]
 
        arg.title = title_input.value
        arg.tags = []
        for (var t in search_tags) {
-         arg.tags.push(t)
+         arg.tags.push(Number.parseInt(t))
        }
        arg.tags.sort()
-       arg.query = query_input.value
-       arg.regex = regex_input.checked
+       arg.tags_all = tag_all_input.checked
+       arg.query_string = query_input.value
+       arg.regexp = regex_input.checked
+
 
        const search_id = id_input.value
        if (search_id != "") {
-         arg.id = search_id
+         arg.id = Number.parseInt(search_id)
+       } else {
+         arg.id = 0
        }
 
        const req = $.post(
          url,
-         arg,
+         { search: JSON.stringify(arg), },
          (res) => {
            if (res.status) {
              // reload Search list, clear form

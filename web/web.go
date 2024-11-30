@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 28. 09. 2024 by Benjamin Walkenhorst
 // (c) 2024 Benjamin Walkenhorst
-// Time-stamp: <2024-11-25 18:26:37 krylon>
+// Time-stamp: <2024-11-30 20:12:10 krylon>
 
 // Package web provides the web interface.
 package web
@@ -2609,16 +2609,18 @@ func (srv *Server) handleAjaxSearchSubmit(w http.ResponseWriter, r *http.Request
 		r.RemoteAddr)
 
 	var (
-		err     error
-		sess    *sessions.Session
-		rbuf    []byte
-		db      *database.Database
-		res     = Reply{Payload: make(map[string]string, 3)}
-		msg     string
-		hstatus = 200
+		err       error
+		sess      *sessions.Session
+		rbuf      []byte
+		db        *database.Database
+		res       = Reply{Payload: make(map[string]string, 3)}
+		msg, jStr string
+		query     model.Search
+		hstatus   = 200
 	)
 
 	// var example = url.Values{
+	// 	"id":     []string{"42"},
 	// 	"query":  []string{"SQL"},
 	// 	"regex":  []string{"false"},
 	// 	"tags[]": []string{"5", "6"},
@@ -2629,17 +2631,47 @@ func (srv *Server) handleAjaxSearchSubmit(w http.ResponseWriter, r *http.Request
 		res.Message = fmt.Sprintf("Error parsing form data: %s",
 			err.Error())
 		srv.log.Printf("[ERROR] %s\n", res.Message)
+		//hstatus = 400
+		goto SEND_RESPONSE
+	}
+
+	jStr = r.FormValue("search")
+
+	if err = json.Unmarshal([]byte(jStr), &query); err != nil {
+		res.Message = fmt.Sprintf("Error decoding request: %s\n%s\n\n",
+			err.Error(),
+			jStr)
+		srv.log.Printf("[ERROR] %s\n", res.Message)
 		hstatus = 400
 		goto SEND_RESPONSE
 	}
 
 	srv.log.Printf("[DEBUG] Received Search query:\n%#v\n\n",
-		r.Form)
+		query)
 
 	db = srv.pool.Get()
 	defer srv.pool.Put(db)
 
-	res.Message = "Submitting Search queries is not implemented, yet."
+	if query.ID != 0 {
+		res.Message = "Editing queries is not supported, yet."
+		srv.log.Printf("[ERROR] %s\n", res.Message)
+		hstatus = 500
+		goto SEND_RESPONSE
+	}
+
+	query.TimeCreated = time.Now()
+
+	if err = db.SearchAdd(&query); err != nil {
+		res.Message = fmt.Sprintf("Failed to add Search %q to database: %s",
+			query.Title,
+			err.Error())
+		srv.log.Printf("[ERROR] %s\n", res.Message)
+		hstatus = 500
+		goto SEND_RESPONSE
+	}
+
+	res.Message = fmt.Sprintf("Search was added to database, ID is %d", query.ID)
+	res.Status = true
 
 SEND_RESPONSE:
 	if sess != nil {
