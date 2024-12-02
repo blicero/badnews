@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 19. 09. 2024 by Benjamin Walkenhorst
 // (c) 2024 Benjamin Walkenhorst
-// Time-stamp: <2024-11-16 15:19:11 krylon>
+// Time-stamp: <2024-12-02 17:52:15 krylon>
 
 // Package query provides symbolic constants to identify database queries.
 package query
@@ -51,6 +51,7 @@ const (
 	SearchDelete
 	SearchGetByID
 	SearchGetActive
+	SearchGetNextPending
 	SearchGetAll
 	SearchStart
 	SearchFinish

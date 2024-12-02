@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 30. 11. 2024 by Benjamin Walkenhorst
 // (c) 2024 Benjamin Walkenhorst
-// Time-stamp: <2024-11-30 22:14:49 krylon>
+// Time-stamp: <2024-12-02 19:45:25 krylon>
 
 // Package sleuth handles the scheduling and dispatching of Search Queries.
 package sleuth
@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"github.com/blicero/badnews/common"
+	"github.com/blicero/badnews/common/path"
 	"github.com/blicero/badnews/database"
 	"github.com/blicero/badnews/logdomain"
 	"github.com/blicero/badnews/model"
@@ -38,7 +39,14 @@ func Create() (*Sleuth, error) {
 
 	if s.log, err = common.GetLogger(logdomain.Search); err != nil {
 		return nil, err
+	} else if s.db, err = database.Open(common.Path(path.Database)); err != nil {
+		s.log.Printf("[CRITICAL] Cannot open database at %s: %s\n",
+			common.Path(path.Database),
+			err.Error())
+		return nil, err
 	}
+
+	s.searchQ = make(chan *model.Search)
 
 	return s, nil
 } // func Create() (*Sleuth, error)
@@ -56,6 +64,56 @@ func (s *Sleuth) Run() {
 	defer ticker.Stop()
 
 	for s.IsActive() {
-
+		var (
+			err error
+			q   *model.Search
+		)
+		select {
+		case q = <-s.searchQ:
+			// do something
+			if err = s.db.SearchStart(q); err != nil {
+				s.log.Printf("[ERROR] Failed to mark Search Query %s (%d) as started: %s\n",
+					q.Title,
+					q.ID,
+					err.Error())
+				continue
+			} else if err = s.db.SearchExecute(q); err != nil {
+				s.log.Printf("[ERROR] Failed to execute Search query %s (%d): %s\n",
+					q.Title,
+					q.ID,
+					err.Error())
+			}
+		case <-ticker.C:
+			continue
+		}
 	}
 } // func (s *Sleuth) Run()
+
+func (s *Sleuth) feeder() {
+	var (
+		err        error
+		searchList []*model.Search
+	)
+
+	if searchList, err = s.db.SearchGetActive(); err != nil {
+		s.log.Printf("[ERROR] Failed to load active search queries: %s\n",
+			err.Error())
+		return
+	}
+
+	for _, q := range searchList {
+		s.searchQ <- q
+	}
+
+	for s.IsActive() {
+		var q *model.Search
+
+		if q, err = s.db.SearchGetNextPending(); err != nil {
+			s.log.Printf("[ERROR] Failed to load pending search queries: %s\n",
+				err.Error())
+			return
+		} else if q != nil {
+			s.searchQ <- q
+		}
+	}
+} // func (s *Sleuth) feeder()

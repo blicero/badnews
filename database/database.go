@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 19. 09. 2024 by Benjamin Walkenhorst
 // (c) 2024 Benjamin Walkenhorst
-// Time-stamp: <2024-11-18 22:17:03 krylon>
+// Time-stamp: <2024-12-02 18:10:42 krylon>
 
 // Package database provides persistence.
 package database
@@ -3121,6 +3121,80 @@ EXEC_QUERY:
 
 	return nil, nil
 } // func (db *Database) SearchGetByID(id int64) (*model.Search, error)
+
+// SearchGetNextPending returns the oldest Search Query in the database that
+// has not been started, yet.
+func (db *Database) SearchGetNextPending() (*model.Search, error) {
+	const qid query.ID = query.SearchGetNextPending
+	var (
+		err  error
+		msg  string
+		stmt *sql.Stmt
+	)
+
+	if stmt, err = db.getQuery(qid); err != nil {
+		db.log.Printf("[ERROR] Cannot prepare query %s: %s\n",
+			qid,
+			err.Error())
+		return nil, err
+	} else if db.tx != nil {
+		stmt = db.tx.Stmt(stmt)
+	}
+
+	var rows *sql.Rows
+
+EXEC_QUERY:
+	if rows, err = stmt.Query(); err != nil {
+		if worthARetry(err) {
+			waitForRetry()
+			goto EXEC_QUERY
+		}
+
+		return nil, err
+	}
+
+	defer rows.Close() // nolint: errcheck,gosec
+
+	if !rows.Next() {
+		db.log.Println("[DEBUG] No pending Search was found in database.")
+		return nil, nil
+	}
+
+	var (
+		s        = new(model.Search)
+		tcreated int64
+		tagStr   string
+		tags     []string
+	)
+
+	if err = rows.Scan(&s.ID, &s.Title, &tcreated, &tagStr, &s.TagsAll, &s.QueryString, &s.Regex); err != nil {
+		msg = fmt.Sprintf("Error scanning row for Search: %s",
+			err.Error())
+		db.log.Printf("[ERROR] %s\n", msg)
+		return nil, errors.New(msg)
+	}
+
+	s.TimeCreated = time.Unix(tcreated, 0)
+
+	tags = strings.Split(tagStr, ",")
+
+	if len(tags) > 0 {
+		s.Tags = make([]int64, len(tags))
+
+		for idx, t := range tags {
+			var tid int64
+			if tid, err = strconv.ParseInt(t, 10, 64); err != nil {
+				db.log.Printf("[ERROR] Cannot parse Tag ID %q: %s\n",
+					t,
+					err.Error())
+				return nil, err
+			}
+			s.Tags[idx] = tid
+		}
+	}
+
+	return s, nil
+} // func (db *Database) SearchGetNextPending() (*model.Search, error)
 
 // SearchGetActive returns all Search queries that have been marked as started but not finished.
 func (db *Database) SearchGetActive() ([]*model.Search, error) {

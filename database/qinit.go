@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 19. 09. 2024 by Benjamin Walkenhorst
 // (c) 2024 Benjamin Walkenhorst
-// Time-stamp: <2024-11-15 17:24:43 krylon>
+// Time-stamp: <2024-12-02 17:55:20 krylon>
 
 package database
 
@@ -95,4 +95,5 @@ CREATE TABLE search (
 `,
 	"CREATE INDEX search_active_idx ON search (time_started IS NOT NULL, time_finished IS NULL)",
 	"CREATE INDEX search_status_idx ON search (status)",
+	"CREATE INDEX search_ctime_idx ON search (time_created)",
 }

@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 19. 09. 2024 by Benjamin Walkenhorst
 // (c) 2024 Benjamin Walkenhorst
-// Time-stamp: <2024-11-16 15:23:22 krylon>
+// Time-stamp: <2024-12-02 17:54:45 krylon>
 
 package database
 
@@ -310,6 +310,23 @@ SELECT
 FROM search
 WHERE time_started IS NOT NULL AND time_finished IS NULL
 ORDER BY time_started
+`,
+	query.SearchGetNextPending: `
+SELECT
+    id,
+    title,
+    time_created,
+    tags,
+    tags_all,
+    filter_by_period,
+    filter_period_begin,
+    filter_period_end,
+    query_string,
+    regex
+FROM search
+WHERE time_started IS NULL
+ORDER BY time_created
+LIMIT 1
 `,
 	query.SearchGetAll: `
 SELECT
