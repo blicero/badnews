@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 18. 09. 2024 by Benjamin Walkenhorst
 // (c) 2024 Benjamin Walkenhorst
-// Time-stamp: <2024-11-05 19:14:56 krylon>
+// Time-stamp: <2024-12-03 15:06:34 krylon>
 
 package main
 
@@ -17,6 +17,7 @@ import (
 	"github.com/blicero/badnews/common"
 	"github.com/blicero/badnews/common/path"
 	"github.com/blicero/badnews/reader"
+	"github.com/blicero/badnews/sleuth"
 	"github.com/blicero/badnews/web"
 )
 
@@ -108,6 +109,8 @@ func main() {
 		go bee.Run()
 	}
 
+	go runSleuth()
+
 	rdr.Start()
 	go srv.ListenAndServe()
 
@@ -125,3 +128,20 @@ func main() {
 		os.Exit(0)
 	}
 }
+
+func runSleuth() {
+	var (
+		err error
+		s   *sleuth.Sleuth
+	)
+
+	if s, err = sleuth.Create(); err != nil {
+		fmt.Fprintf(
+			os.Stderr,
+			"Failed to create Sleuth: %s\n",
+			err.Error())
+		os.Exit(2)
+	}
+
+	s.Run()
+} // func runSleuth()
