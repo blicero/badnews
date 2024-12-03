@@ -1,5 +1,5 @@
 # -*- mode: org; fill-column: 78; -*-
-# Time-stamp: <2024-12-02 19:56:42 krylon>
+# Time-stamp: <2024-12-03 15:09:51 krylon>
 #
 #+TAGS: internals(i) ui(u) bug(b) feature(f)
 #+TAGS: database(d) design(e), meditation(m)
@@ -17,12 +17,12 @@
   BadNews is an RSS reader
 ** Clock table
    #+BEGIN: clocktable :scope file :maxlevel 202 :emphasize t
-   #+CAPTION: Clock summary at [2024-12-02 Mo 19:56]
+   #+CAPTION: Clock summary at [2024-12-03 Di 15:09]
    | Headline                                             | Time       |            |          |          |       |      |
    |------------------------------------------------------+------------+------------+----------+----------+-------+------|
-   | *Total time*                                         | *7d 22:26* |            |          |          |       |      |
+   | *Total time*                                         | *7d 22:55* |            |          |          |       |      |
    |------------------------------------------------------+------------+------------+----------+----------+-------+------|
-   | *BadNews [29/35]*                                    | *7d 22:26* |            |          |          |       |      |
+   | *BadNews [29/35]*                                    | *7d 22:55* |            |          |          |       |      |
    | \_  /Features [14/14]/                               |            | /2d 12:49/ |          |          |       |      |
    | \_    Blacklisting [1/1]                             |            |            |     6:03 |          |       |      |
    | \_    Rating and Tagging [12/12]                     |            |            |  2d 6:46 |          |       |      |
@@ -39,7 +39,7 @@
    | \_          Disable linked Tags in menu              |            |            |          |          |       | 1:13 |
    | \_          Unlink Tags from Items                   |            |            |          |          |       | 1:13 |
    | \_          Fetch linked tags per item in handler... |            |            |          |          |       | 0:23 |
-   | \_  /Components [15/21]/                             |            | /5d 9:37/  |          |          |       |      |
+   | \_  /Components [15/21]/                             |            | /5d 10:06/ |          |          |       |      |
    | \_    Data model [3/3]                               |            |            |     5:25 |          |       |      |
    | \_      Feeds [3/3]                                  |            |            |          |     4:58 |       |      |
    | \_        Delete Feeds [2/2]                         |            |            |          |          |  4:58 |      |
@@ -67,8 +67,8 @@
    | \_      Performance [2/2]                            |            |            |          |    10:10 |       |      |
    | \_        Caching                                    |            |            |          |          |  3:06 |      |
    | \_        Pre-computing advice                       |            |            |          |          |  7:04 |      |
-   | \_    Search [1/2]                                   |            |            |  2d 0:46 |          |       |      |
-   | \_      Scheduling or something                      |            |            |          |     5:01 |       |      |
+   | \_    Search [1/2]                                   |            |            |  2d 1:15 |          |       |      |
+   | \_      Scheduling or something                      |            |            |          |     5:30 |       |      |
    | \_      Execute Searches                             |            |            |          |    14:57 |       |      |
    #+END:
 ** Journal
@@ -528,6 +528,7 @@
     web UI, and how background searches should be run.
 **** TODO Scheduling or something
      :LOGBOOK:
+     CLOCK: [2024-12-03 Di 14:40]--[2024-12-03 Di 15:09] =>  0:29
      CLOCK: [2024-12-02 Mo 16:42]--[2024-12-02 Mo 19:56] =>  3:14
      CLOCK: [2024-11-30 Sa 20:30]--[2024-11-30 Sa 22:17] =>  1:47
      :END:
