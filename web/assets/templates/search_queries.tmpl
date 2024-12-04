@@ -1,6 +1,6 @@
 {{ define "search_queries" }}
 {{/* Created on 21. 11. 2024 */}}
-{{/* Time-stamp: <2024-11-21 18:35:23 krylon> */}}
+{{/* Time-stamp: <2024-12-04 18:03:34 krylon> */}}
 <table id="search_queries" class="table table-success table-striped">
   <thead>
     <tr>
@@ -15,7 +15,7 @@
     {{ range .Queries }}
     <tr>
       <th>{{ .ID }}</th>
-      <th>{{ .Title }}</th>
+      <th><big onclick="load_search_results({{ .ID }});">{{ .Title }}</big></th>
       <th>
         {{ if .IsFinished }}
         {{ if .Status }}
@@ -29,7 +29,12 @@
         {{ fmt_time_minute .TimeCreated }}
       </th>
       <th>
-        <span class="debug">TODO</span>
+        {{ if not .TimeStarted.IsZero }}
+        {{ fmt_time_minute .TimeStarted }}
+        {{ if not .TimeFinished.IsZero }}
+        -- {{ fmt_time_minute .TimeFinished }}
+        {{ end }}
+        {{ end }}
       </th>
     </tr>
     {{ end }}

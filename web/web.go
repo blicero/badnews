@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 28. 09. 2024 by Benjamin Walkenhorst
 // (c) 2024 Benjamin Walkenhorst
-// Time-stamp: <2024-11-30 20:12:10 krylon>
+// Time-stamp: <2024-12-04 17:53:18 krylon>
 
 // Package web provides the web interface.
 package web
@@ -217,6 +217,7 @@ func Create(addr string) (*Server, error) {
 	srv.router.HandleFunc("/ajax/blacklist/add", srv.handleAjaxBlacklistAdd)
 	srv.router.HandleFunc("/ajax/search/all", srv.handleAjaxSearchQueries)
 	srv.router.HandleFunc("/ajax/search/submit", srv.handleAjaxSearchSubmit)
+	srv.router.HandleFunc("/ajax/search/results/{id:(?:\\d+)$}", srv.handleAjaxSearchResults)
 
 	return srv, nil
 } // func Create(addr string) (*Server, error)
@@ -2696,3 +2697,108 @@ SEND_RESPONSE:
 		srv.log.Println("[ERROR] " + msg)
 	}
 } // func (srv *Server) handleAjaxSearchSubmit(w http.ResponseWriter, r *http.Request)
+
+func (srv *Server) handleAjaxSearchResults(w http.ResponseWriter, r *http.Request) {
+	srv.log.Printf("[TRACE] Handle request for %s from %s\n",
+		r.URL.EscapedPath(),
+		r.RemoteAddr)
+
+	const tmplName = "item_view"
+	var (
+		err        error
+		sess       *sessions.Session
+		rbuf       []byte
+		tbuf       bytes.Buffer
+		db         *database.Database
+		res        = Reply{Payload: make(map[string]string, 3)}
+		msg, idStr string
+		q          *model.Search
+		qid        int64
+		feeds      []model.Feed
+		tmpl       *template.Template
+		vars       = mux.Vars(r)
+		hstatus    = 200
+		data       = tmplDataItemView{
+			tmplDataBase: tmplDataBase{
+				Debug: common.Debug,
+				URL:   r.URL.String(),
+			},
+		}
+	)
+
+	idStr = vars["id"]
+	if qid, err = strconv.ParseInt(idStr, 10, 64); err != nil {
+		res.Message = fmt.Sprintf("Cannot parse query ID %q: %s",
+			idStr,
+			err.Error())
+		srv.log.Printf("[ERROR] %s\n", res.Message)
+		hstatus = 400
+		goto SEND_RESPONSE
+	}
+
+	db = srv.pool.Get()
+	defer srv.pool.Put(db)
+
+	if q, err = db.SearchGetByID(qid); err != nil {
+		res.Message = fmt.Sprintf("Failed to load Search #%d: %s",
+			qid,
+			err.Error())
+		srv.log.Printf("[ERROR] %s\n", res.Message)
+		hstatus = 500
+		goto SEND_RESPONSE
+	} else if feeds, err = db.FeedGetAll(); err != nil {
+		res.Message = fmt.Sprintf("Failed to load all Feeds: %s",
+			err.Error())
+		srv.log.Printf("[ERROR] %s\n", res.Message)
+		hstatus = 500
+		goto SEND_RESPONSE
+	}
+
+	data.Items = q.Results
+	data.Feeds = make(map[int64]model.Feed, len(feeds))
+
+	for _, f := range feeds {
+		data.Feeds[f.ID] = f
+	}
+
+	if tmpl = srv.tmpl.Lookup(tmplName); tmpl == nil {
+		res.Message = fmt.Sprintf("Did not find Template %s",
+			tmplName)
+		srv.log.Printf("[ERROR] %s\n", res.Message)
+		hstatus = 500
+		goto SEND_RESPONSE
+	} else if err = tmpl.Execute(&tbuf, &data); err != nil {
+		res.Message = fmt.Sprintf("Failed to render template %s: %s",
+			tmplName,
+			err.Error())
+		srv.log.Printf("[ERROR] %s\n", res.Message)
+		hstatus = 500
+		goto SEND_RESPONSE
+	}
+
+	res.Payload["content"] = tbuf.String()
+	res.Status = true
+
+SEND_RESPONSE:
+	if sess != nil {
+		if err = sess.Save(r, w); err != nil {
+			srv.log.Printf("[ERROR] Failed to set session cookie: %s\n",
+				err.Error())
+		}
+	}
+	res.Timestamp = time.Now()
+	if rbuf, err = json.Marshal(&res); err != nil {
+		srv.log.Printf("[ERROR] Error serializing response: %s\n",
+			err.Error())
+		rbuf = errJSON(err.Error())
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Cache-Control", "no-store, max-age=0")
+	w.WriteHeader(hstatus)
+	if _, err = w.Write(rbuf); err != nil {
+		msg = fmt.Sprintf("Failed to send result: %s",
+			err.Error())
+		srv.log.Println("[ERROR] " + msg)
+	}
+} // func (srv *Server) handleAjaxSearchResults(w http.ResponseWriter, r *http.Request)

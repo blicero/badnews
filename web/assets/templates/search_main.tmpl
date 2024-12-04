@@ -1,6 +1,6 @@
 {{ define "search_main" }}
 {{/* Created on 19. 11. 2024 */}}
-{{/* Time-stamp: <2024-11-20 16:27:45 krylon> */}}
+{{/* Time-stamp: <2024-12-04 18:05:52 krylon> */}}
 <!DOCTYPE html>
 <html>
   {{ template "head" . }}
@@ -35,6 +35,20 @@
     <h2>Results</h2>
 
     <div id="search_results">
+      <table class="table table-info table-striped">
+        <thead>
+          <tr>
+            <th>Time</th>
+            <th>Feed</th>
+            <th>Title</th>
+            <th>Rating</th>
+            <th>Tags</th>
+            <th>Description</th>
+          </tr>
+        </thead>
+        <tbody id="search_result_items">
+        </tbody>
+      </table>
     </div>
 
     {{ template "footer" . }}

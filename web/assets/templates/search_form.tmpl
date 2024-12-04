@@ -1,6 +1,6 @@
 {{ define "search_form" }}
 {{/* Created on 21. 11. 2024 */}}
-{{/* Time-stamp: <2024-11-30 20:02:55 krylon> */}}
+{{/* Time-stamp: <2024-12-03 18:48:17 krylon> */}}
 <table class="table table-secondary table-striped horizontal">
   <tbody>
     <script>
@@ -81,6 +81,7 @@
          (res) => {
            if (res.status) {
              // reload Search list, clear form
+             load_search_queries()
            } else {
              msg_add(res.message)
              console.log(res.message)
