@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 18. 09. 2024 by Benjamin Walkenhorst
 // (c) 2024 Benjamin Walkenhorst
-// Time-stamp: <2024-12-03 15:06:34 krylon>
+// Time-stamp: <2024-12-03 17:53:14 krylon>
 
 package main
 
@@ -35,6 +35,7 @@ func main() {
 		sigq            chan os.Signal
 		flushCache      bool
 		startBee        bool
+		doSleuth        bool
 		minlog          = "TRACE"
 		baseDir         = common.Path(path.Base)
 		workerCntReader int
@@ -47,6 +48,7 @@ func main() {
 	flag.BoolVar(&flushCache, "flush", false, "Flush cached ratings and tag suggestions")
 	flag.IntVar(&workerCntReader, "readercount", common.WorkerCntReader, "The number of workers for the Reader")
 	flag.BoolVar(&startBee, "bee", false, "Precompute suggested Tags and Ratings for news Items")
+	flag.BoolVar(&doSleuth, "sleuth", false, "Run the Sleuth")
 	flag.Parse()
 
 	if baseDir != common.Path(path.Base) {
@@ -109,7 +111,9 @@ func main() {
 		go bee.Run()
 	}
 
-	go runSleuth()
+	if doSleuth {
+		go runSleuth()
+	}
 
 	rdr.Start()
 	go srv.ListenAndServe()
