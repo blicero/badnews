@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 30. 11. 2024 by Benjamin Walkenhorst
 // (c) 2024 Benjamin Walkenhorst
-// Time-stamp: <2024-12-03 15:01:22 krylon>
+// Time-stamp: <2024-12-03 18:17:19 krylon>
 
 // Package sleuth handles the scheduling and dispatching of Search Queries.
 package sleuth
@@ -62,6 +62,9 @@ func (s *Sleuth) Run() {
 	s.active.Store(true)
 	defer s.active.Store(false)
 
+	s.log.Println("[INFO] Sleuth main loop starting up")
+	defer s.log.Println("[INFO] Sleuth main loop finishing")
+
 	var ticker = time.NewTicker(pulse)
 	defer ticker.Stop()
 
@@ -115,7 +118,7 @@ func (s *Sleuth) feeder() {
 	for s.IsActive() {
 		var q *model.Search
 
-		s.log.Println("[INFO] Sleuth feeder loop fetching one Query from database.")
+		// s.log.Println("[INFO] Sleuth feeder loop fetching one Query from database.")
 
 		if q, err = s.db.SearchGetNextPending(); err != nil {
 			s.log.Printf("[ERROR] Failed to load pending search queries: %s\n",
@@ -124,8 +127,8 @@ func (s *Sleuth) feeder() {
 		} else if q != nil {
 			s.searchQ <- q
 		} else {
-			s.log.Printf("[INFO] No pending queries were found, sleeping for %s\n",
-				pulse)
+			// s.log.Printf("[INFO] No pending queries were found, sleeping for %s\n",
+			// 	pulse)
 			time.Sleep(pulse)
 		}
 	}
