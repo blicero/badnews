@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 19. 09. 2024 by Benjamin Walkenhorst
 // (c) 2024 Benjamin Walkenhorst
-// Time-stamp: <2024-12-02 17:54:45 krylon>
+// Time-stamp: <2024-12-03 18:07:03 krylon>
 
 package database
 
@@ -339,6 +339,9 @@ SELECT
     msg,
     tags,
     tags_all,
+    filter_by_period,
+    filter_period_begin,
+    filter_period_end,
     query_string,
     regex,
     results

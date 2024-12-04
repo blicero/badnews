@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 19. 09. 2024 by Benjamin Walkenhorst
 // (c) 2024 Benjamin Walkenhorst
-// Time-stamp: <2024-12-02 18:10:42 krylon>
+// Time-stamp: <2024-12-03 18:31:04 krylon>
 
 // Package database provides persistence.
 package database
@@ -3156,18 +3156,18 @@ EXEC_QUERY:
 	defer rows.Close() // nolint: errcheck,gosec
 
 	if !rows.Next() {
-		db.log.Println("[DEBUG] No pending Search was found in database.")
+		// db.log.Println("[DEBUG] No pending Search was found in database.")
 		return nil, nil
 	}
 
 	var (
-		s        = new(model.Search)
-		tcreated int64
-		tagStr   string
-		tags     []string
+		s                                = new(model.Search)
+		tcreated, periodBegin, periodEnd int64
+		tagStr                           string
+		tags                             []string
 	)
 
-	if err = rows.Scan(&s.ID, &s.Title, &tcreated, &tagStr, &s.TagsAll, &s.QueryString, &s.Regex); err != nil {
+	if err = rows.Scan(&s.ID, &s.Title, &tcreated, &tagStr, &s.TagsAll, &s.FilterByPeriod, &periodBegin, &periodEnd, &s.QueryString, &s.Regex); err != nil {
 		msg = fmt.Sprintf("Error scanning row for Search: %s",
 			err.Error())
 		db.log.Printf("[ERROR] %s\n", msg)
@@ -3175,6 +3175,8 @@ EXEC_QUERY:
 	}
 
 	s.TimeCreated = time.Unix(tcreated, 0)
+	s.FilterPeriod[0] = time.Unix(periodBegin, 0)
+	s.FilterPeriod[1] = time.Unix(periodEnd, 0)
 
 	tags = strings.Split(tagStr, ",")
 
@@ -3231,14 +3233,14 @@ EXEC_QUERY:
 
 	for rows.Next() {
 		var (
-			s                 = new(model.Search)
-			tcreated          int64
-			tstarted          *int64
-			tagStr, resultStr string
-			tags, results     []string
+			s                                = new(model.Search)
+			tcreated, periodBegin, periodEnd int64
+			tstarted                         *int64
+			tagStr, resultStr                string
+			tags, results                    []string
 		)
 
-		if err = rows.Scan(&s.Title, &tcreated, &tstarted, &s.Status, &s.Message, &tagStr, &s.TagsAll, &s.QueryString, &s.Regex, &resultStr); err != nil {
+		if err = rows.Scan(&s.Title, &tcreated, &tstarted, &s.Status, &s.Message, &tagStr, &s.TagsAll, &s.FilterByPeriod, &periodBegin, &periodEnd, &s.QueryString, &s.Regex, &resultStr); err != nil {
 			msg = fmt.Sprintf("Error scanning row for pending Search queries: %s",
 				err.Error())
 			db.log.Printf("[ERROR] %s\n", msg)
@@ -3246,6 +3248,8 @@ EXEC_QUERY:
 		}
 
 		s.TimeCreated = time.Unix(tcreated, 0)
+		s.FilterPeriod[0] = time.Unix(periodBegin, 0)
+		s.FilterPeriod[1] = time.Unix(periodEnd, 0)
 		if tstarted != nil {
 			s.TimeStarted = time.Unix(*tstarted, 0)
 		}
@@ -3328,14 +3332,15 @@ EXEC_QUERY:
 
 	for rows.Next() {
 		var (
-			s                   = new(model.Search)
-			tcreated            int64
-			tstarted, tfinished *int64
-			tagStr, resultStr   string
-			tags, results       []string
+			s                      = new(model.Search)
+			tcreated               int64
+			tstarted, tfinished    *int64
+			tagStr, resultStr      string
+			periodBegin, periodEnd int64
+			tags, results          []string
 		)
 
-		if err = rows.Scan(&s.Title, &tcreated, &tstarted, &tfinished, &s.Status, &s.Message, &tagStr, &s.TagsAll, &s.QueryString, &s.Regex, &resultStr); err != nil {
+		if err = rows.Scan(&s.ID, &s.Title, &tcreated, &tstarted, &tfinished, &s.Status, &s.Message, &tagStr, &s.TagsAll, &s.FilterByPeriod, &periodBegin, &periodEnd, &s.QueryString, &s.Regex, &resultStr); err != nil {
 			msg = fmt.Sprintf("Error scanning row for pending Search queries: %s",
 				err.Error())
 			db.log.Printf("[ERROR] %s\n", msg)
@@ -3343,6 +3348,8 @@ EXEC_QUERY:
 		}
 
 		s.TimeCreated = time.Unix(tcreated, 0)
+		s.FilterPeriod[0] = time.Unix(periodBegin, 0)
+		s.FilterPeriod[1] = time.Unix(periodEnd, 0)
 		if tstarted != nil {
 			s.TimeStarted = time.Unix(*tstarted, 0)
 		}
