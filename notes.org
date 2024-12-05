@@ -1,5 +1,5 @@
 # -*- mode: org; fill-column: 78; -*-
-# Time-stamp: <2024-12-05 19:09:30 krylon>
+# Time-stamp: <2024-12-05 20:23:36 krylon>
 #
 #+TAGS: internals(i) ui(u) bug(b) feature(f)
 #+TAGS: database(d) design(e), meditation(m)
@@ -9,7 +9,7 @@
 #+TODO: MEDITATE(m) PLANNING(p) | SUSPENDED(s)
 #+PRIORITIES: A G D
 
-* BadNews [33/35]
+* BadNews [34/37]
   :PROPERTIES:
   :COOKIE_DATA: todo recursive
   :VISIBILITY: children
@@ -218,7 +218,7 @@
       :LOGBOOK:
       CLOCK: [2024-10-19 Sa 20:37]--[2024-10-19 Sa 21:00] =>  0:23
       :END:
-** Components [19/21]
+** Components [20/23]
    :PROPERTIES:
    :COOKIE_DATA: todo recursive
    :VISIBILITY: children
@@ -321,7 +321,7 @@
      :LOGBOOK:
      CLOCK: [2024-09-26 Do 17:56]--[2024-09-26 Do 20:12] =>  2:16
      :END:
-*** Web Interface [11/12]
+*** Web Interface [12/14]
     :PROPERTIES:
     :COOKIE_DATA: todo recursive
     :VISIBILITY: children
