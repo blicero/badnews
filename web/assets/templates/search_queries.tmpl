@@ -1,6 +1,6 @@
 {{ define "search_queries" }}
 {{/* Created on 21. 11. 2024 */}}
-{{/* Time-stamp: <2024-12-04 18:03:34 krylon> */}}
+{{/* Time-stamp: <2024-12-05 19:07:25 krylon> */}}
 <table id="search_queries" class="table table-success table-striped">
   <thead>
     <tr>
@@ -13,10 +13,13 @@
   </thead>
   <tbody>
     {{ range .Queries }}
-    <tr>
-      <th>{{ .ID }}</th>
-      <th><big onclick="load_search_results({{ .ID }});">{{ .Title }}</big></th>
-      <th>
+    <tr id="query_{{ .ID }}">
+      <td>{{ .ID }}</td>
+      <td>
+        <img src="/static/delete.png" onclick="search_query_delete({{ .ID }});" />
+        <big onclick="load_search_results({{ .ID }});">{{ .Title }}</big>
+      </td>
+      <td>
         {{ if .IsFinished }}
         {{ if .Status }}
         Finished successfully
@@ -24,18 +27,18 @@
         Error: {{ .Message }}
         {{ end }}
         {{ end }}
-      </th>
-      <th>
+      </td>
+      <td>
         {{ fmt_time_minute .TimeCreated }}
-      </th>
-      <th>
+      </td>
+      <td>
         {{ if not .TimeStarted.IsZero }}
         {{ fmt_time_minute .TimeStarted }}
         {{ if not .TimeFinished.IsZero }}
         -- {{ fmt_time_minute .TimeFinished }}
         {{ end }}
         {{ end }}
-      </th>
+      </td>
     </tr>
     {{ end }}
   </tbody>

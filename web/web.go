@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 28. 09. 2024 by Benjamin Walkenhorst
 // (c) 2024 Benjamin Walkenhorst
-// Time-stamp: <2024-12-04 17:53:18 krylon>
+// Time-stamp: <2024-12-05 18:43:06 krylon>
 
 // Package web provides the web interface.
 package web
@@ -218,6 +218,7 @@ func Create(addr string) (*Server, error) {
 	srv.router.HandleFunc("/ajax/search/all", srv.handleAjaxSearchQueries)
 	srv.router.HandleFunc("/ajax/search/submit", srv.handleAjaxSearchSubmit)
 	srv.router.HandleFunc("/ajax/search/results/{id:(?:\\d+)$}", srv.handleAjaxSearchResults)
+	srv.router.HandleFunc("/ajax/search/delete/{id:(?:\\d+)$}", srv.handleAjaxSearchDelete)
 
 	return srv, nil
 } // func Create(addr string) (*Server, error)
@@ -2752,6 +2753,12 @@ func (srv *Server) handleAjaxSearchResults(w http.ResponseWriter, r *http.Reques
 		srv.log.Printf("[ERROR] %s\n", res.Message)
 		hstatus = 500
 		goto SEND_RESPONSE
+	} else if data.Tags, err = db.TagGetSorted(); err != nil {
+		res.Message = fmt.Sprintf("Failed to load Tags: %s",
+			err.Error())
+		srv.log.Printf("[ERROR] %s\n", res.Message)
+		hstatus = 500
+		goto SEND_RESPONSE
 	}
 
 	data.Items = q.Results
@@ -2759,6 +2766,15 @@ func (srv *Server) handleAjaxSearchResults(w http.ResponseWriter, r *http.Reques
 
 	for _, f := range feeds {
 		data.Feeds[f.ID] = f
+	}
+
+	for _, i := range data.Items {
+		if i.Tags, err = db.TagLinkGetByItem(i); err != nil {
+			srv.log.Printf("[ERROR] Failed to load Tags for Item %d (%q): %s\n",
+				i.ID,
+				i.Headline,
+				err.Error())
+		}
 	}
 
 	if tmpl = srv.tmpl.Lookup(tmplName); tmpl == nil {
@@ -2802,3 +2818,94 @@ SEND_RESPONSE:
 		srv.log.Println("[ERROR] " + msg)
 	}
 } // func (srv *Server) handleAjaxSearchResults(w http.ResponseWriter, r *http.Request)
+
+func (srv *Server) handleAjaxSearchDelete(w http.ResponseWriter, r *http.Request) {
+	srv.log.Printf("[TRACE] Handle request for %s from %s\n",
+		r.URL.EscapedPath(),
+		r.RemoteAddr)
+	var (
+		err        error
+		sess       *sessions.Session
+		rbuf       []byte
+		idStr, msg string
+		qID        int64
+		q          *model.Search
+		db         *database.Database
+		vars       map[string]string
+		res        = Reply{
+			Payload: make(map[string]string, 2),
+		}
+		hstatus = 200
+	)
+
+	vars = mux.Vars(r)
+	idStr = vars["id"]
+
+	if qID, err = strconv.ParseInt(idStr, 10, 64); err != nil {
+		res.Message = fmt.Sprintf("Cannot parse Item ID %q: %s",
+			idStr,
+			err.Error())
+		srv.log.Printf("[CANTHAPPEN] %s\n", res.Message)
+		hstatus = 400
+		goto SEND_RESPONSE
+	}
+
+	db = srv.pool.Get()
+	defer srv.pool.Put(db)
+
+	if sess, err = srv.store.Get(r, sessionNameFrontend); err != nil {
+		res.Message = fmt.Sprintf("Error getting client session from session store: %s",
+			err.Error())
+		srv.log.Println("[CRITICAL] " + res.Message)
+		srv.sendErrorMessage(w, res.Message)
+		return
+	} else if q, err = db.SearchGetByID(qID); err != nil {
+		res.Message = fmt.Sprintf("Failed to load Tag %d: %s",
+			qID,
+			err.Error())
+		srv.log.Println("[CRITICAL] " + res.Message)
+		srv.sendErrorMessage(w, res.Message)
+		goto SEND_RESPONSE
+	} else if q == nil {
+		res.Message = fmt.Sprintf("Did not find Search %d in database", qID)
+		srv.log.Printf("[ERROR] %s\n", res.Message)
+		hstatus = 400
+		goto SEND_RESPONSE
+	} else if err = db.SearchDelete(q); err != nil {
+		res.Message = fmt.Sprintf("Failed to remove Search %s (%d): %s",
+			q.Title,
+			q.ID,
+			err.Error())
+		srv.log.Printf("[ERROR] %s\n", res.Message)
+		hstatus = 500
+		goto SEND_RESPONSE
+	}
+
+	res.Status = true
+	res.Message = fmt.Sprintf("Search %q (%d) was removed successfully",
+		q.Title,
+		q.ID)
+
+SEND_RESPONSE:
+	if sess != nil {
+		if err = sess.Save(r, w); err != nil {
+			srv.log.Printf("[ERROR] Failed to set session cookie: %s\n",
+				err.Error())
+		}
+	}
+	res.Timestamp = time.Now()
+	if rbuf, err = json.Marshal(&res); err != nil {
+		srv.log.Printf("[ERROR] Error serializing response: %s\n",
+			err.Error())
+		rbuf = errJSON(err.Error())
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Cache-Control", "no-store, max-age=0")
+	w.WriteHeader(hstatus)
+	if _, err = w.Write(rbuf); err != nil {
+		msg = fmt.Sprintf("Failed to send result: %s",
+			err.Error())
+		srv.log.Println("[ERROR] " + msg)
+	}
+} // func (srv *Server) handleAjaxSearchDelete(w http.ResponseWriter, r *http.Request)
