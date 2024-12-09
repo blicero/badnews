@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 19. 09. 2024 by Benjamin Walkenhorst
 // (c) 2024 Benjamin Walkenhorst
-// Time-stamp: <2024-12-03 18:31:04 krylon>
+// Time-stamp: <2024-12-07 16:07:22 krylon>
 
 // Package database provides persistence.
 package database
@@ -3059,7 +3059,8 @@ EXEC_QUERY:
 			s                   = &model.Search{ID: id}
 			tcreated            int64
 			tstarted, tfinished *int64
-			tagStr, resultStr   string
+			tagStr              string
+			resultStr           *string
 			tags, results       []string
 		)
 
@@ -3080,7 +3081,11 @@ EXEC_QUERY:
 		}
 
 		tags = strings.Split(tagStr, ",")
-		results = strings.Split(resultStr, ",")
+		if resultStr != nil {
+			results = strings.Split(*resultStr, ",")
+		} else {
+			results = nil
+		}
 
 		if len(tags) > 0 {
 			s.Tags = make([]int64, len(tags))
@@ -3236,7 +3241,8 @@ EXEC_QUERY:
 			s                                = new(model.Search)
 			tcreated, periodBegin, periodEnd int64
 			tstarted                         *int64
-			tagStr, resultStr                string
+			tagStr                           string
+			resultStr                        *string
 			tags, results                    []string
 		)
 
@@ -3255,7 +3261,9 @@ EXEC_QUERY:
 		}
 
 		tags = strings.Split(tagStr, ",")
-		results = strings.Split(resultStr, ",")
+		if resultStr != nil {
+			results = strings.Split(*resultStr, ",")
+		}
 
 		if len(tags) > 0 {
 			s.Tags = make([]int64, len(tags))
@@ -3335,7 +3343,8 @@ EXEC_QUERY:
 			s                      = new(model.Search)
 			tcreated               int64
 			tstarted, tfinished    *int64
-			tagStr, resultStr      string
+			tagStr                 string
+			resultStr              *string
 			periodBegin, periodEnd int64
 			tags, results          []string
 		)
@@ -3358,7 +3367,11 @@ EXEC_QUERY:
 		}
 
 		tags = strings.Split(tagStr, ",")
-		results = strings.Split(resultStr, ",")
+		if resultStr != nil {
+			results = strings.Split(*resultStr, ",")
+		} else {
+			results = nil
+		}
 
 		if len(tags) > 0 {
 			s.Tags = make([]int64, len(tags))
