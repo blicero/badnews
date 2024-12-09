@@ -1,6 +1,6 @@
 {{ define "search_queries" }}
 {{/* Created on 21. 11. 2024 */}}
-{{/* Time-stamp: <2024-12-05 19:07:25 krylon> */}}
+{{/* Time-stamp: <2024-12-07 15:06:52 krylon> */}}
 <table id="search_queries" class="table table-success table-striped">
   <thead>
     <tr>
@@ -36,6 +36,7 @@
         {{ fmt_time_minute .TimeStarted }}
         {{ if not .TimeFinished.IsZero }}
         -- {{ fmt_time_minute .TimeFinished }}
+        ({{ .Duration }})
         {{ end }}
         {{ end }}
       </td>

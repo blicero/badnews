@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 19. 09. 2024 by Benjamin Walkenhorst
 // (c) 2024 Benjamin Walkenhorst
-// Time-stamp: <2024-11-16 14:54:03 krylon>
+// Time-stamp: <2024-12-07 15:06:08 krylon>
 
 // Package model provides the data types used across the application.
 package model
@@ -187,6 +187,11 @@ func (s *Search) getPattern() *regexp.Regexp {
 func (s *Search) IsFinished() bool {
 	return s.TimeFinished.After(s.TimeStarted)
 } // func (s *Search) IsFinished() bool
+
+// Duration returns the delta between the start and end time.
+func (s *Search) Duration() time.Duration {
+	return s.TimeFinished.Sub(s.TimeStarted)
+} // func (s *Search) Duration() time.Duration
 
 // Match returns true if the Search QueryString matches the givem Item.
 // If the Search also filters by period, the Item's Timestamp is checked first.
