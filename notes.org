@@ -1,5 +1,5 @@
 # -*- mode: org; fill-column: 78; -*-
-# Time-stamp: <2024-12-05 20:23:36 krylon>
+# Time-stamp: <2024-12-09 20:12:24 krylon>
 #
 #+TAGS: internals(i) ui(u) bug(b) feature(f)
 #+TAGS: database(d) design(e), meditation(m)
@@ -9,7 +9,7 @@
 #+TODO: MEDITATE(m) PLANNING(p) | SUSPENDED(s)
 #+PRIORITIES: A G D
 
-* BadNews [34/37]
+* BadNews [34/39]
   :PROPERTIES:
   :COOKIE_DATA: todo recursive
   :VISIBILITY: children
@@ -17,12 +17,12 @@
   BadNews is an RSS reader
 ** Clock table
    #+BEGIN: clocktable :scope file :maxlevel 202 :emphasize t
-   #+CAPTION: Clock summary at [2024-12-05 Do 19:09]
+   #+CAPTION: Clock summary at [2024-12-09 Mo 20:12]
    | Headline                                             | Time      |            |         |          |       |      |
    |------------------------------------------------------+-----------+------------+---------+----------+-------+------|
-   | *Total time*                                         | *8d 2:28* |            |         |          |       |      |
+   | *Total time*                                         | *8d 7:14* |            |         |          |       |      |
    |------------------------------------------------------+-----------+------------+---------+----------+-------+------|
-   | *BadNews [33/35]*                                    | *8d 2:28* |            |         |          |       |      |
+   | *BadNews [34/37]*                                    | *8d 7:14* |            |         |          |       |      |
    | \_  /Features [14/14]/                               |           | /2d 12:49/ |         |          |       |      |
    | \_    Blacklisting [1/1]                             |           |            |    6:03 |          |       |      |
    | \_    Rating and Tagging [12/12]                     |           |            | 2d 6:46 |          |       |      |
@@ -39,7 +39,7 @@
    | \_          Disable linked Tags in menu              |           |            |         |          |       | 1:13 |
    | \_          Unlink Tags from Items                   |           |            |         |          |       | 1:13 |
    | \_          Fetch linked tags per item in handler... |           |            |         |          |       | 0:23 |
-   | \_  /Components [19/21]/                             |           | /5d 13:39/ |         |          |       |      |
+   | \_  /Components [20/23]/                             |           | /5d 18:25/ |         |          |       |      |
    | \_    Data model [3/3]                               |           |            |    5:25 |          |       |      |
    | \_      Feeds [3/3]                                  |           |            |         |     4:58 |       |      |
    | \_        Delete Feeds [2/2]                         |           |            |         |          |  4:58 |      |
@@ -50,7 +50,7 @@
    | \_      Queries respect transaction                  |           |            |         |     0:03 |       |      |
    | \_    Feed catcher / parser [0/0]                    |           |            |    5:41 |          |       |      |
    | \_      Testing                                      |           |            |         |     2:16 |       |      |
-   | \_    Web Interface [11/12]                          |           |            | 2d 0:45 |          |       |      |
+   | \_    Web Interface [12/14]                          |           |            | 2d 0:45 |          |       |      |
    | \_      Search [4/5]                                 |           |            |         |  1d 0:07 |       |      |
    | \_        Deleting Search Queries                    |           |            |         |          |  0:57 |      |
    | \_        Overview                                   |           |            |         |          |  8:32 |      |
@@ -69,7 +69,9 @@
    | \_      Performance [2/2]                            |           |            |         |    10:10 |       |      |
    | \_        Caching                                    |           |            |         |          |  3:06 |      |
    | \_        Pre-computing advice                       |           |            |         |          |  7:04 |      |
-   | \_    Search [2/2]                                   |           |            | 2d 2:02 |          |       |      |
+   | \_    Search [2/4]                                   |           |            | 2d 6:48 |          |       |      |
+   | \_      Performance tuning                           |           |            |         |     3:09 |       |      |
+   | \_      Process tags recursively                     |           |            |         |     1:37 |       |      |
    | \_      Scheduling or something                      |           |            |         |     6:17 |       |      |
    | \_      Execute Searches                             |           |            |         |    14:57 |       |      |
    #+END:
@@ -218,7 +220,7 @@
       :LOGBOOK:
       CLOCK: [2024-10-19 Sa 20:37]--[2024-10-19 Sa 21:00] =>  0:23
       :END:
-** Components [20/23]
+** Components [20/25]
    :PROPERTIES:
    :COOKIE_DATA: todo recursive
    :VISIBILITY: children
@@ -491,7 +493,7 @@
       simple-minded replacement for cachego that works the way I want it to,
       and as far as I can tell, it does work the way I want it to, so now I
       can try using that one.
-*** Search [2/2]
+*** Search [2/4]
     :PROPERTIES:
     :COOKIE_DATA: todo recursive
     :VISIBILITY: children
@@ -541,6 +543,14 @@
     The search "engine", if you will, seems to work for the moment.
     Next, I'll have to think about how I want to integrate searching into the
     web UI, and how background searches should be run.
+**** TODO Performance tuning
+     :LOGBOOK:
+     CLOCK: [2024-12-07 Sa 15:04]--[2024-12-07 Sa 18:13] =>  3:09
+     :END:
+**** TODO Process tags recursively
+     :LOGBOOK:
+     CLOCK: [2024-12-09 Mo 18:35]--[2024-12-09 Mo 20:12] =>  1:37
+     :END:
 **** DONE Scheduling or something
      CLOSED: [2024-12-03 Di 18:37]
      :LOGBOOK:
