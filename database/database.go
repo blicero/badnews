@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 19. 09. 2024 by Benjamin Walkenhorst
 // (c) 2024 Benjamin Walkenhorst
-// Time-stamp: <2024-12-07 16:07:22 krylon>
+// Time-stamp: <2024-12-13 21:33:05 krylon>
 
 // Package database provides persistence.
 package database
@@ -2797,6 +2797,70 @@ EXEC_QUERY:
 
 	return items, nil
 } // func (db *Database) TagLinkGetByTag(tag *model.Tag) ([]*model.Item, error)
+
+// TagLinkGetByTagHierarchy loads all Items that have the given Tag attached to them.
+func (db *Database) TagLinkGetByTagHierarchy(tag *model.Tag) ([]*model.Item, error) {
+	const qid query.ID = query.TagLinkGetByTagHierarchy
+	var (
+		err  error
+		msg  string
+		stmt *sql.Stmt
+	)
+
+	if stmt, err = db.getQuery(qid); err != nil {
+		db.log.Printf("[ERROR] Cannot prepare query %s: %s\n",
+			qid,
+			err.Error())
+		return nil, err
+	} else if db.tx != nil {
+		stmt = db.tx.Stmt(stmt)
+	}
+
+	var rows *sql.Rows
+
+EXEC_QUERY:
+	if rows, err = stmt.Query(tag.ID); err != nil {
+		if worthARetry(err) {
+			waitForRetry()
+			goto EXEC_QUERY
+		}
+
+		return nil, err
+	}
+
+	defer rows.Close() // nolint: errcheck,gosec
+	var items = make([]*model.Item, 0, 16)
+
+	for rows.Next() {
+		var (
+			rating, stamp int64
+			ustr          string
+			item          = new(model.Item)
+		)
+
+		if err = rows.Scan(&item.ID, &item.FeedID, &ustr, &stamp, &item.Headline, &item.Description, &rating); err != nil {
+			msg = fmt.Sprintf("Error scanning row for Item: %s",
+				err.Error())
+			db.log.Printf("[ERROR] %s\n", msg)
+			return nil, errors.New(msg)
+		}
+
+		item.Rating = int8(rating)
+		item.Timestamp = time.Unix(stamp, 0)
+		if item.URL, err = url.Parse(ustr); err != nil {
+			db.log.Printf("[ERROR] Invalid URL for Item %q (%d): %s\n\t%s\n",
+				item.Headline,
+				item.ID,
+				err.Error(),
+				ustr)
+			return nil, err
+		}
+
+		items = append(items, item)
+	}
+
+	return items, nil
+} // func (db *Database) TagLinkGetByTagHierarchy(tag *model.Tag) ([]*model.Item, error)
 
 // TagLinkGetByTagMap loads all Items that have the given Tag attached to them.
 // This method returns the results as a map rather than a slice.

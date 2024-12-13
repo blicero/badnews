@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 19. 09. 2024 by Benjamin Walkenhorst
 // (c) 2024 Benjamin Walkenhorst
-// Time-stamp: <2024-12-02 17:52:15 krylon>
+// Time-stamp: <2024-12-13 21:05:21 krylon>
 
 // Package query provides symbolic constants to identify database queries.
 package query
@@ -47,6 +47,7 @@ const (
 	TagLinkDeleteByFeed
 	TagLinkGetByItem
 	TagLinkGetByTag
+	TagLinkGetByTagHierarchy
 	SearchAdd
 	SearchDelete
 	SearchGetByID
@@ -93,6 +94,7 @@ func AllQueries() []ID {
 		TagLinkDeleteByFeed,
 		TagLinkGetByItem,
 		TagLinkGetByTag,
+		TagLinkGetByTagHierarchy,
 		SearchAdd,
 		SearchDelete,
 		SearchGetByID,
