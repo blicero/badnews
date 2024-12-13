@@ -1,5 +1,5 @@
 # -*- mode: org; fill-column: 78; -*-
-# Time-stamp: <2024-12-09 20:12:24 krylon>
+# Time-stamp: <2024-12-13 21:52:31 krylon>
 #
 #+TAGS: internals(i) ui(u) bug(b) feature(f)
 #+TAGS: database(d) design(e), meditation(m)
@@ -17,12 +17,12 @@
   BadNews is an RSS reader
 ** Clock table
    #+BEGIN: clocktable :scope file :maxlevel 202 :emphasize t
-   #+CAPTION: Clock summary at [2024-12-09 Mo 20:12]
+   #+CAPTION: Clock summary at [2024-12-13 Fr 21:52]
    | Headline                                             | Time      |            |         |          |       |      |
    |------------------------------------------------------+-----------+------------+---------+----------+-------+------|
-   | *Total time*                                         | *8d 7:14* |            |         |          |       |      |
+   | *Total time*                                         | *8d 8:19* |            |         |          |       |      |
    |------------------------------------------------------+-----------+------------+---------+----------+-------+------|
-   | *BadNews [34/37]*                                    | *8d 7:14* |            |         |          |       |      |
+   | *BadNews [34/39]*                                    | *8d 8:19* |            |         |          |       |      |
    | \_  /Features [14/14]/                               |           | /2d 12:49/ |         |          |       |      |
    | \_    Blacklisting [1/1]                             |           |            |    6:03 |          |       |      |
    | \_    Rating and Tagging [12/12]                     |           |            | 2d 6:46 |          |       |      |
@@ -39,7 +39,7 @@
    | \_          Disable linked Tags in menu              |           |            |         |          |       | 1:13 |
    | \_          Unlink Tags from Items                   |           |            |         |          |       | 1:13 |
    | \_          Fetch linked tags per item in handler... |           |            |         |          |       | 0:23 |
-   | \_  /Components [20/23]/                             |           | /5d 18:25/ |         |          |       |      |
+   | \_  /Components [20/25]/                             |           | /5d 19:30/ |         |          |       |      |
    | \_    Data model [3/3]                               |           |            |    5:25 |          |       |      |
    | \_      Feeds [3/3]                                  |           |            |         |     4:58 |       |      |
    | \_        Delete Feeds [2/2]                         |           |            |         |          |  4:58 |      |
@@ -69,9 +69,9 @@
    | \_      Performance [2/2]                            |           |            |         |    10:10 |       |      |
    | \_        Caching                                    |           |            |         |          |  3:06 |      |
    | \_        Pre-computing advice                       |           |            |         |          |  7:04 |      |
-   | \_    Search [2/4]                                   |           |            | 2d 6:48 |          |       |      |
+   | \_    Search [2/4]                                   |           |            | 2d 7:53 |          |       |      |
    | \_      Performance tuning                           |           |            |         |     3:09 |       |      |
-   | \_      Process tags recursively                     |           |            |         |     1:37 |       |      |
+   | \_      Process tags recursively                     |           |            |         |     2:42 |       |      |
    | \_      Scheduling or something                      |           |            |         |     6:17 |       |      |
    | \_      Execute Searches                             |           |            |         |    14:57 |       |      |
    #+END:
@@ -549,8 +549,24 @@
      :END:
 **** TODO Process tags recursively
      :LOGBOOK:
+     CLOCK: [2024-12-13 Fr 20:48]--[2024-12-13 Fr 21:52] =>  1:04
+     CLOCK: [2024-12-11 Mi 19:43]--[2024-12-11 Mi 19:44] =>  0:01
      CLOCK: [2024-12-09 Mo 18:35]--[2024-12-09 Mo 20:12] =>  1:37
      :END:
+     If I search for tagged Items, I want the Search to also return Items
+     tagged with children of that Tag.
+     I am a bit stuck on how to do this. In 2009, while studying computer
+     science for one glorious semester, we had an exercise that involved a
+     matrix of connections between cities and some recursive algorithm so that
+     in the end the matrix told you if there was *any* connection between two
+     cities, directly or indirectly. The algorithm had a name, but I have
+     since forgotten it.
+     [2024-12-13 Fr 20:42]
+     Adjacency matrix was the term I was thinking of. Or at least that is the
+     starting point.
+     Anyway, that was too complicated.
+     I could also attempt to do it in pure SQL. I already have the query to
+     get the tag hierarchy.
 **** DONE Scheduling or something
      CLOSED: [2024-12-03 Di 18:37]
      :LOGBOOK:
