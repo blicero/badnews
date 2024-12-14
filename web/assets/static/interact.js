@@ -1,4 +1,4 @@
-// Time-stamp: <2024-12-05 18:29:46 krylon>
+// Time-stamp: <2024-12-14 18:30:56 krylon>
 // -*- mode: javascript; coding: utf-8; -*-
 // Copyright 2015-2020 Benjamin Walkenhorst <krylon@gmx.net>
 //
@@ -230,7 +230,7 @@ function unrate_item(id) {
 
 var item_cnt = 0
 
-function load_items(cnt) {
+function load_items(cnt, offset=0) {
     const url = `/ajax/items/${item_cnt}/${cnt}`
 
     const req = $.get(url,

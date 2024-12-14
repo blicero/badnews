@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 06. 05. 2020 by Benjamin Walkenhorst
 // (c) 2020 Benjamin Walkenhorst
-// Time-stamp: <2024-11-22 15:40:18 krylon>
+// Time-stamp: <2024-12-14 18:14:22 krylon>
 //
 // This file contains data structures to be passed to HTML templates.
 
@@ -60,6 +60,7 @@ type tmplDataItems struct {
 	tmplDataBase
 	ReqCnt      int64
 	MaxItems    int64
+	Offset      int64
 	Feeds       map[int64]model.Feed
 	Suggestions map[int64][]advisor.SuggestedTag
 }

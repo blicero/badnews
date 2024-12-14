@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 28. 09. 2024 by Benjamin Walkenhorst
 // (c) 2024 Benjamin Walkenhorst
-// Time-stamp: <2024-12-05 18:43:06 krylon>
+// Time-stamp: <2024-12-14 18:25:02 krylon>
 
 // Package web provides the web interface.
 package web
@@ -192,7 +192,7 @@ func Create(addr string) (*Server, error) {
 	srv.router.HandleFunc("/favicon.ico", srv.handleFavIco)
 	srv.router.HandleFunc("/static/{file}", srv.handleStaticFile)
 	srv.router.HandleFunc("/{page:(?:index|main|start)?$}", srv.handleMain)
-	srv.router.HandleFunc("/items/{cnt:(?:\\d+)}", srv.handleItemPage)
+	srv.router.HandleFunc("/items/{cnt:(?:\\d+)}{offset:(?:/\\d+)?}", srv.handleItemPage)
 	srv.router.HandleFunc("/feed/{id:(?:\\d+$)}", srv.handleFeedDetails)
 	srv.router.HandleFunc("/feed/all", srv.handleFeedPage)
 	srv.router.HandleFunc("/tags/all", srv.handleTagAll)
@@ -399,12 +399,13 @@ func (srv *Server) handleItemPage(w http.ResponseWriter, r *http.Request) {
 		r.URL.EscapedPath(),
 		r.RemoteAddr)
 	var (
-		err  error
-		msg  string
-		tmpl *template.Template
-		db   *database.Database
-		sess *sessions.Session
-		data = tmplDataItems{
+		err       error
+		msg       string
+		tmpl      *template.Template
+		db        *database.Database
+		offsetStr string
+		sess      *sessions.Session
+		data      = tmplDataItems{
 			tmplDataBase: tmplDataBase{
 				Title: "Items",
 				Debug: true,
@@ -426,6 +427,19 @@ func (srv *Server) handleItemPage(w http.ResponseWriter, r *http.Request) {
 			msg)
 		srv.sendErrorMessage(w, msg)
 		return
+	}
+
+	offsetStr = vars["offset"]
+	if offsetStr != "" {
+		if data.Offset, err = strconv.ParseInt(offsetStr[1:], 10, 64); err != nil {
+			msg = fmt.Sprintf("Cannot parse Offset %q: %s",
+				offsetStr,
+				err.Error())
+			srv.log.Printf("[CANTHAPPEN] %s\n",
+				msg)
+			srv.sendErrorMessage(w, msg)
+			return
+		}
 	}
 
 	db = srv.pool.Get()

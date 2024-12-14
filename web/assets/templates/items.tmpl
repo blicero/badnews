@@ -1,6 +1,6 @@
 {{ define "items" }}
 {{/* Created on 30. 09. 2024 */}}
-{{/* Time-stamp: <2024-12-04 23:19:52 krylon> */}}
+{{/* Time-stamp: <2024-12-14 18:31:16 krylon> */}}
 <!DOCTYPE html>
 <html>
   {{ template "head" . }}
@@ -28,7 +28,7 @@
 
      $(document).ready(function() {
        console.log("Starting to load Items...")
-       window.setTimeout(load_items, 100, {{ .ReqCnt }})
+       window.setTimeout(load_items, 100, {{ .ReqCnt }}, {{ .Offset }})
      })
     </script>
 
