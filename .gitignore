@@ -1,4 +1,4 @@
-# Time-stamp: <2024-10-18 17:06:41 krylon>
+# Time-stamp: <2024-12-14 18:39:14 krylon>
 *~
 *#
 .*
@@ -15,3 +15,5 @@ bak.*
 badnews
 
 *.sync-conflict-*
+
+*.exe
