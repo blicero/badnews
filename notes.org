@@ -1,5 +1,5 @@
 # -*- mode: org; fill-column: 78; -*-
-# Time-stamp: <2024-12-13 21:52:31 krylon>
+# Time-stamp: <2024-12-14 18:38:08 krylon>
 #
 #+TAGS: internals(i) ui(u) bug(b) feature(f)
 #+TAGS: database(d) design(e), meditation(m)
@@ -9,7 +9,7 @@
 #+TODO: MEDITATE(m) PLANNING(p) | SUSPENDED(s)
 #+PRIORITIES: A G D
 
-* BadNews [34/39]
+* BadNews [34/40]
   :PROPERTIES:
   :COOKIE_DATA: todo recursive
   :VISIBILITY: children
@@ -17,12 +17,12 @@
   BadNews is an RSS reader
 ** Clock table
    #+BEGIN: clocktable :scope file :maxlevel 202 :emphasize t
-   #+CAPTION: Clock summary at [2024-12-13 Fr 21:52]
+   #+CAPTION: Clock summary at [2024-12-14 Sa 18:37]
    | Headline                                             | Time      |            |         |          |       |      |
    |------------------------------------------------------+-----------+------------+---------+----------+-------+------|
-   | *Total time*                                         | *8d 8:19* |            |         |          |       |      |
+   | *Total time*                                         | *8d 9:19* |            |         |          |       |      |
    |------------------------------------------------------+-----------+------------+---------+----------+-------+------|
-   | *BadNews [34/39]*                                    | *8d 8:19* |            |         |          |       |      |
+   | *BadNews [34/39]*                                    | *8d 9:19* |            |         |          |       |      |
    | \_  /Features [14/14]/                               |           | /2d 12:49/ |         |          |       |      |
    | \_    Blacklisting [1/1]                             |           |            |    6:03 |          |       |      |
    | \_    Rating and Tagging [12/12]                     |           |            | 2d 6:46 |          |       |      |
@@ -39,7 +39,7 @@
    | \_          Disable linked Tags in menu              |           |            |         |          |       | 1:13 |
    | \_          Unlink Tags from Items                   |           |            |         |          |       | 1:13 |
    | \_          Fetch linked tags per item in handler... |           |            |         |          |       | 0:23 |
-   | \_  /Components [20/25]/                             |           | /5d 19:30/ |         |          |       |      |
+   | \_  /Components [20/25]/                             |           | /5d 20:30/ |         |          |       |      |
    | \_    Data model [3/3]                               |           |            |    5:25 |          |       |      |
    | \_      Feeds [3/3]                                  |           |            |         |     4:58 |       |      |
    | \_        Delete Feeds [2/2]                         |           |            |         |          |  4:58 |      |
@@ -50,12 +50,13 @@
    | \_      Queries respect transaction                  |           |            |         |     0:03 |       |      |
    | \_    Feed catcher / parser [0/0]                    |           |            |    5:41 |          |       |      |
    | \_      Testing                                      |           |            |         |     2:16 |       |      |
-   | \_    Web Interface [12/14]                          |           |            | 2d 0:45 |          |       |      |
+   | \_    Web Interface [12/15]                          |           |            | 2d 1:45 |          |       |      |
    | \_      Search [4/5]                                 |           |            |         |  1d 0:07 |       |      |
    | \_        Deleting Search Queries                    |           |            |         |          |  0:57 |      |
    | \_        Overview                                   |           |            |         |          |  8:32 |      |
    | \_        Form                                       |           |            |         |          | 13:30 |      |
    | \_        Result View                                |           |            |         |          |  0:17 |      |
+   | \_      Paged Item view                              |           |            |         |     1:00 |       |      |
    | \_      Feeds overview                               |           |            |         |     1:42 |       |      |
    | \_      Message Area                                 |           |            |         |     7:10 |       |      |
    | \_      Appearances matter [5/5]                     |           |            |         |     4:40 |       |      |
@@ -220,7 +221,7 @@
       :LOGBOOK:
       CLOCK: [2024-10-19 Sa 20:37]--[2024-10-19 Sa 21:00] =>  0:23
       :END:
-** Components [20/25]
+** Components [20/26]
    :PROPERTIES:
    :COOKIE_DATA: todo recursive
    :VISIBILITY: children
@@ -323,7 +324,7 @@
      :LOGBOOK:
      CLOCK: [2024-09-26 Do 17:56]--[2024-09-26 Do 20:12] =>  2:16
      :END:
-*** Web Interface [12/14]
+*** Web Interface [12/15]
     :PROPERTIES:
     :COOKIE_DATA: todo recursive
     :VISIBILITY: children
@@ -337,6 +338,9 @@
     CLOCK: [2024-09-29 So 16:10]--[2024-09-29 So 16:30] =>  0:20
     :END:
     For an RSS reader, a web interface is the obvious approach, isn't it?
+**** TODO [#B] Remove cookie handling
+     I don't use cookies at all, I might as well remove them, they cause
+     problems occasionally.
 **** DONE Search [4/5]
      CLOSED: [2024-12-04 Mi 18:08]
      :PROPERTIES:
@@ -352,7 +356,7 @@
       :LOGBOOK:
       CLOCK: [2024-12-05 Do 18:12]--[2024-12-05 Do 19:09] =>  0:57
       :END:
-***** TODO Re-Run Search Queries
+***** TODO [#F] Re-Run Search Queries
 ***** DONE Overview
       CLOSED: [2024-12-04 Mi 18:08]
       :LOGBOOK:
@@ -381,7 +385,10 @@
       :LOGBOOK:
       CLOCK: [2024-12-04 Mi 17:51]--[2024-12-04 Mi 18:08] =>  0:17
       :END:
-**** TODO Paged Item view
+**** TODO [#C] Paged Item view
+     :LOGBOOK:
+     CLOCK: [2024-12-14 Sa 17:37]--[2024-12-14 Sa 18:37] =>  1:00
+     :END:
      Since we are doing AJAX, I could get away without reloading the entire
      page. Not sure whether this is a good idea or not, but I think reloading
      is in order, so that I can have a URL that refers to the specific page.
