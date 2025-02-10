@@ -1,5 +1,5 @@
 # -*- mode: org; fill-column: 78; -*-
-# Time-stamp: <2024-12-14 18:38:08 krylon>
+# Time-stamp: <2025-02-10 22:02:47 krylon>
 #
 #+TAGS: internals(i) ui(u) bug(b) feature(f)
 #+TAGS: database(d) design(e), meditation(m)
@@ -17,12 +17,12 @@
   BadNews is an RSS reader
 ** Clock table
    #+BEGIN: clocktable :scope file :maxlevel 202 :emphasize t
-   #+CAPTION: Clock summary at [2024-12-14 Sa 18:37]
+   #+CAPTION: Clock summary at [2025-02-10 Mo 22:02]
    | Headline                                             | Time      |            |         |          |       |      |
    |------------------------------------------------------+-----------+------------+---------+----------+-------+------|
-   | *Total time*                                         | *8d 9:19* |            |         |          |       |      |
+   | *Total time*                                         | *8d 9:30* |            |         |          |       |      |
    |------------------------------------------------------+-----------+------------+---------+----------+-------+------|
-   | *BadNews [34/39]*                                    | *8d 9:19* |            |         |          |       |      |
+   | *BadNews [34/40]*                                    | *8d 9:30* |            |         |          |       |      |
    | \_  /Features [14/14]/                               |           | /2d 12:49/ |         |          |       |      |
    | \_    Blacklisting [1/1]                             |           |            |    6:03 |          |       |      |
    | \_    Rating and Tagging [12/12]                     |           |            | 2d 6:46 |          |       |      |
@@ -39,18 +39,20 @@
    | \_          Disable linked Tags in menu              |           |            |         |          |       | 1:13 |
    | \_          Unlink Tags from Items                   |           |            |         |          |       | 1:13 |
    | \_          Fetch linked tags per item in handler... |           |            |         |          |       | 0:23 |
-   | \_  /Components [20/25]/                             |           | /5d 20:30/ |         |          |       |      |
+   | \_  /Components [20/26]/                             |           | /5d 20:41/ |         |          |       |      |
    | \_    Data model [3/3]                               |           |            |    5:25 |          |       |      |
    | \_      Feeds [3/3]                                  |           |            |         |     4:58 |       |      |
    | \_        Delete Feeds [2/2]                         |           |            |         |          |  4:58 |      |
    | \_          Delete from database                     |           |            |         |          |       | 3:00 |
    | \_          Clean up the Bayesian models             |           |            |         |          |       | 0:15 |
-   | \_    Database [1/2]                                 |           |            |   12:17 |          |       |      |
+   | \_    Database [1/2]                                 |           |            |   12:22 |          |       |      |
+   | \_      Measure twice, cut once                      |           |            |         |     0:05 |       |      |
    | \_      Testing [0/0]                                |           |            |         |     3:02 |       |      |
    | \_      Queries respect transaction                  |           |            |         |     0:03 |       |      |
    | \_    Feed catcher / parser [0/0]                    |           |            |    5:41 |          |       |      |
    | \_      Testing                                      |           |            |         |     2:16 |       |      |
-   | \_    Web Interface [12/15]                          |           |            | 2d 1:45 |          |       |      |
+   | \_    Web Interface [12/15]                          |           |            | 2d 1:51 |          |       |      |
+   | \_      Remove cookie handling                       |           |            |         |     0:06 |       |      |
    | \_      Search [4/5]                                 |           |            |         |  1d 0:07 |       |      |
    | \_        Deleting Search Queries                    |           |            |         |          |  0:57 |      |
    | \_        Overview                                   |           |            |         |          |  8:32 |      |
@@ -291,6 +293,10 @@
     CLOCK: [2024-09-20 Fr 10:19]--[2024-09-20 Fr 10:55] =>  0:36
     CLOCK: [2024-09-19 Do 16:52]--[2024-09-19 Do 21:01] =>  4:09
     :END:
+**** Measure twice, cut once
+     :LOGBOOK:
+     CLOCK: [2025-02-10 Mo 21:57]--[2025-02-10 Mo 22:02] =>  0:05
+     :END:
 **** TODO [#E] Global Connection Pool
      I think it might be a good idea to use just a single connection pool
      instead of individual connections or multiple pools scattered everywhere.
@@ -339,6 +345,9 @@
     :END:
     For an RSS reader, a web interface is the obvious approach, isn't it?
 **** TODO [#B] Remove cookie handling
+     :LOGBOOK:
+     CLOCK: [2024-12-19 Do 16:44]--[2024-12-19 Do 16:50] =>  0:06
+     :END:
      I don't use cookies at all, I might as well remove them, they cause
      problems occasionally.
 **** DONE Search [4/5]
