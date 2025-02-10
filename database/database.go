@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 19. 09. 2024 by Benjamin Walkenhorst
 // (c) 2024 Benjamin Walkenhorst
-// Time-stamp: <2024-12-13 21:33:05 krylon>
+// Time-stamp: <2025-02-10 21:56:27 krylon>
 
 // Package database provides persistence.
 package database
@@ -18,6 +18,7 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/blicero/badnews/common"
@@ -70,7 +71,11 @@ func worthARetry(e error) bool {
 // operation that failed due to a transient error.
 const retryDelay = 25 * time.Millisecond
 
+// WaitCnt is a counter to keep track of database locking
+var WaitCnt atomic.Int64
+
 func waitForRetry() {
+	WaitCnt.Add(1)
 	time.Sleep(retryDelay)
 } // func waitForRetry()
 

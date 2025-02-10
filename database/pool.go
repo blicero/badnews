@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 07. 06. 2024 by Benjamin Walkenhorst
 // (c) 2024 Benjamin Walkenhorst
-// Time-stamp: <2024-09-24 14:59:20 krylon>
+// Time-stamp: <2025-02-10 21:55:15 krylon>
 
 package database
 
@@ -90,6 +90,7 @@ func (pool *Pool) Get() *Database {
 
 	pool.lock.Lock()
 	defer pool.lock.Unlock()
+	pool.log.Printf("[DEBUG] Pool has %d connections\n", pool.cnt)
 
 WAIT_FOR_LINK:
 	if pool.link != nil {
@@ -114,6 +115,7 @@ func (pool *Pool) GetNoWait() (*Database, error) {
 
 	pool.lock.Lock()
 	defer pool.lock.Unlock()
+	pool.log.Printf("[DEBUG] Pool has %d connections\n", pool.cnt)
 
 	if pool.link != nil {
 		link := pool.link
@@ -144,6 +146,7 @@ func (pool *Pool) Put(db *Database) {
 	}
 
 	pool.lock.Lock()
+	pool.log.Printf("[DEBUG] Pool has %d connections\n", pool.cnt)
 	link.next = pool.link
 	pool.link = link
 	pool.cnt++

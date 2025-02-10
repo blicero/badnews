@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 18. 09. 2024 by Benjamin Walkenhorst
 // (c) 2024 Benjamin Walkenhorst
-// Time-stamp: <2024-12-03 17:53:14 krylon>
+// Time-stamp: <2025-02-10 22:00:28 krylon>
 
 package main
 
@@ -12,10 +12,12 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 
 	"github.com/blicero/badnews/busybee"
 	"github.com/blicero/badnews/common"
 	"github.com/blicero/badnews/common/path"
+	"github.com/blicero/badnews/database"
 	"github.com/blicero/badnews/reader"
 	"github.com/blicero/badnews/sleuth"
 	"github.com/blicero/badnews/web"
@@ -119,17 +121,28 @@ func main() {
 	go srv.ListenAndServe()
 
 	sigq = make(chan os.Signal, 2)
+	var ticker = time.NewTicker(time.Second * 5)
+	defer ticker.Stop()
 
 	signal.Notify(sigq, os.Interrupt, syscall.SIGHUP, syscall.SIGQUIT, syscall.SIGTERM)
 
 	for {
-		sig := <-sigq
-
-		fmt.Fprintf(
-			os.Stderr,
-			"Received signal %s, quitting.\n",
-			sig)
-		os.Exit(0)
+		select {
+		case sig := <-sigq:
+			fmt.Fprintf(
+				os.Stderr,
+				"Received signal %s, quitting.\n",
+				sig)
+			os.Exit(0)
+		case <-ticker.C:
+			var cnt = database.WaitCnt.Load()
+			if cnt > 0 {
+				fmt.Fprintf(
+					os.Stderr,
+					">>> WaitCnt == %d\n",
+					cnt)
+			}
+		}
 	}
 }
 
