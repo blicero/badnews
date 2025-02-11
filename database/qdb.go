@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 19. 09. 2024 by Benjamin Walkenhorst
 // (c) 2024 Benjamin Walkenhorst
-// Time-stamp: <2024-12-13 21:28:10 krylon>
+// Time-stamp: <2025-02-10 23:11:28 krylon>
 
 package database
 
@@ -300,7 +300,7 @@ SELECT DISTINCT
     i.feed_id,
     i.url,
     i.timestamp,
-    i.headline
+    i.headline,
     i.description,
     i.rating
 FROM tag_link l
